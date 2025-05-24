@@ -76,7 +76,7 @@ class Recipe(db.Model):
     steps: Mapped[str] = mapped_column(Text, nullable=False)
 
     #Relatioship with other tables
-    medias: Mapped[list["Media"]] = relationship(back_populates="recipe")
+    media: Mapped[list["Media"]] = relationship(back_populates="recipe")
 
     def serialize(self):
         return {
@@ -94,6 +94,7 @@ class MediaType(enum.Enum):
 class Media(db.Model):
     __tablename__='medias'
     id: Mapped[int] = mapped_column(primary_key=True)
+    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id"))
     type_media: Mapped[MediaType] = mapped_column(Enum(MediaType), nullable=False)
     url: Mapped[str] = mapped_column(String(255), nullable=False)
 
