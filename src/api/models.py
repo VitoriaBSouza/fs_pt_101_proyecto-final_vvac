@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, Boolean, Enum, DateTime, func, ForeignKey, Text
+from sqlalchemy import String, Boolean, Enum, DateTime, func, ForeignKey, Text, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 import enum
@@ -22,6 +22,11 @@ class User(db.Model):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now()) # 
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=func.now())
 
+    #Relatioship with other tables
+    score: Mapped[list["RecipeScore"]] = relationship(back_populates="user")
+    comments: Mapped[list["Comment"]] = relationship(back_populates="user")
+    collection: Mapped[list["Collection"]] = relationship(back_populates="user")
+
     def serialize(self):
         return {
             "id": self.id,
@@ -32,33 +37,31 @@ class User(db.Model):
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             # No se serializa la contraseña
         }
-
-
+    
 class Comment(db.Model):
     __tablename__ = 'comments'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
-    # recipe_id: Mapped[int] = mapped_column(ForeignKey('recipe.id'), nullable=False)
-    username: Mapped[str] = mapped_column(ForeignKey('users.username'), nullable=False)
+    recipe_id: Mapped[int] = mapped_column(ForeignKey('recipes.id'), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    published: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    # relaciones
-    #user = relationship("User", backref="comments", lazy=True)
-    #recipe = relationship("Recipe", backref="comments", lazy=True)
+    #Relatioship with other tables
+    user: Mapped["User"] = relationship(back_populates="comments")
+    recipe: Mapped["Recipe"] = relationship(back_populates="comments")
 
     def serialize(self):
         return {
             "id": self.id,
             "user_id": self.user_id,
-            #"recipe_id": self.recipe_id,
-            "username": self.username,
+            "recipe_id": self.recipe_id,
+            "username": self.user.username,
             "content": self.content,
-            "timestamp": self.timestamp.isoformat() if self.timestamp else None
+            "timestamp": self.published.isoformat() if self.published else None
         }
 
-class DificultyType(enum.Enum):
+class DifficultyType(enum.Enum):
     # Requires little to basic cooking skills and common ingredients.
     EASY = "easy"
     # Requires more experience, more prep and cooking time.
@@ -69,30 +72,56 @@ class DificultyType(enum.Enum):
     
 class Recipe(db.Model):
     __tablename__='recipes'
+
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(100), nullable=False)
-    dificulty_type: Mapped[DificultyType] = mapped_column(Enum(DificultyType), nullable=False)
+    difficulty_type: Mapped[DifficultyType] = mapped_column(Enum(DifficultyType), nullable=False)
     prep_time: Mapped[int] = mapped_column(nullable=True) #In minutes(covertion made at the frontend)
     steps: Mapped[str] = mapped_column(Text, nullable=False)
+    published: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     #Relatioship with other tables
     media: Mapped[list["Media"]] = relationship(back_populates="recipe")
+    score: Mapped[list["RecipeScore"]] = relationship(back_populates="recipe")
+    ingredient: Mapped[list["RecipeIngredient"]] = relationship(back_populates="recipe")
+    comments: Mapped[list["Comment"]] = relationship(back_populates="recipe")
+    collection: Mapped[list["Collection"]] = relationship(back_populates="recipe")
 
     def serialize(self):
         return {
             "id": self.id,
             "title": self.title,
-            "dificulty_type": self.dificulty_type.value,
+            "media": [media.serialize() for media in self.media],
+            "dificulty_type": self.difficulty_type.value,
             "prep_time": self.prep_time,
             "steps": self.steps,
-            "media": self.medias
+            "published": self.published.isoformat() if self.published else None
         }
+    
+class RecipeScore(db.Model):
+    __tablename__='recipe_scores'
 
+    user_id: Mapped["User"] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    recipe_id: Mapped["Recipe"] = mapped_column(ForeignKey("recipes.id"), primary_key=True)
+    score: Mapped[int] = mapped_column(nullable=True) #On frontend we make the calculation for final score
+    
+    #Relatioship with other tables
+    user: Mapped["User"] = relationship(back_populates="score")
+    recipe: Mapped["Recipe"] = relationship(back_populates="score")
+
+    def serialize(self):
+        return {
+            "user_id": self.user_id,
+            "recipe_id": self.recipe_id,
+            "score": self.score
+        } 
+    
 class MediaType(enum.Enum):
     IMAGE = "image"
 
 class Media(db.Model):
     __tablename__='medias'
+
     id: Mapped[int] = mapped_column(primary_key=True)
     recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id"))
     type_media: Mapped[MediaType] = mapped_column(Enum(MediaType), nullable=False)
@@ -100,20 +129,40 @@ class Media(db.Model):
 
     #Relatioship with other tables
     recipe: Mapped["Recipe"] = relationship(back_populates="media")
+    
     def serialize(self):
         return {
             "id": self.id,
             "type": self.type_media.value,
             "link": self.url
-        } 
+        }
+    
+class Collection(db.Model):
+    __tablename__ = 'collections'
 
+    recipe_id: Mapped["Recipe"] = mapped_column(ForeignKey("recipes.id"), primary_key=True)
+    user_id: Mapped["User"] = mapped_column(ForeignKey("users.id"), primary_key=True)
+
+    #Relatioship with other tables
+    user: Mapped["User"] = relationship(back_populates="collection")
+    recipe: Mapped["Recipe"] = relationship(back_populates="collection")
+
+    def serialize(self):
+        return {
+            "recipe_id": self.recipe_id,
+            "user_id": self.user_id,
+        }
 
 class Ingredient(db.Model):
     __tablename__='ingredients'
+
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    quantity: Mapped[int] = mapped_column(nullable=False)
+    quantity: Mapped[float] = mapped_column(Float, nullable=False)
     unit: Mapped[str] = mapped_column(String(50), nullable=False) #opciones en frontend
+
+    #Relatioship with other tables
+    recipe_ingredient: Mapped[list["RecipeIngredient"]] = relationship(back_populates="ingredient")
 
     def serialize(self):
         return {
@@ -121,4 +170,20 @@ class Ingredient(db.Model):
             "quantity": self.quantity,
             "unit": self.unit,
             "name": self.name
+        } 
+    
+class RecipeIngredient(db.Model):
+    __tablename__='recipe_ingredients'
+
+    recipe_id: Mapped[Recipe] = mapped_column(ForeignKey("recipes.id"), primary_key=True)
+    ingredient_id: Mapped[Ingredient] = mapped_column(ForeignKey("ingredients.id"), primary_key=True)
+
+    #Relatioship with other tables
+    recipe: Mapped["Recipe"] = relationship(back_populates="ingredient")
+    ingredient: Mapped["Ingredient"] = relationship(back_populates="recipe_ingredient")
+
+    def serialize(self):
+        return {
+            "recipe_id": self.recipe_id,
+            "ingredient_id": self.ingredient_id
         } 
