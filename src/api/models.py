@@ -98,7 +98,7 @@ class Media(db.Model):
     url: Mapped[str] = mapped_column(String(255), nullable=False)
 
     #Relatioship with other tables
-    recipe: Mapped["Recipe"] = relationship(back_populates=""media"")
+    recipe: Mapped["Recipe"] = relationship(back_populates="media")
     def serialize(self):
         return {
             "id": self.id,
