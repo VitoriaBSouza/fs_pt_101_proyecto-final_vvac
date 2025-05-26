@@ -16,10 +16,10 @@ class User(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(String(30), unique=True, nullable=False)
-    email: Mapped[str] = mapped_column(String(254), unique=True, nullable=False)
-    password: Mapped[str] = mapped_column(String(128), nullable=False)  # guarda como texto plano hasta que se hashee
-    status: Mapped[UserStatus] = mapped_column(Enum(UserStatus), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now()) # 
+    email: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    password: Mapped[str] = mapped_column(nullable=False)  # guarda como texto plano hasta que se hashee
+    status: Mapped[UserStatus] = mapped_column(Enum(UserStatus), default=UserStatus.active, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=func.now())
 
     #Relatioship with other tables
