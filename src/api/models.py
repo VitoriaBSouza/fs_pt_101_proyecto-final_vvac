@@ -86,7 +86,7 @@ class Recipe(db.Model):
     user: Mapped["User"] = relationship(back_populates="recipes")
     media: Mapped[list["Media"]] = relationship(back_populates="recipe")
     score: Mapped[list["RecipeScore"]] = relationship(back_populates="recipe")
-    ingredient: Mapped[list["RecipeIngredient"]] = relationship(back_populates="recipe")
+    ingredients: Mapped[list["RecipeIngredient"]] = relationship(back_populates="recipe") #cambio de ingredient a ingredients por reutilizacion en distintas recetas
     comments: Mapped[list["Comment"]] = relationship(back_populates="recipe")
     collection: Mapped[list["Collection"]] = relationship(back_populates="recipe")
 
@@ -167,7 +167,7 @@ class Ingredient(db.Model):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
 
     #Relatioship with other tables
-    recipe_ingredient: Mapped[list["RecipeIngredient"]] = relationship(back_populates="ingredient")
+    recipes: Mapped[list["RecipeIngredient"]] = relationship(back_populates="ingredient") #cambio recipe_ingredient por recipes para reutilizacion de ingredientes
 
     def serialize(self):
         return {
@@ -176,7 +176,7 @@ class Ingredient(db.Model):
         } 
     
 class RecipeIngredient(db.Model):
-    __tablename__='recipe_ingredients'
+    __tablename__ = 'recipe_ingredients'
 
     recipe_id: Mapped[Recipe] = mapped_column(ForeignKey("recipes.id"), primary_key=True)
     ingredient_id: Mapped[Ingredient] = mapped_column(ForeignKey("ingredients.id"), primary_key=True)
