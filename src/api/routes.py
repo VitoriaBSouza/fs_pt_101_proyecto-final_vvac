@@ -166,3 +166,77 @@ def update_user(user_id):
 #End of user endpoints
 
 #From here all recipe related endpoints
+
+
+
+
+
+# From here all comments related endpoints
+
+# GET all comments
+
+@app.route('/comments', methods=['GET'])
+def get_all_comments():
+    comments = Comment.query.all()
+    return jsonify([comment.serialize() for comment in comments]), 200
+
+# GET comment by ID
+
+@app.route('/comments/<int:comment_id>', methods=['GET'])
+def get_comment(comment_id):
+    comment = Comment.query.get(comment_id)
+    if comment is None:
+        return jsonify({"error": "Comment not found"}), 404
+    return jsonify(comment.serialize()), 200
+
+
+#POST new comment
+
+@app.route('/comments', methods=['POST'])
+def create_comment():
+    data = request.get_json()
+
+    if not all(key in data for key in ("user_id", "recipe_id", "content")):
+        return jsonify({"error": "Missing data"}), 400
+
+    new_comment = Comment(
+        user_id=data["user_id"],
+        recipe_id=data["recipe_id"],
+        content=data["content"]
+    )
+
+    db.session.add(new_comment)
+    db.session.commit()
+
+    return jsonify(new_comment.serialize()), 201
+
+#PUT(edit) existing comment
+
+@app.route('/comments/<int:comment_id>', methods=['PUT'])
+def update_comment(comment_id):
+    comment = Comment.query.get(comment_id)
+    if comment is None:
+        return jsonify({"error": "Comment not found"}), 404
+
+    data = request.get_json()
+    if "content" in data:
+        comment.content = data["content"]
+
+    db.session.commit()
+    return jsonify(comment.serialize()), 200
+
+
+#DELETE a comment
+
+@app.route('/comments/<int:comment_id>', methods=['DELETE'])
+def delete_comment(comment_id):
+    comment = Comment.query.get(comment_id)
+    if comment is None:
+        return jsonify({"error": "Comment not found"}), 404
+
+    db.session.delete(comment)
+    db.session.commit()
+    return jsonify({"message": "Comment deleted"}), 200
+
+
+# end of comment endpoints
