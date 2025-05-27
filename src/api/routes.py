@@ -204,7 +204,7 @@ def create_recipe():
             return jsonify({"error": "Please add all the steps and instructions needed to your recipe"}), 400
 
         if not data["author"]:
-            return jsonify({"error": "User not found, please try to log in again or make an account"}), 400
+            return jsonify({"error": "User not found, please try to log in again or sign up"}), 400
 
         if not data["ingredient"]:
             return jsonify({"error": "Please add all the igredients details to your recipe"}), 400
@@ -220,7 +220,7 @@ def create_recipe():
             setLevel = DifficultyType.HARD
 
         else:
-            return jsonify({"error": "Please choose from one of these options: Easy, Moderate or Hard."}), 400
+            return jsonify({"error": "Please choose from one of these options for difficulty level: Easy, Moderate or Hard."}), 400
         
         #We add on frontend the control of blank space and lower cases
         new_recipe = Recipe(
