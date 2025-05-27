@@ -127,10 +127,10 @@ def delete_user(user_id):
         return jsonify({"error": "User not found"}), 404
 
     # Anonymize personal data but keep the recipes on the dabase.
-    user.username = f"deleted_user_{user_id}"  # or set to a placeholder like "Deleted User"
-    user.email =  f"deleted_user_{user_id}@example.com" # or set to a placeholder
+    user.username = f"deleted_user_{user_id}"  #set username place holder
+    user.email =  f"deleted_user_{user_id}@example.com" # set email place holder
     user.password = generate_password_hash("User{user_id}NoLongerExists")
-    user.status = UserStatus.deleted  # Optionally mark as deleted
+    user.status = UserStatus.deleted  # Mark as deleted status
     user.updated_at = datetime.now(timezone.utc)
 
     # We also delete the comments and fav list.
@@ -142,7 +142,7 @@ def delete_user(user_id):
 
     return jsonify({"message": "You account has been successfully erased"}), 200
 
-@api.route("/user/<int:user_id>", methods=["PUT"]) #ruta dinamica para decir el id del registro a modificar
+@api.route("/user/<int:user_id>", methods=["PUT"])
 def update_user(user_id):
 
     data = request.get_json()
@@ -166,3 +166,7 @@ def update_user(user_id):
 #End of user endpoints
 
 #From here all recipe related endpoints
+#Attach your code here
+#End of recipe endpoints
+
+
