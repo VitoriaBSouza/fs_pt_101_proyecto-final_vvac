@@ -166,7 +166,53 @@ def update_user(user_id):
 #End of user endpoints
 
 #From here all recipe related endpoints
-#Attach your code here
+#Paste your code here and make sure to add notes on the start and finish of the endpoints
 #End of recipe endpoints
 
+#From here starts all ingredient related endpoints
+@api.route('/ingredients', methods=['GET'])
+def get_ingredients():
 
+    stmt = select(Ingredient)
+
+    ingredients = db.session.execute(stmt).scalars().all()
+
+    return jsonify([ingredient.serialize() for ingredient in ingredients]), 200
+
+@api.route('/ingredients', methods=['POST'])
+def add_ingredient():
+    try:
+        data = request.json
+
+        if not data["name"]: 
+            return jsonify({"error": "Missing ingredient name."}), 400
+        
+        if not data["quantity"]:
+            return jsonify({"error": "Please add a quantity."}), 400
+        
+        if not data["unit"]:
+            return jsonify({"error": "Please the correct unit to be used."}), 400    
+        
+        #Check if the ingredient already exists
+        stmt = select(Ingredient).where(Ingredient.name==data["name"])
+        ing = db.session.execute(stmt).scalar_one_or_none()
+
+        if ing is None:
+            new_ingredient = Ingredient(
+                name=data["name"],
+            )
+            return jsonify({"error": "User not found, please sign up"}), 405
+        
+        #Check if the password matches the user
+        if not check_password_hash(user.password, data["password"]):
+            return jsonify({"error": "Email or password not valid"}), 401
+
+       #Generate str token as it's not possible to be a number
+        token = create_access_token(identity=str(user.id))
+  
+
+        return jsonify({"success": True, "token": token}), 200
+    
+    except Exception as e:
+        print(e)
+        return jsonify({"error": str(e)}), 500

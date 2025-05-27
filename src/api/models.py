@@ -158,8 +158,6 @@ class Ingredient(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    quantity: Mapped[float] = mapped_column(Float, nullable=False)
-    unit: Mapped[str] = mapped_column(String(50), nullable=False) #opciones en frontend
 
     #Relatioship with other tables
     recipe_ingredient: Mapped[list["RecipeIngredient"]] = relationship(back_populates="ingredient")
@@ -167,8 +165,6 @@ class Ingredient(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "quantity": self.quantity,
-            "unit": self.unit,
             "name": self.name
         } 
     
@@ -178,6 +174,10 @@ class RecipeIngredient(db.Model):
     recipe_id: Mapped[Recipe] = mapped_column(ForeignKey("recipes.id"), primary_key=True)
     ingredient_id: Mapped[Ingredient] = mapped_column(ForeignKey("ingredients.id"), primary_key=True)
 
+    #Quantity and unit goes here as it will depend on the recipe
+    quantity: Mapped[float] = mapped_column(Float, nullable=False)
+    unit: Mapped[str] = mapped_column(String(50), nullable=False) #opciones en frontend
+
     #Relatioship with other tables
     recipe: Mapped["Recipe"] = relationship(back_populates="ingredient")
     ingredient: Mapped["Ingredient"] = relationship(back_populates="recipe_ingredient")
@@ -185,5 +185,8 @@ class RecipeIngredient(db.Model):
     def serialize(self):
         return {
             "recipe_id": self.recipe_id,
-            "ingredient_id": self.ingredient_id
+            "ingredient_id": self.ingredient_id,
+            "ingredient_name": self.ingredient.name,
+            "quantity": self.quantity,
+            "unit": self.unit
         } 
