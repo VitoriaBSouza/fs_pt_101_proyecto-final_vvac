@@ -64,12 +64,12 @@ class Comment(db.Model):
 
 class DifficultyType(enum.Enum):
     # Requires little to basic cooking skills and common ingredients.
-    EASY = "easy"
+    EASY = "Easy"
     # Requires more experience, more prep and cooking time.
     # Maybe some ingredients you don’t already have in your kitchen.
-    MODERATE = "moderate"
+    MODERATE = "Moderate"
     # Challenging recipes that require more advanced skills, experience and maybe some special equipment.
-    HARD = "hard"
+    HARD = "Hard"
     
 class Recipe(db.Model):
     __tablename__='recipes'
@@ -100,7 +100,7 @@ class Recipe(db.Model):
             "published": self.published.isoformat() if self.published else None,
             "dificulty_type": self.difficulty_type.value,
             "prep_time": self.prep_time,
-            "ingredients": [recipe_ing.serialize() for recipe_ing in self.ingredient],
+            "ingredients": [recipe_ing.serialize() for recipe_ing in self.ingredients],
             "steps": self.steps,
             "comments": [comment.serialize() for comment in self.comments]
         }
@@ -186,8 +186,8 @@ class RecipeIngredient(db.Model):
     unit: Mapped[str] = mapped_column(String(50), nullable=False) #opciones en frontend
 
     #Relatioship with other tables
-    recipe: Mapped["Recipe"] = relationship(back_populates="ingredient")
-    ingredient: Mapped["Ingredient"] = relationship(back_populates="recipe_ingredient")
+    recipe: Mapped["Recipe"] = relationship(back_populates="ingredients")
+    ingredient: Mapped["Ingredient"] = relationship(back_populates="recipes")
 
     def serialize(self):
         return {

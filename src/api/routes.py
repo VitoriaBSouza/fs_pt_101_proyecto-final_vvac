@@ -2,10 +2,10 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Recipe, Ingredient, Comment, Media, UserStatus, Collection, RecipeIngredient
+from api.models import db, User, Recipe, Ingredient, Comment, Media, UserStatus, Collection, RecipeIngredient, DifficultyType
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
-from sqlalchemy import select, delete, func
+from sqlalchemy import select, delete
 from datetime import datetime, timezone
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -166,23 +166,117 @@ def update_user(user_id):
 #End of user endpoints
 
 #From here all recipe related endpoints
+# GET all recipes
+@api.route('/recipes', methods=['GET'])
+def get_recipes():
 
+    stmt = select(Recipe)
 
+    recipes = db.session.execute(stmt).scalars().all()
 
+    return jsonify([recipe.serialize() for recipe in recipes]), 200
+
+# GET a specific recipe
+@api.route('/recipes/<int:recipe_id>', methods=['GET'])
+def get_recipe(recipe_id):
+
+    stmt = select(Recipe).where(Recipe.id == recipe_id)
+    recipes = db.session.execute(stmt).scalar_one_or_none()
+
+    if recipes is None:
+        return jsonify({"error": "Recipe not found"}), 404
+
+    return jsonify([recipe.serialize() for recipe in recipes]), 200
+
+# POST to create a new recipe
+@api.route('/recipes', methods=['POST'])
+def create_recipe():
+    try:
+        data = request.json
+
+        if not data["title"]: 
+            return jsonify({"error": "Please add a title to your recipe"}), 400
+        
+        if not data["difficulty_type"]:
+            return jsonify({"error": "Please add a difficulty level to your recipe"}), 400
+        
+        if not data["steps"]:
+            return jsonify({"error": "Please add all the steps and instructions needed to your recipe"}), 400
+
+        if not data["author"]:
+            return jsonify({"error": "User not found, please try to log in again or make an account"}), 400
+
+        if not data["ingredient"]:
+            return jsonify({"error": "Please add all the igredients details to your recipe"}), 400
+
+        #Conditions to turn the string value into the enum value in our database
+        if data["difficulty_type"] == "Easy":
+            setLevel = DifficultyType.EASY
+
+        elif data["difficulty_type"] == "Moderate":
+            setLevel = DifficultyType.MODERATE
+            
+        elif data["difficulty_type"] == "Hard":
+            setLevel = DifficultyType.HARD
+
+        else:
+            return jsonify({"error": "Please choose from one of these options: Easy, Moderate or Hard."}), 400
+        
+        #We add on frontend the control of blank space and lower cases
+        new_recipe = Recipe(
+            title=data["title"],
+            author=data["author"],
+            difficulty_type=setLevel,
+            steps=data["steps"],
+            published=datetime.now(timezone.utc)
+        )
+        db.session.add(new_recipe)
+        db.session.flush()
+    
+        #Add ingredients to the recipe
+        for ing in data["ingredient"]:
+                name = ing["name"]
+                quantity = ing["quantity"]
+                unit = ing["unit"]
+
+        stmt = select(Ingredient).where(Ingredient.name == name)
+        ingredient = db.session.execute(stmt).scalar_one_or_none()
+
+        #We add ingredient to database if it does not exist
+        if ingredient is None:
+            ingredient = Ingredient(name=name)
+            db.session.add(ingredient)
+            db.session.flush()
+
+        recipe_ing = RecipeIngredient(
+                recipe_id=new_recipe.id,
+                ingredient_id=ingredient.id,
+                quantity=quantity,
+                unit=unit
+            )
+            
+        db.session.add(recipe_ing)
+
+        db.session.commit()
+
+        return jsonify({"success": True}), 201
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+#Recipe endpoints end here
 
 # =================================================================
 # Comment endpoints
 # =================================================================
 
 # GET all comments
-
 @api.route('/comments', methods=['GET'])
 def get_all_comments():
     comments = Comment.query.all()
     return jsonify([comment.serialize() for comment in comments]), 200
 
 # GET comment by ID
-
 @api.route('/comments/<int:comment_id>', methods=['GET'])
 def get_comment(comment_id):
     comment = Comment.query.get(comment_id)
@@ -192,7 +286,6 @@ def get_comment(comment_id):
 
 
 #POST new comment
-
 @api.route('/comments', methods=['POST'])
 def create_comment():
     data = request.get_json()
@@ -212,7 +305,6 @@ def create_comment():
     return jsonify(new_comment.serialize()), 201
 
 #PUT to update comment
-
 @api.route('/comments/<int:comment_id>', methods=['PUT'])
 def update_comment(comment_id):
     comment = Comment.query.get(comment_id)
@@ -228,7 +320,6 @@ def update_comment(comment_id):
 
 
 #DELETE a comment
-
 @api.route('/comments/<int:comment_id>', methods=['DELETE'])
 def delete_comment(comment_id):
     comment = Comment.query.get(comment_id)
