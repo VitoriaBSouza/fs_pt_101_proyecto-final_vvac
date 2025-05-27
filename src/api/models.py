@@ -158,8 +158,6 @@ class Ingredient(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    quantity: Mapped[float] = mapped_column(Float, nullable=False)
-    unit: Mapped[str] = mapped_column(String(50), nullable=False) #opciones en frontend
 
     #Relatioship with other tables
     recipes: Mapped[list["RecipeIngredient"]] = relationship(back_populates="ingredient") #cambio recipe_ingredient por recipes para reutilizacion de ingredientes
@@ -167,22 +165,22 @@ class Ingredient(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "quantity": self.quantity,
-            "unit": self.unit,
             "name": self.name
         } 
     
 class RecipeIngredient(db.Model):
     __tablename__ = 'recipe_ingredients'
 
-    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id"), primary_key=True)
-    ingredient_id: Mapped[int] = mapped_column(ForeignKey("ingredients.id"), primary_key=True)
-#cantidad y unidad estaban en Ingredient, lo cual limita la reutilización del mismo ingrediente en distintas recetas.    
-    quantity: Mapped[float] = mapped_column(Float, nullable=False)
-    unit: Mapped[str] = mapped_column(String(50), nullable=False)
+    recipe_id: Mapped[Recipe] = mapped_column(ForeignKey("recipes.id"), primary_key=True)
+    ingredient_id: Mapped[Ingredient] = mapped_column(ForeignKey("ingredients.id"), primary_key=True)
 
-    recipe: Mapped["Recipe"] = relationship(back_populates="ingredients")
-    ingredient: Mapped["Ingredient"] = relationship(back_populates="recipes")
+    #Quantity and unit goes here as it will depend on the recipe
+    quantity: Mapped[float] = mapped_column(Float, nullable=False)
+    unit: Mapped[str] = mapped_column(String(50), nullable=False) #opciones en frontend
+
+    #Relatioship with other tables
+    recipe: Mapped["Recipe"] = relationship(back_populates="ingredient")
+    ingredient: Mapped["Ingredient"] = relationship(back_populates="recipe_ingredient")
 
     def serialize(self):
         return {
@@ -191,4 +189,4 @@ class RecipeIngredient(db.Model):
             "ingredient_name": self.ingredient.name,
             "quantity": self.quantity,
             "unit": self.unit
-        }
+        } 

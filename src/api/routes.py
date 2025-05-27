@@ -127,10 +127,10 @@ def delete_user(user_id):
         return jsonify({"error": "User not found"}), 404
 
     # Anonymize personal data but keep the recipes on the dabase.
-    user.username = f"deleted_user_{user_id}"  # or set to a placeholder like "Deleted User"
-    user.email =  f"deleted_user_{user_id}@example.com" # or set to a placeholder
+    user.username = f"deleted_user_{user_id}"  #set username place holder
+    user.email =  f"deleted_user_{user_id}@example.com" # set email place holder
     user.password = generate_password_hash("User{user_id}NoLongerExists")
-    user.status = UserStatus.deleted  # Optionally mark as deleted
+    user.status = UserStatus.deleted  # Mark as deleted status
     user.updated_at = datetime.now(timezone.utc)
 
     # We also delete the comments and fav list.
@@ -142,7 +142,7 @@ def delete_user(user_id):
 
     return jsonify({"message": "You account has been successfully erased"}), 200
 
-@api.route("/user/<int:user_id>", methods=["PUT"]) #ruta dinamica para decir el id del registro a modificar
+@api.route("/user/<int:user_id>", methods=["PUT"])
 def update_user(user_id):
 
     data = request.get_json()
@@ -176,14 +176,14 @@ def update_user(user_id):
 
 # GET all comments
 
-@app.route('/comments', methods=['GET'])
+@api.route('/comments', methods=['GET'])
 def get_all_comments():
     comments = Comment.query.all()
     return jsonify([comment.serialize() for comment in comments]), 200
 
 # GET comment by ID
 
-@app.route('/comments/<int:comment_id>', methods=['GET'])
+@api.route('/comments/<int:comment_id>', methods=['GET'])
 def get_comment(comment_id):
     comment = Comment.query.get(comment_id)
     if comment is None:
@@ -193,7 +193,7 @@ def get_comment(comment_id):
 
 #POST new comment
 
-@app.route('/comments', methods=['POST'])
+@api.route('/comments', methods=['POST'])
 def create_comment():
     data = request.get_json()
 
@@ -213,7 +213,7 @@ def create_comment():
 
 #PUT to update comment
 
-@app.route('/comments/<int:comment_id>', methods=['PUT'])
+@api.route('/comments/<int:comment_id>', methods=['PUT'])
 def update_comment(comment_id):
     comment = Comment.query.get(comment_id)
     if comment is None:
@@ -229,7 +229,7 @@ def update_comment(comment_id):
 
 #DELETE a comment
 
-@app.route('/comments/<int:comment_id>', methods=['DELETE'])
+@api.route('/comments/<int:comment_id>', methods=['DELETE'])
 def delete_comment(comment_id):
     comment = Comment.query.get(comment_id)
     if comment is None:
@@ -244,14 +244,14 @@ def delete_comment(comment_id):
 # ===============================
 
 # GET all ingredients
-@app.route('/ingredients', methods=['GET'])
+@api.route('/ingredients', methods=['GET'])
 def get_all_ingredients():
     ingredients = Ingredient.query.all()
     return jsonify([ingredient.serialize() for ingredient in ingredients]), 200
 
 
 # GET ingredient by ID
-@app.route('/ingredients/<int:ingredient_id>', methods=['GET'])
+@api.route('/ingredients/<int:ingredient_id>', methods=['GET'])
 def get_ingredient(ingredient_id):
     ingredient = Ingredient.query.get(ingredient_id)
     if not ingredient:
@@ -260,7 +260,7 @@ def get_ingredient(ingredient_id):
 
 
 # POST new ingredient
-@app.route('/ingredients', methods=['POST'])
+@api.route('/ingredients', methods=['POST'])
 def create_ingredient():
     data = request.get_json()
 
@@ -280,7 +280,7 @@ def create_ingredient():
 
 
 # PUT to update ingredient
-@app.route('/ingredients/<int:ingredient_id>', methods=['PUT'])
+@api.route('/ingredients/<int:ingredient_id>', methods=['PUT'])
 def update_ingredient(ingredient_id):
     ingredient = Ingredient.query.get(ingredient_id)
     if not ingredient:
@@ -296,7 +296,7 @@ def update_ingredient(ingredient_id):
 
 
 # DELETE an ingredient
-@app.route('/ingredients/<int:ingredient_id>', methods=['DELETE'])
+@api.route('/ingredients/<int:ingredient_id>', methods=['DELETE'])
 def delete_ingredient(ingredient_id):
     ingredient = Ingredient.query.get(ingredient_id)
     if not ingredient:
@@ -313,14 +313,14 @@ def delete_ingredient(ingredient_id):
 # ========================================
 
 # GET all ingredients for a recipe
-@app.route('/recipes/<int:recipe_id>/ingredients', methods=['GET'])
+@api.route('/recipes/<int:recipe_id>/ingredients', methods=['GET'])
 def get_recipe_ingredients(recipe_id):
     ingredients = RecipeIngredient.query.filter_by(recipe_id=recipe_id).all()
     return jsonify([ri.serialize() for ri in ingredients]), 200
 
 
 # POST to add a new ingredient to a recipe
-@app.route('/recipes/<int:recipe_id>/ingredients', methods=['POST'])
+@api.route('/recipes/<int:recipe_id>/ingredients', methods=['POST'])
 def add_ingredient_to_recipe(recipe_id):
     data = request.get_json()
 
@@ -341,7 +341,7 @@ def add_ingredient_to_recipe(recipe_id):
 
 
 # PUT to update quantity/unit for a recipe's ingredient
-@app.route('/recipes/<int:recipe_id>/ingredients/<int:ingredient_id>', methods=['PUT'])
+@api.route('/recipes/<int:recipe_id>/ingredients/<int:ingredient_id>', methods=['PUT'])
 def update_recipe_ingredient(recipe_id, ingredient_id):
     ri = RecipeIngredient.query.get((recipe_id, ingredient_id))
     if not ri:
@@ -356,7 +356,7 @@ def update_recipe_ingredient(recipe_id, ingredient_id):
 
 
 # DELETE an ingredient from a specific recipe
-@app.route('/recipes/<int:recipe_id>/ingredients/<int:ingredient_id>', methods=['DELETE'])
+@api.route('/recipes/<int:recipe_id>/ingredients/<int:ingredient_id>', methods=['DELETE'])
 def delete_recipe_ingredient(recipe_id, ingredient_id):
     ri = RecipeIngredient.query.get((recipe_id, ingredient_id))
     if not ri:
@@ -371,21 +371,21 @@ def delete_recipe_ingredient(recipe_id, ingredient_id):
 # ========================================
 
 # GET all saved collections for all users
-@app.route('/collections', methods=['GET'])
+@api.route('/collections', methods=['GET'])
 def get_all_collections():
     collections = Collection.query.all()
     return jsonify([c.serialize() for c in collections]), 200
 
 
 # GET all recipes saved by a user
-@app.route('/users/<int:user_id>/collections', methods=['GET'])
+@api.route('/users/<int:user_id>/collections', methods=['GET'])
 def get_user_collections(user_id):
     collections = Collection.query.filter_by(user_id=user_id).all()
     return jsonify([c.serialize() for c in collections]), 200
 
 
 # POST to save a recipe to a user's collection
-@app.route('/collections', methods=['POST'])
+@api.route('/collections', methods=['POST'])
 def add_to_collection():
     data = request.get_json()
 
@@ -409,7 +409,7 @@ def add_to_collection():
 
 # PUT – Usually unnecessary for pure many-to-many, but provided here for consistency
 # (to "transfer" a saved recipe from one user to another — rare use case)
-@app.route('/collections/<int:recipe_id>/<int:user_id>', methods=['PUT'])
+@api.route('/collections/<int:recipe_id>/<int:user_id>', methods=['PUT'])
 def update_collection(recipe_id, user_id):
     collection = Collection.query.get((recipe_id, user_id))
     if not collection:
@@ -434,7 +434,7 @@ def update_collection(recipe_id, user_id):
 
 
 # DELETE a saved recipe from a user's collection
-@app.route('/collections/<int:recipe_id>/<int:user_id>', methods=['DELETE'])
+@api.route('/collections/<int:recipe_id>/<int:user_id>', methods=['DELETE'])
 def delete_from_collection(recipe_id, user_id):
     collection = Collection.query.get((recipe_id, user_id))
     if not collection:
@@ -450,14 +450,14 @@ def delete_from_collection(recipe_id, user_id):
 # ========================
 
 # GET all media items
-@app.route('/media', methods=['GET'])
+@api.route('/media', methods=['GET'])
 def get_all_media():
     media_items = Media.query.all()
     return jsonify([m.serialize() for m in media_items]), 200
 
 
 # GET media by ID
-@app.route('/media/<int:media_id>', methods=['GET'])
+@api.route('/media/<int:media_id>', methods=['GET'])
 def get_media_by_id(media_id):
     media = Media.query.get(media_id)
     if not media:
@@ -466,7 +466,7 @@ def get_media_by_id(media_id):
 
 
 # POST new media item
-@app.route('/media', methods=['POST'])
+@api.route('/media', methods=['POST'])
 def create_media():
     data = request.get_json()
 
@@ -491,7 +491,7 @@ def create_media():
 
 
 # PUT to update an existing media item
-@app.route('/media/<int:media_id>', methods=['PUT'])
+@api.route('/media/<int:media_id>', methods=['PUT'])
 def update_media(media_id):
     media = Media.query.get(media_id)
     if not media:
@@ -513,7 +513,7 @@ def update_media(media_id):
 
 
 # DELETE a media item
-@app.route('/media/<int:media_id>', methods=['DELETE'])
+@api.route('/media/<int:media_id>', methods=['DELETE'])
 def delete_media(media_id):
     media = Media.query.get(media_id)
     if not media:
