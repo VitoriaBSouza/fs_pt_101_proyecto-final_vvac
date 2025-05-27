@@ -26,6 +26,7 @@ class User(db.Model):
     score: Mapped[list["RecipeScore"]] = relationship(back_populates="user")
     comments: Mapped[list["Comment"]] = relationship(back_populates="user")
     collection: Mapped[list["Collection"]] = relationship(back_populates="user")
+    recipes: Mapped[list["Recipe"]] = relationship(back_populates="user")
 
     def serialize(self):
         return {
@@ -74,6 +75,7 @@ class Recipe(db.Model):
     __tablename__='recipes'
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    author: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     title: Mapped[str] = mapped_column(String(100), nullable=False)
     difficulty_type: Mapped[DifficultyType] = mapped_column(Enum(DifficultyType), nullable=False)
     prep_time: Mapped[int] = mapped_column(nullable=True) #In minutes(covertion made at the frontend)
@@ -81,6 +83,7 @@ class Recipe(db.Model):
     published: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     #Relatioship with other tables
+    user: Mapped["User"] = relationship(back_populates="recipes")
     media: Mapped[list["Media"]] = relationship(back_populates="recipe")
     score: Mapped[list["RecipeScore"]] = relationship(back_populates="recipe")
     ingredient: Mapped[list["RecipeIngredient"]] = relationship(back_populates="recipe")
@@ -91,11 +94,15 @@ class Recipe(db.Model):
         return {
             "id": self.id,
             "title": self.title,
+            "author": self.author,
+            "username": self.user.username,
             "media": [media.serialize() for media in self.media],
+            "published": self.published.isoformat() if self.published else None,
             "dificulty_type": self.difficulty_type.value,
             "prep_time": self.prep_time,
+            "ingredients": [recipe_ing.serialize() for recipe_ing in self.ingredient],
             "steps": self.steps,
-            "published": self.published.isoformat() if self.published else None
+            "comments": [comment.serialize() for comment in self.comments]
         }
     
 class RecipeScore(db.Model):
