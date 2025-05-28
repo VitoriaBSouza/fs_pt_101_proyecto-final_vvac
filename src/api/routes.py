@@ -119,8 +119,11 @@ def get_user_profile():
     return jsonify({"success": True, 'user':user.serialize()})
 
 #DELETE user account (we keep recipes posted and soft delete the user personal data and comments)
-@api.route("/user/<int:user_id>", methods=["DELETE"])
-def delete_user(user_id):
+@api.route("/user", methods=["DELETE"])
+@jwt_required() 
+def delete_user():
+
+    user_id = get_jwt_identity()
     stmt = select(User).where(User.id == user_id)
     user = db.session.execute(stmt).scalar_one_or_none()
     if user is None:
@@ -142,9 +145,11 @@ def delete_user(user_id):
 
     return jsonify({"message": "You account has been successfully erased"}), 200
 
-@api.route("/user/<int:user_id>", methods=["PUT"])
-def update_user(user_id):
+@api.route("/user", methods=["PUT"])
+@jwt_required() 
+def update_user():
 
+    user_id = get_jwt_identity()
     data = request.get_json()
 
     stmt = select(User).where(User.id == user_id)
@@ -171,7 +176,6 @@ def update_user(user_id):
 def get_recipes():
 
     stmt = select(Recipe)
-
     recipes = db.session.execute(stmt).scalars().all()
 
     return jsonify([recipe.serialize() for recipe in recipes]), 200
@@ -189,8 +193,89 @@ def get_recipe(recipe_id):
     return jsonify([recipe.serialize() for recipe in recipes]), 200
 
 # POST to create a new recipe
-@api.route('/recipes', methods=['POST'])
+@api.route('/users/recipes', methods=['POST'])
+@jwt_required() 
 def create_recipe():
+
+    user_id = get_jwt_identity()
+
+    try:
+        data = request.json
+
+        if not data["title"]: 
+            return jsonify({"error": "Please add a title to your recipe"}), 400
+        
+        if not data["difficulty_type"]:
+            return jsonify({"error": "Please add a difficulty level to your recipe"}), 400
+        
+        if not data["steps"]:
+            return jsonify({"error": "Please add all the steps and instructions needed to your recipe"}), 400
+
+        if not data["ingredient"]:
+            return jsonify({"error": "Please add all the igredients details to your recipe"}), 400
+
+        #Conditions to turn the string value into the enum value in our database
+        if data["difficulty_type"] == "Easy":
+            setLevel = DifficultyType.EASY
+
+        elif data["difficulty_type"] == "Moderate":
+            setLevel = DifficultyType.MODERATE
+            
+        elif data["difficulty_type"] == "Hard":
+            setLevel = DifficultyType.HARD
+
+        else:
+            return jsonify({"error": "Please choose from one of these options for difficulty level: Easy, Moderate or Hard."}), 400
+        
+        #We add on frontend the control of blank space and lower cases
+        new_recipe = Recipe(
+            title=data["title"],
+            author=user_id,
+            difficulty_type=setLevel,
+            steps=data["steps"],
+            published=datetime.now(timezone.utc)
+        )
+        db.session.add(new_recipe)
+        db.session.flush()
+    
+        #Add ingredients to the recipe
+        for ing in data["ingredient"]:
+                name = ing["name"]
+                quantity = ing["quantity"]
+                unit = ing["unit"]
+
+        stmt = select(Ingredient).where(Ingredient.name == name)
+        ingredient = db.session.execute(stmt).scalar_one_or_none()
+
+        #We add ingredient to database if it does not exist
+        if ingredient is None:
+            ingredient = Ingredient(name=name)
+            db.session.add(ingredient)
+            db.session.flush()
+
+        recipe_ing = RecipeIngredient(
+                recipe_id=new_recipe.id,
+                ingredient_id=ingredient.id,
+                quantity=quantity,
+                unit=unit
+            )
+            
+        db.session.add(recipe_ing)
+
+        db.session.commit()
+
+        return jsonify({"success": True}), 201
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# PUT a specific recipe
+@api.route('/recipes/<int:recipe_id>', methods=['PUT'])
+def edit_recipe(recipe_id):
+
+    stmt = select(Recipe).where(Recipe.id == recipe_id)
+    recipes = db.session.execute(stmt).scalar_one_or_none()
+    
     try:
         data = request.json
 
@@ -314,7 +399,7 @@ def create_comment():
 
 #PUT to update comment
 ##Editar endpoint para incluir user_id, recipe_id y comment_id
-@api.route('users/<int:user_id>/recipes/<int:recipe_id>/comments/<int:comment_id>', methods=['PUT'])
+@api.route('users/recipes/<int:recipe_id>/comments/<int:comment_id>', methods=['PUT'])
 def update_comment(comment_id):
     comment = Comment.query.get(comment_id)
     if comment is None:
