@@ -270,23 +270,31 @@ def create_recipe():
 # Comment endpoints
 # =================================================================
 
-# GET all comments
+# GET all comments(for test)
 @api.route('/comments', methods=['GET'])
 def get_all_comments():
     comments = Comment.query.all()
     return jsonify([comment.serialize() for comment in comments]), 200
 
-# GET comment by ID
-@api.route('/comments/<int:comment_id>', methods=['GET'])
+# GET comment by ID(for test)
+@api.route('users/<int:user_id>/comments/<int:comment_id>', methods=['GET'])
 def get_comment(comment_id):
     comment = Comment.query.get(comment_id)
     if comment is None:
         return jsonify({"error": "Comment not found"}), 404
     return jsonify(comment.serialize()), 200
 
+## GET all comments by recipe ID(to load on page after we open a recipe)
+@api.route('users/<int:user_id>/recipes/<int:recipe_id>/comments', methods=['GET'])
+def get_comment(comment_id):
+    comment = Comment.query.get(comment_id)
+    if comment is None:
+        return jsonify({"error": "Comment not found"}), 404
+    return jsonify(comment.serialize()), 200
 
 #POST new comment
-@api.route('/comments', methods=['POST'])
+##Tiene de ser con recipe_id dinamico para estar asociado a la receta en concreto
+@api.route('users/<int:user_id>/recipes/<int:recipe_id>/comments', methods=['POST'])
 def create_comment():
     data = request.get_json()
 
@@ -305,7 +313,8 @@ def create_comment():
     return jsonify(new_comment.serialize()), 201
 
 #PUT to update comment
-@api.route('/comments/<int:comment_id>', methods=['PUT'])
+##Editar endpoint para incluir user_id, recipe_id y comment_id
+@api.route('users/<int:user_id>/recipes/<int:recipe_id>/comments/<int:comment_id>', methods=['PUT'])
 def update_comment(comment_id):
     comment = Comment.query.get(comment_id)
     if comment is None:
@@ -320,7 +329,8 @@ def update_comment(comment_id):
 
 
 #DELETE a comment
-@api.route('/comments/<int:comment_id>', methods=['DELETE'])
+##Editar endpoint para incluir user_id, recipe_id y comment_id
+@api.route('users/<int:user_id>/recipes/<int:recipe_id>/comments/<int:comment_id>', methods=['DELETE'])
 def delete_comment(comment_id):
     comment = Comment.query.get(comment_id)
     if comment is None:
@@ -334,14 +344,14 @@ def delete_comment(comment_id):
 # Ingredient Endpoints
 # ===============================
 
-# GET all ingredients
+# GET all ingredients(for test)
 @api.route('/ingredients', methods=['GET'])
 def get_all_ingredients():
     ingredients = Ingredient.query.all()
     return jsonify([ingredient.serialize() for ingredient in ingredients]), 200
 
 
-# GET ingredient by ID
+# GET ingredient by ID(for test)
 @api.route('/ingredients/<int:ingredient_id>', methods=['GET'])
 def get_ingredient(ingredient_id):
     ingredient = Ingredient.query.get(ingredient_id)
@@ -356,11 +366,12 @@ def create_ingredient():
     data = request.get_json()
 
     # Validate required fields
-    if not all(k in data for k in ("name", "quantity", "unit")):
+    if not all(k in data for k in ("name")):
         return jsonify({"error": "Missing data"}), 400
 
     new_ingredient = Ingredient(
         name=data["name"],
+         ##Sacar unit y quantity porque no es necesario y van en tabla de asociación
         quantity=data["quantity"],
         unit=data["unit"]
     )
@@ -379,6 +390,7 @@ def update_ingredient(ingredient_id):
 
     data = request.get_json()
     ingredient.name = data.get("name", ingredient.name)
+    ##Sacar unit y quantity porque no es necesario y van en tabla de asociación
     ingredient.quantity = data.get("quantity", ingredient.quantity)
     ingredient.unit = data.get("unit", ingredient.unit)
 
@@ -397,18 +409,16 @@ def delete_ingredient(ingredient_id):
     db.session.commit()
     return jsonify({"message": "Ingredient deleted"}), 200
 
-
-
 # ========================================
 # RecipeIngredient Endpoints (Join Table)
 # ========================================
 
-# GET all ingredients for a recipe
+## Podemos borrar esta tabla y dejar GET para hacer test debido a que recipe endpoint ya hace el post si es necesario
+# GET all ingredients for a recipe (for test)
 @api.route('/recipes/<int:recipe_id>/ingredients', methods=['GET'])
 def get_recipe_ingredients(recipe_id):
     ingredients = RecipeIngredient.query.filter_by(recipe_id=recipe_id).all()
     return jsonify([ri.serialize() for ri in ingredients]), 200
-
 
 # POST to add a new ingredient to a recipe
 @api.route('/recipes/<int:recipe_id>/ingredients', methods=['POST'])
@@ -429,7 +439,6 @@ def add_ingredient_to_recipe(recipe_id):
     db.session.add(new_link)
     db.session.commit()
     return jsonify(new_link.serialize()), 201
-
 
 # PUT to update quantity/unit for a recipe's ingredient
 @api.route('/recipes/<int:recipe_id>/ingredients/<int:ingredient_id>', methods=['PUT'])
@@ -461,22 +470,22 @@ def delete_recipe_ingredient(recipe_id, ingredient_id):
 # Collection Endpoints
 # ========================================
 
-# GET all saved collections for all users
+# GET all saved collections for all users(for test)
 @api.route('/collections', methods=['GET'])
 def get_all_collections():
     collections = Collection.query.all()
     return jsonify([c.serialize() for c in collections]), 200
 
 
-# GET all recipes saved by a user
-@api.route('/users/<int:user_id>/collections', methods=['GET'])
+# GET collection of recipe of a specific user
+@api.route('users/<int:user_id>/collections', methods=['GET'])
 def get_user_collections(user_id):
     collections = Collection.query.filter_by(user_id=user_id).all()
     return jsonify([c.serialize() for c in collections]), 200
 
 
 # POST to save a recipe to a user's collection
-@api.route('/collections', methods=['POST'])
+@api.route('users/<int:user_id>/collections', methods=['POST'])
 def add_to_collection():
     data = request.get_json()
 
@@ -500,6 +509,7 @@ def add_to_collection():
 
 # PUT – Usually unnecessary for pure many-to-many, but provided here for consistency
 # (to "transfer" a saved recipe from one user to another — rare use case)
+## Sacarlo porque solo se añade o se quita de la colección
 @api.route('/collections/<int:recipe_id>/<int:user_id>', methods=['PUT'])
 def update_collection(recipe_id, user_id):
     collection = Collection.query.get((recipe_id, user_id))
@@ -525,7 +535,7 @@ def update_collection(recipe_id, user_id):
 
 
 # DELETE a saved recipe from a user's collection
-@api.route('/collections/<int:recipe_id>/<int:user_id>', methods=['DELETE'])
+@api.route('users/<int:user_id>/collections/<int:recipe_id>', methods=['DELETE'])
 def delete_from_collection(recipe_id, user_id):
     collection = Collection.query.get((recipe_id, user_id))
     if not collection:
