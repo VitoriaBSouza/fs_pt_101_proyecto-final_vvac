@@ -392,8 +392,19 @@ def edit_recipe(recipe_id):
             unit=unit
         )
             
-        db.session.add(recipe_ing)
+        db.session.flush(recipe_ing)
 
+        # Check for media if they added or deleted image on the recipe
+        media_data = data["media"]
+
+        if not media_data:
+            # If no media, add a placeholder image
+            placeholder_media = Media(
+                recipe_id=recipe.id,
+                type_media=MediaType.IMAGE,
+                url=PLACEHOLDER_IMAGE_URL
+            )
+        db.session.add(placeholder_media)
         db.session.commit()
 
         return jsonify({"success": True}), 201
