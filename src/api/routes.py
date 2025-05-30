@@ -388,7 +388,7 @@ def edit_recipe(recipe_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-#DELETE user account (we keep recipes posted and soft delete the user personal data and comments)
+#DELETE recipe created by user
 @api.route("/user/recipes/<int:recipe_id>", methods=["DELETE"])
 @jwt_required()
 def delete_one_recipe(recipe_id):
