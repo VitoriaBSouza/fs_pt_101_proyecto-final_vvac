@@ -17,6 +17,8 @@ userServices.signup = async (formData) => {
       headers: {
         "Content-Type": "application/json",
       },
+      //Need to add email, password and username fields all required.
+      //All other fields are filled automatically.
       body: JSON.stringify(formData),
     });
 
@@ -40,6 +42,7 @@ userServices.login = async (formData) => {
       headers: {
         "Content-Type": "application/json",
       },
+      //Need only the email and password fields. All the others are filled automatically.
       body: JSON.stringify(formData),
     });
     const data = await resp.json();
@@ -62,6 +65,7 @@ userServices.getUser = async () => {
   try {
     const resp = await fetch(url + "/api/user", {
       method: "GET",
+      //Token required, we have to log in first
       headers: authHeaders()
     })
 
@@ -86,7 +90,9 @@ userServices.editUser = async (userData) => {
   try {
     const resp = await fetch(url + "/api/user", {
       method: "PUT",
+      //Token required, we have to log in first
       headers: authHeaders(),
+      //Same as the POST method
       body: JSON.stringify(userData)
     })
 
@@ -111,6 +117,7 @@ userServices.deleteUser = async () => {
   try {
     const resp = await fetch(url + "/api/user", {
       method: "DELETE",
+      //Token required, we have to log in first
       headers: authHeaders()
     })
 

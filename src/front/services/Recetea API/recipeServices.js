@@ -9,6 +9,9 @@ const authHeaders = () => ({
   'Content-Type': 'application/json'
 });
 
+
+
+//For mis recetas option
 //Get all recipes (need to log in)
 recipeServices.getAllUserRecipes = async () => {
     try {
@@ -49,6 +52,9 @@ recipeServices.createRecipe = async (recipeData) => {
         const resp = await fetch(url + "/user/recipes", {
         method: 'POST',
         headers: authHeaders(),
+        //Need to have title, difficulty_type, steps and ingredients. Prep_time is optional.
+        //The author and username fields will be filled automatically as well publised field.
+        //The ingredients require quantity, name and unit fields filled. If does not exist on the dabatase will be added.
         body: JSON.stringify(recipeData)
         });
 
@@ -67,6 +73,7 @@ recipeServices.editRecipe = async (recipe_id, recipeData) => {
         const resp = await fetch(url + "user/recipes/" + recipe_id, {
         method: 'PUT',
         headers: authHeaders(),
+        //Same as the post body.
         body: JSON.stringify(recipeData)
         });
 

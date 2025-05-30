@@ -442,6 +442,7 @@ def get_all_media():
 
 
 # GET media by ID(for test)
+#We do not need one for user loged in as the recipe serialize the media associated to it
 @api.route('/media/<int:media_id>', methods=['GET'])
 def get_media_by_id(media_id):
 
@@ -503,7 +504,8 @@ def delete_media(recipe_id, media_id):
     if recipe is None:
         return jsonify({"error": "Recipe not found"}), 404
     
-    media = Media.query.get(media_id)
+    media_stmt = select(Media).where(Media.recipe_id == recipe_id, Media.id == media_id)
+    media = db.session.execute(media_stmt).scalar_one_or_none()
 
     if not media:
         return jsonify({"error": "Media not found"}), 404
@@ -514,7 +516,24 @@ def delete_media(recipe_id, media_id):
         return jsonify({"error": "Media does not belong to this recipe"}), 403
 
     db.session.delete(media)
+    db.session.flush()
+
+    #Check if there is any media related to the recipe left
+    remaining_media_stmt = select(Media).where(Media.recipe_id == recipe_id)  # ← Fix: Check all remaining media
+    remaining_media = db.session.execute(remaining_media_stmt).scalars().first()
+
+    #If none we add a placeholder image
+    if not remaining_media:
+        placeholder_media = Media(
+            recipe_id=recipe_id,
+            type_media=MediaType.IMAGE,
+            url=PLACEHOLDER_IMAGE_URL
+        )
+
+        db.session.add(placeholder_media)
+    
     db.session.commit()
+
     return jsonify({"message": "Image deleted. Upload a new image."}), 200
 
 # =================================================================
