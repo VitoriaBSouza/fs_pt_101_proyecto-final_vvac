@@ -25,7 +25,7 @@ recipeServices.getAllUserRecipes = async () => {
         return data;
     } catch (error) {
         console.error("Error fetching user recipes:", error);
-        return null;
+        return error;
     }
 }
 
@@ -42,7 +42,7 @@ recipeServices.getOneUserRecipe = async (recipe_id) => {
         return data;
     } catch (error) {
         console.error("Error fetching recipe:", error);
-        return null;
+        return error;
     }
 }
 
@@ -63,7 +63,7 @@ recipeServices.createRecipe = async (recipeData) => {
         return data;
     } catch (error) {
         console.error("Error creating recipe:", error);
-        return null;
+        return error;
     }
 }
 
@@ -82,7 +82,7 @@ recipeServices.editRecipe = async (recipe_id, recipeData) => {
         return data;
     } catch (error) {
         console.error("Error editing recipe:", error);
-        return null;
+        return error;
     }
 }
 
@@ -99,7 +99,7 @@ recipeServices.deleteRecipe = async (recipe_id) => {
       return data;
     } catch (error) {
       console.error("Error deleting recipe:", error);
-      return null;
+      return error;
     }
 }
 

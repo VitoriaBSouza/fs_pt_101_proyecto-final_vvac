@@ -458,9 +458,10 @@ def get_media_by_id(media_id):
 @jwt_required()
 def add_media(recipe_id):
 
+    user_id = get_jwt_identity()
+
     try:
-        user_id = get_jwt_identity()
-        data = request.get_json()
+        data = request.json
 
         #Only allow to add if the recipe belongs to user
         stmt = select(Recipe).where(Recipe.id == recipe_id, Recipe.author == user_id)
@@ -470,7 +471,7 @@ def add_media(recipe_id):
             return jsonify({"error":  "Recipe not found or not owned by user"}), 404
         
         # Ensure required fields are present
-        if not all(k in data for k in ("type_media", "url")):
+        if not data["type_media"] or not data["url"]:
             return jsonify({"error": "Missing data. Failed to upload media."}), 400
         
         #Convert the type_medi to match the enum in MediaTupe database
@@ -487,8 +488,8 @@ def add_media(recipe_id):
         db.session.commit()
         return jsonify(new_media.serialize()), 201
 
-    except ValueError:
-        return jsonify({"error": "Invalid media type. Only images allowed."}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 # DELETE a media item
@@ -543,72 +544,125 @@ def delete_media(recipe_id, media_id):
 # GET all comments(for test)
 @api.route('/comments', methods=['GET'])
 def get_all_comments():
+
     comments = Comment.query.all()
+
     return jsonify([comment.serialize() for comment in comments]), 200
 
 # GET comment by ID(for test)
-@api.route('users/<int:user_id>/comments/<int:comment_id>', methods=['GET'])
+@api.route('/comments/<int:comment_id>', methods=['GET'])
 def get_comments(comment_id):
+
     comment = Comment.query.get(comment_id)
+
     if comment is None:
         return jsonify({"error": "Comment not found"}), 404
+    
     return jsonify(comment.serialize()), 200
 
-## GET all comments by recipe ID(to load on page after we open a recipe)
-@api.route('users/<int:user_id>/recipes/<int:recipe_id>/comments', methods=['GET'])
+## GET all comments by recipe ID
+@api.route('/recipes/<int:recipe_id>/comments', methods=['GET'])
 def get_comment(comment_id):
+
     comment = Comment.query.get(comment_id)
+
     if comment is None:
         return jsonify({"error": "Comment not found"}), 404
+    
     return jsonify(comment.serialize()), 200
 
-#POST new comment
-##Tiene de ser con recipe_id dinamico para estar asociado a la receta en concreto
-@api.route('users/<int:user_id>/recipes/<int:recipe_id>/comments', methods=['POST'])
-def create_comment():
-    data = request.get_json()
+#POST new comment by recipe ID
+@api.route('users/recipes/<int:recipe_id>/comments', methods=['POST'])
+@jwt_required()
+def create_comment(recipe_id):
 
-    if not all(key in data for key in ("user_id", "recipe_id", "content")):
-        return jsonify({"error": "Missing data"}), 400
+    user_id = get_jwt_identity()
 
-    new_comment = Comment(
-        user_id=data["user_id"],
-        recipe_id=data["recipe_id"],
-        content=data["content"]
-    )
+    try: 
+        data = request.json
 
-    db.session.add(new_comment)
-    db.session.commit()
+        stmt_recipe = select(Recipe).where(Recipe.id == recipe_id, Recipe.author == user_id)
+        recipe = db.session.execute(stmt_recipe).scalar_one_or_none()
+        
+        if recipe is None:
+            return jsonify({"error": "Recipe not found"}), 404
 
-    return jsonify(new_comment.serialize()), 201
+        if not data["content"]:
+            return jsonify({"error": "Missing content"}), 400
+
+        new_comment = Comment(
+            user_id=user_id,
+            recipe_id=recipe_id,
+            content=data["content"]
+        )
+
+        db.session.add(new_comment)
+        db.session.commit()
+
+        return jsonify(new_comment.serialize()), 201
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
 
 #PUT to update comment
-##Editar endpoint para incluir user_id, recipe_id y comment_id
 @api.route('users/recipes/<int:recipe_id>/comments/<int:comment_id>', methods=['PUT'])
-def update_comment(comment_id):
-    comment = Comment.query.get(comment_id)
-    if comment is None:
-        return jsonify({"error": "Comment not found"}), 404
+@jwt_required()
+def edit_comment(recipe_id, comment_id):
 
-    data = request.get_json()
-    if "content" in data:
-        comment.content = data["content"]
+    user_id = get_jwt_identity()
 
-    db.session.commit()
-    return jsonify(comment.serialize()), 200
+    try: 
+
+        data = request.json
+
+        stmt = select(Comment).where(
+            Comment.recipe_id == recipe_id, 
+            Comment.user_id == user_id, 
+            Comment.id == comment_id
+        )
+        comment = db.session.execute(stmt).scalar_one_or_none()
+
+        if comment is None:
+            return jsonify({"error": "Comment not found"}), 404
+
+        if "content" in data:
+            comment.content = data["content"]
+
+        db.session.commit()
+        return jsonify(comment.serialize()), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 #DELETE a comment
-##Editar endpoint para incluir user_id, recipe_id y comment_id
-@api.route('users/<int:user_id>/recipes/<int:recipe_id>/comments/<int:comment_id>', methods=['DELETE'])
-def delete_comment(comment_id):
-    comment = Comment.query.get(comment_id)
-    if comment is None:
-        return jsonify({"error": "Comment not found"}), 404
+@api.route('users/recipes/<int:recipe_id>/comments/<int:comment_id>', methods=['DELETE'])
+@jwt_required()
+def delete_comment(recipe_id, comment_id):
 
-    db.session.delete(comment)
-    db.session.commit()
-    return jsonify({"message": "Comment deleted"}), 200
+    user_id = get_jwt_identity()
+
+    try:
+
+        stmt = select(Comment).where(
+            Comment.recipe_id == recipe_id, 
+            Comment.user_id == user_id, 
+            Comment.id == comment_id
+        )
+
+        comment = db.session.execute(stmt).scalar_one_or_none()
+
+        if comment is None:
+            return jsonify({"error": "Comment not found"}), 404
+
+        db.session.delete(comment)
+        db.session.commit()
+        
+        return jsonify({"message": "Comment deleted"}), 200
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # ===============================
 # Ingredient Endpoints
