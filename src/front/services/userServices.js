@@ -80,7 +80,7 @@ userServices.getUser = async () => {
 }
 
 //PUT to edit user information
-userServices.editUser = async () => {
+userServices.editUser = async (userData) => {
   try {
     const resp = await fetch(url + "/api/user", {
       method: "PUT",
@@ -88,7 +88,8 @@ userServices.editUser = async () => {
         //pass token from local storage here as we need authorization
         'Authorization': 'Bearer ' + localStorage.getItem('token'),
         'Content-Type': 'application/json'
-      }
+      },
+      body: JSON.stringify(userData)
     })
 
     const data = await resp.json()
@@ -96,7 +97,7 @@ userServices.editUser = async () => {
     if (!resp.ok) throw Error(data.error)
     console.log(data)
 
-    //add user data as object, we need to use JSON.stringify()
+    //update user data locally as object, we need to use JSON.stringify()
     localStorage.setItem('user', JSON.stringify(data.user))
     
     return data;
@@ -124,8 +125,11 @@ userServices.deleteUser = async () => {
     if (!resp.ok) throw Error(data.error)
     console.log(data)
 
-    //add user data as object, we need to use JSON.stringify()
-    localStorage.setItem('user', JSON.stringify(data.user))
+    //we remove the user and token from local storage in order to log them out
+    //The user status changes to deleted and their username and password are changed to a placeholder
+    //so they cannot log in again, but we keep their recipes posted on our database
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
     
     return data;
 
