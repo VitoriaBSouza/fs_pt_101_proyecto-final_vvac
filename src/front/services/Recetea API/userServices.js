@@ -3,6 +3,12 @@ const url = import.meta.env.VITE_BACKEND_URL;
 
 const userServices = {};
 
+// Utility: Add JWT token
+const authHeaders = () => ({
+  'Authorization': 'Bearer ' + localStorage.getItem('token'),
+  'Content-Type': 'application/json'
+});
+
 //POST method to call sign up
 userServices.signup = async (formData) => {
   try {
@@ -56,11 +62,7 @@ userServices.getUser = async () => {
   try {
     const resp = await fetch(url + "/api/user", {
       method: "GET",
-      headers: {
-        //pass token from local storage here
-        'Authorization': 'Bearer ' + localStorage.getItem('token'),
-        'Content-Type': 'application/json'
-      }
+      headers: authHeaders()
     })
 
     const data = await resp.json()
@@ -84,11 +86,7 @@ userServices.editUser = async (userData) => {
   try {
     const resp = await fetch(url + "/api/user", {
       method: "PUT",
-      headers: {
-        //pass token from local storage here as we need authorization
-        'Authorization': 'Bearer ' + localStorage.getItem('token'),
-        'Content-Type': 'application/json'
-      },
+      headers: authHeaders(),
       body: JSON.stringify(userData)
     })
 
@@ -113,11 +111,7 @@ userServices.deleteUser = async () => {
   try {
     const resp = await fetch(url + "/api/user", {
       method: "DELETE",
-      headers: {
-        //pass token from local storage here
-        'Authorization': 'Bearer ' + localStorage.getItem('token'),
-        'Content-Type': 'application/json'
-      }
+      headers: authHeaders()
     })
 
     const data = await resp.json()

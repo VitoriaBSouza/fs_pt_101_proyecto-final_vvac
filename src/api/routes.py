@@ -15,6 +15,8 @@ api = Blueprint('api', __name__)
 # Allow CORS requests to this API
 CORS(api)
 
+#Placeholder image URL for recipes without images
+PLACEHOLDER_IMAGE_URL = "https://via.placeholder.com/400x300?text=No+Image"
 
 @api.route('/hello', methods=['POST', 'GET'])
 def handle_hello():
@@ -297,11 +299,22 @@ def create_recipe():
                 unit=unit
             )
             
-        db.session.add(recipe_ing)
+        db.session.flush(recipe_ing)
 
+        # Check for media if they added image to the recipe
+        media_data = data["media"]
+
+        if not media_data:
+            # If no media was submitted, add a placeholder image
+            placeholder_media = Media(
+                recipe_id=new_recipe.id,
+                type_media=MediaType.IMAGE,
+                url=PLACEHOLDER_IMAGE_URL
+            )
+        db.session.add(placeholder_media)
         db.session.commit()
 
-        return jsonify({"success": True}), 201
+        return jsonify({"success": True, "recipe_id": new_recipe.id}), 201
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -433,33 +446,35 @@ def get_all_media():
 def get_media_by_id(media_id):
 
     media = Media.query.get(media_id)
-    
+
     if not media:
         return jsonify({"error": "Media not found"}), 404
     
     return jsonify(media.serialize()), 200
 
-
 # POST new media item
 @api.route('user/recipes/<int:recipe_id>/media', methods=['POST'])
 @jwt_required()
-def create_media(recipe_id):
+def add_media(recipe_id):
 
     try:
         user_id = get_jwt_identity()
         data = request.get_json()
 
+        #Only allow to add if the recipe belongs to user
         stmt = select(Recipe).where(Recipe.id == recipe_id, Recipe.author == user_id)
         recipe = db.session.execute(stmt).scalar_one_or_none()
 
         if recipe is None:
-            return jsonify({"error": "Recipe not found or unauthorized"}), 404
-
+            return jsonify({"error":  "Recipe not found or not owned by user"}), 404
+        
         # Ensure required fields are present
-        if not all(k in data for k in ("type", "url")):
+        if not all(k in data for k in ("type_media", "url")):
             return jsonify({"error": "Missing data. Failed to upload media."}), 400
         
-        media_type = MediaType(data["type"])
+        #Convert the type_medi to match the enum in MediaTupe database
+        if data["type_media"] == "image" or data["type_media"] == "Image":
+            media_type = MediaType.IMAGE
         
         new_media = Media(
             recipe_id=recipe_id,
@@ -475,38 +490,32 @@ def create_media(recipe_id):
         return jsonify({"error": "Invalid media type. Only images allowed."}), 400
 
 
-# PUT to update an existing media item
-@api.route('/media/<int:media_id>', methods=['PUT'])
-def update_media(media_id):
-    media = Media.query.get(media_id)
-    if not media:
-        return jsonify({"error": "Media not found"}), 404
-
-    data = request.get_json()
-
-    # Optional fields
-    if "url" in data:
-        media.url = data["url"]
-    if "type" in data:
-        try:
-            media.type_media = MediaType(data["type"])
-        except ValueError:
-            return jsonify({"error": "Invalid media type"}), 400
-
-    db.session.commit()
-    return jsonify(media.serialize()), 200
-
-
 # DELETE a media item
-@api.route('/media/<int:media_id>', methods=['DELETE'])
-def delete_media(media_id):
+@api.route('user/recipes/<int:recipe_id>/media/<int:media_id>', methods=['DELETE'])
+@jwt_required()
+def delete_media(recipe_id, media_id):
+
+    user_id = get_jwt_identity()
+
+    stmt_recipe = select(Recipe).where(Recipe.id == recipe_id, Recipe.author == user_id)
+    recipe = db.session.execute(stmt_recipe).scalar_one_or_none()
+
+    if recipe is None:
+        return jsonify({"error": "Recipe not found"}), 404
+    
     media = Media.query.get(media_id)
+
     if not media:
         return jsonify({"error": "Media not found"}), 404
+    
+    #Will only allow to delete the media of said recipe
+    #The recipe only alows to edit if owned by the user
+    if media.recipe_id != recipe_id:
+        return jsonify({"error": "Media does not belong to this recipe"}), 403
 
     db.session.delete(media)
     db.session.commit()
-    return jsonify({"message": "Media deleted"}), 200
+    return jsonify({"message": "Image deleted. Upload a new image."}), 200
 
 # =================================================================
 # Comment endpoints

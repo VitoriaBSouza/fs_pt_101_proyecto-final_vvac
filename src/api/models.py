@@ -140,8 +140,9 @@ class Media(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "type": self.type_media.value,
-            "link": self.url
+            "recipe_id":self.recipe_id,
+            "type_media": self.type_media.value,
+            "url": self.url
         }
     
 class Collection(db.Model):
