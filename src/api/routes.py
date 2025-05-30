@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Recipe, Ingredient, Comment, Media, UserStatus, Collection, RecipeIngredient, DifficultyType
+from api.models import db, User, Recipe, Ingredient, Comment, Media, UserStatus, Collection, RecipeIngredient, DifficultyType, MediaType
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from sqlalchemy import select, delete
@@ -415,6 +415,99 @@ def delete_one_recipe(recipe_id):
 
 #Recipe endpoints end here
 
+# ========================
+# Media Endpoints
+# ========================
+
+# GET all media items(for test)
+@api.route('/media', methods=['GET'])
+def get_all_media():
+
+    media_items = Media.query.all()
+
+    return jsonify([m.serialize() for m in media_items]), 200
+
+
+# GET media by ID(for test)
+@api.route('/media/<int:media_id>', methods=['GET'])
+def get_media_by_id(media_id):
+
+    media = Media.query.get(media_id)
+    
+    if not media:
+        return jsonify({"error": "Media not found"}), 404
+    
+    return jsonify(media.serialize()), 200
+
+
+# POST new media item
+@api.route('user/recipes/<int:recipe_id>/media', methods=['POST'])
+@jwt_required()
+def create_media(recipe_id):
+
+    try:
+        user_id = get_jwt_identity()
+        data = request.get_json()
+
+        stmt = select(Recipe).where(Recipe.id == recipe_id, Recipe.author == user_id)
+        recipe = db.session.execute(stmt).scalar_one_or_none()
+
+        if recipe is None:
+            return jsonify({"error": "Recipe not found or unauthorized"}), 404
+
+        # Ensure required fields are present
+        if not all(k in data for k in ("type", "url")):
+            return jsonify({"error": "Missing data. Failed to upload media."}), 400
+        
+        media_type = MediaType(data["type"])
+        
+        new_media = Media(
+            recipe_id=recipe_id,
+            type_media=media_type,
+            url=data["url"]
+        )
+
+        db.session.add(new_media)
+        db.session.commit()
+        return jsonify(new_media.serialize()), 201
+
+    except ValueError:
+        return jsonify({"error": "Invalid media type. Only images allowed."}), 400
+
+
+# PUT to update an existing media item
+@api.route('/media/<int:media_id>', methods=['PUT'])
+def update_media(media_id):
+    media = Media.query.get(media_id)
+    if not media:
+        return jsonify({"error": "Media not found"}), 404
+
+    data = request.get_json()
+
+    # Optional fields
+    if "url" in data:
+        media.url = data["url"]
+    if "type" in data:
+        try:
+            media.type_media = MediaType(data["type"])
+        except ValueError:
+            return jsonify({"error": "Invalid media type"}), 400
+
+    db.session.commit()
+    return jsonify(media.serialize()), 200
+
+
+# DELETE a media item
+@api.route('/media/<int:media_id>', methods=['DELETE'])
+def delete_media(media_id):
+    media = Media.query.get(media_id)
+    if not media:
+        return jsonify({"error": "Media not found"}), 404
+
+    db.session.delete(media)
+    db.session.commit()
+    return jsonify({"message": "Media deleted"}), 200
+
 # =================================================================
 # Comment endpoints
 # =================================================================
@@ -695,80 +788,3 @@ def delete_from_collection(recipe_id, user_id):
     return jsonify({"message": "Recipe removed from collection"}), 200
 
 
-# ========================
-# Media Endpoints
-# ========================
-
-# GET all media items
-@api.route('/media', methods=['GET'])
-def get_all_media():
-    media_items = Media.query.all()
-    return jsonify([m.serialize() for m in media_items]), 200
-
-
-# GET media by ID
-@api.route('/media/<int:media_id>', methods=['GET'])
-def get_media_by_id(media_id):
-    media = Media.query.get(media_id)
-    if not media:
-        return jsonify({"error": "Media not found"}), 404
-    return jsonify(media.serialize()), 200
-
-
-# POST new media item
-@api.route('/media', methods=['POST'])
-def create_media():
-    data = request.get_json()
-
-    # Ensure required fields are present
-    if not all(k in data for k in ("recipe_id", "type", "url")):
-        return jsonify({"error": "Missing data"}), 400
-
-    try:
-        media_type = MediaType(data["type"])
-    except ValueError:
-        return jsonify({"error": "Invalid media type"}), 400
-
-    new_media = Media(
-        recipe_id=data["recipe_id"],
-        type_media=media_type,
-        url=data["url"]
-    )
-
-    db.session.add(new_media)
-    db.session.commit()
-    return jsonify(new_media.serialize()), 201
-
-
-# PUT to update an existing media item
-@api.route('/media/<int:media_id>', methods=['PUT'])
-def update_media(media_id):
-    media = Media.query.get(media_id)
-    if not media:
-        return jsonify({"error": "Media not found"}), 404
-
-    data = request.get_json()
-
-    # Optional fields
-    if "url" in data:
-        media.url = data["url"]
-    if "type" in data:
-        try:
-            media.type_media = MediaType(data["type"])
-        except ValueError:
-            return jsonify({"error": "Invalid media type"}), 400
-
-    db.session.commit()
-    return jsonify(media.serialize()), 200
-
-
-# DELETE a media item
-@api.route('/media/<int:media_id>', methods=['DELETE'])
-def delete_media(media_id):
-    media = Media.query.get(media_id)
-    if not media:
-        return jsonify({"error": "Media not found"}), 404
-
-    db.session.delete(media)
-    db.session.commit()
-    return jsonify({"message": "Media deleted"}), 200
