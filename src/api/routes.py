@@ -2,13 +2,14 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Recipe, Ingredient, Comment, Media, UserStatus, Collection, RecipeIngredient, DifficultyType, MediaType
+from api.models import db, User, Recipe, Ingredient, Comment, Media, UserStatus, Collection, RecipeIngredient, DifficultyType, MediaType, RecipeScore
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from sqlalchemy import select, delete, func
 from datetime import datetime, timezone
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from werkzeug.security import generate_password_hash, check_password_hash
+from api.email_utils import send_email, get_serializer
 
 api = Blueprint('api', __name__)
 
@@ -171,6 +172,84 @@ def update_user():
     
     db.session.commit()
     return jsonify(user.serialize()), 200
+
+@api.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    
+    try:
+        email = request.json.get('email')
+        if not email:
+            return jsonify({"error": "Email is required"}), 400
+
+        user = db.session.query(User).filter_by(email=email).first()
+
+        # Evitar revelar si el correo existe
+        if not user or user.status != UserStatus.active:
+            return jsonify({"message": "If that email exists, a reset link was sent."}), 200
+
+        # Create token for limited time
+        serializer = get_serializer()
+        token = serializer.dumps(user.email, salt='password-reset')
+
+        # Generates link to reset password
+        reset_url = url_for('api.reset_password', token=token, _external=True)
+
+        # Personalize email
+        app_name = "Recetea"  # Customize this
+        subject = f"{app_name} - Password Reset Request"
+        body = f"""
+            Hi {user.username},
+
+            We received a request to reset your password for your {app_name} account.
+
+            If you made this request, please reset your password by clicking the link below:
+
+            {reset_url}
+
+            This link will expire in 1 hour. If you didn’t request a password reset, you can ignore this email.
+
+            Best,
+            The {app_name} Team
+            """
+
+        #Sends email with reset link to user
+        send_email(
+            to=user.email,
+            subject=subject,
+            body=body
+        )
+
+        return jsonify({"message": f"If that email exists, a reset link was sent."}), 200
+
+    except Exception as e:
+        print(e)
+        return jsonify({"error": str(e)}), 500
+    
+@api.route('/reset-password/<token>', methods=['POST'])
+def reset_password(token):
+    try:
+        serializer = get_serializer()
+
+        email = serializer.loads(token, salt='password-reset', max_age=3600)
+        data = request.json
+        new_password = data["password"]
+
+        if not new_password:
+            return jsonify({"error": "Add your new password"}), 400
+
+        user = db.session.query(User).filter_by(email=email).first()
+
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        user.password = generate_password_hash(new_password)
+        user.updated_at = datetime.now(timezone.utc)
+        db.session.commit()
+
+        return jsonify({"message": "Password updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 #End of user endpoints
 
@@ -844,7 +923,6 @@ def get_all_collections():
 
     return jsonify([c.serialize() for c in collections]), 200
 
-
 # GET collection of recipe of a specific user
 @api.route('/user/collection', methods=['GET'])
 @jwt_required()
@@ -912,4 +990,55 @@ def delete_from_collection(recipe_id):
 
     return jsonify({"message": "Recipe removed from collection"}), 200
 
+# ========================================
+# RecipeScore Endpoints
+# ========================================
 
+# GET all saved scores(for test)
+@api.route('/user/score', methods=['GET'])
+def get_all_scores():
+
+    stmt = select(RecipeScore)
+    scores = db.session.execute(stmt).scalars().all()
+
+    return jsonify([c.serialize() for c in scores]), 200
+
+##We do not need to set for recipe as it's serrialized so it will be shown on recipe endpoint
+
+# POST score on recipe
+@api.route('/user/recipes/<int:recipe_id>/score', methods=['POST'])
+@jwt_required()
+def add_score(recipe_id):
+
+    user_id = get_jwt_identity()
+
+    try:
+
+        stmt = select(RecipeScore).where(
+            RecipeScore.user_id == user_id,
+            RecipeScore.recipe_id == recipe_id
+        )
+        liked = db.session.execute(stmt).scalar_one_or_none()
+
+        #Check if recipe is already on the list. If liked it will delete the like (decrease -1)
+        if liked:
+            db.session.delete(liked)
+            db.session.commit()
+            return jsonify({"message": "Like removed", "liked": False}), 200
+        
+        #Add it and sum +1 if not liked
+        else:
+            new_like = RecipeScore(
+                user_id=user_id,
+                recipe_id=recipe_id,
+                score=1 
+            )
+
+            db.session.add(new_like)
+            db.session.commit()
+            return jsonify({"message": "Like added", "liked": True}), 201
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+##No need for delete as on POST we already delete the like if it exists
