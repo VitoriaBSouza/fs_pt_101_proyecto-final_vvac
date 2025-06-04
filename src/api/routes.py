@@ -339,16 +339,14 @@ def create_recipe():
             return jsonify({"error": "Please add all the igredients details to your recipe"}), 400
 
         #Conditions to turn the string value into the enum value in our database
-        if data["difficulty_type"] == "Easy":
-            setLevel = DifficultyType.EASY
+        difficulty_map = {
+            "Easy": DifficultyType.EASY,
+            "Moderate": DifficultyType.MODERATE,
+            "Hard": DifficultyType.HARD
+        }
 
-        elif data["difficulty_type"] == "Moderate":
-            setLevel = DifficultyType.MODERATE
-            
-        elif data["difficulty_type"] == "Hard":
-            setLevel = DifficultyType.HARD
-
-        else:
+        setLevel = difficulty_map.get(data["difficulty_type"])
+        if setLevel is None:
             return jsonify({"error": "Please choose from one of these options for difficulty level: Easy, Moderate or Hard."}), 400
         
         #We add on frontend the control of blank space and lower cases
@@ -371,25 +369,33 @@ def create_recipe():
             quantity = ing["quantity"]
             unit = ing["unit"]
 
-            stmt = select(Ingredient).where(Ingredient.name == name)
-            ingredient = db.session.execute(stmt).scalar_one_or_none()
+            #Normalize and fetch allergen and nutricional value from API
+            normalized_name = name.lower().strip()
+            info = get_ingredient_info(normalized_name)
+
+            ingredient = db.session.query(Ingredient).filter(Ingredient.name == normalized_name).one_or_none()
 
             #We add ingredient to database if it does not exist
-            if ingredient is None:
-                ingredient = Ingredient(name=name)
+            if not ingredient:
+                ingredient = Ingredient(
+                    name=name,
+                    allergens=",".join(info["allergens"])
+                )
+
                 db.session.add(ingredient)
                 db.session.flush()
 
-            #Normalize name to avoid errors to fetch on the Food Facts API
-            normalized_name = name.lower().strip()
+            #If found the ingredient we update or add the allergens missings or outdated  
+            new_allergens = ",".join(info.get("allergens", []))
+            
+            if ingredient.allergens != new_allergens:
+                ingredient.allergens = new_allergens
 
             #We make fetch to Food Facts API for allergens and nutritional values
-            info = get_ingredient_info(normalized_name)
             calories = info["calories"] if info else None
             fat = info["fat"] if info else None
             carbs = info["carbs"] if info else None
             protein = info["protein"] if info else None
-            allergens = ",".join(info["allergens"]) if info and "allergens" in info else ""
 
             grams = convert_to_grams(name, unit, quantity)
             total_grams += grams
@@ -406,10 +412,6 @@ def create_recipe():
             )
             new_recipe.ingredients.append(recipe_ing)
             db.session.add(recipe_ing)
-
-        #Update the allergen of the ingredients if empty
-        if not ingredient.allergens and allergens:
-                ingredient.allergens = allergens
 
         new_recipe.total_grams = total_grams
 

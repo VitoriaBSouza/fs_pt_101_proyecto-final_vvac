@@ -118,7 +118,7 @@ def get_ingredient_info(name):
             "fat": nutriments.get("fat_100g", 0),
             "carbs": nutriments.get("carbohydrates_100g", 0),
             "protein": nutriments.get("proteins_100g", 0),
-            "allergens": combined_allergens
+            "allergens": combined_allergens or fallback_allergens
         }
 
     except Exception:
