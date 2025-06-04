@@ -11,6 +11,7 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_requir
 from werkzeug.security import generate_password_hash, check_password_hash
 from api.email_utils import send_email, get_serializer
 
+
 api = Blueprint('api', __name__)
 
 # Allow CORS requests to this API
