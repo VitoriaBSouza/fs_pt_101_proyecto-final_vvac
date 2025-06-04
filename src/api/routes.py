@@ -3,12 +3,13 @@ This module takes care of starting the API Server, Loading the DB and Adding the
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
 from api.models import db, User, Recipe, Ingredient, Comment, Media, UserStatus, Collection, RecipeIngredient, DifficultyType, MediaType
-from api.utils import generate_sitemap, APIException
+from api.Utils.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from sqlalchemy import select, delete
 from datetime import datetime, timezone
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from werkzeug.security import generate_password_hash, check_password_hash
+import requests
 
 api = Blueprint('api', __name__)
 
@@ -391,8 +392,49 @@ def edit_recipe(recipe_id):
             quantity=quantity,
             unit=unit
         )
-            
+        
+        #Need to be saved with flush first in order to check alergens and nutritional value
         db.session.add(recipe_ing)
+
+        nutritional_summary = {
+        "energy_kcal": 0,
+        "proteins": 0,
+        "carbohydrates": 0,
+        "fat": 0
+        }
+        allergens_set = set()
+
+        search_url = "https://world.openfoodfacts.org/cgi/search.pl"
+        headers = {"User-Agent": "YourApp/1.0"}
+
+        for ing in data["ingredient"]:
+            name = ing["name"]
+            quantity = ing["quantity"] #Best to be in grams for nutricional calculator
+            unit = ing["unit"]
+
+        params = {
+            "search_terms": name,
+            "search_simple": 1,
+            "json": 1,
+            "page_size": 1
+        }
+
+        response = requests.get(search_url, params=params, headers=headers)
+        product_data = response.json().get("products")
+
+        if product_data:
+            product = product_data[0]
+            nutriments = product.get("nutriments", {})
+            allergens = product.get("allergens_tags", [])
+
+            # Basic aggregation (assuming quantity is 100g for now)
+            nutritional_summary["energy_kcal"] += nutriments.get("energy-kcal_100g", 0)
+            nutritional_summary["proteins"] += nutriments.get("proteins_100g", 0)
+            nutritional_summary["carbohydrates"] += nutriments.get("carbohydrates_100g", 0)
+            nutritional_summary["fat"] += nutriments.get("fat_100g", 0)
+
+        for allergen in allergens:
+            allergens_set.add(allergen.replace("en:", ""))  # clean tags
 
         db.session.commit()
 
