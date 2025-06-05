@@ -1,6 +1,7 @@
 export const initialStore=()=>{
   return{
     user: localStorage.getItem('user')? JSON.parse(localStorage.getItem('user')) : null,
+    recipes: null,
     message: null,
     todos: [
       {
@@ -33,6 +34,12 @@ export default function storeReducer(store, action = {}) {
       return {
         ...store,
         user: action.payload
+      };
+
+    case 'get_one_recipe':
+      return {
+        ...store,
+        recipes: action.payload
       };
 
     case 'add_user':
