@@ -101,41 +101,44 @@ def get_ingredient_info(name):
         response.raise_for_status()
 
         data = response.json()
-        products = data.get("products", [])
+        products = data.get("products", []) 
 
         product = {}
+        selected_nutriments = {}
+        selected_allergens_tags = []
+
         for p in products:
+            product_name = p.get("product_name", "").lower().strip()
             nutriments = p.get("nutriments", {})
-            if any(
+
+            # Accept product with usable nutrition info
+            if not selected_nutriments and any(
                 nutriments.get(key) not in [None, "", 0]
                 for key in ["energy-kcal_100g", "carbohydrates_100g", "proteins_100g"]
             ):
-                product = p
+                selected_nutriments = nutriments
+
+            # Prefer allergen info only from exact or close matches
+            if product_name == normalized_name:
+                selected_allergens_tags = p.get("allergens_tags", [])
                 break
 
-        if not product:
-            return {
-                "calories": 0,
-                "fat": 0,
-                "carbs": 0,
-                "protein": 0,
-                "allergens": fallback_allergens
-            }
-
         nutriments = product.get("nutriments", {})
-        allergens_tags = product.get("allergens_tags", [])
 
-        api_allergens = [a.replace("en:", "") for a in allergens_tags]
+        api_allergens = [
+            a.replace("en:", "").replace("fr:", "").strip()
+            for a in selected_allergens_tags
+        ]
         combined_allergens = list(set(fallback_allergens + api_allergens))
 
         return {
-            "calories": nutriments.get("energy-kcal_100g", 0),
-            "fat": nutriments.get("fat_100g", 0),
-            "carbs": nutriments.get("carbohydrates_100g", 0),
-            "protein": nutriments.get("proteins_100g", 0),
+            "calories": selected_nutriments.get("energy-kcal_100g", 0),
+            "fat": selected_nutriments.get("fat_100g", 0),
+            "carbs": selected_nutriments.get("carbohydrates_100g", 0),
+            "protein": selected_nutriments.get("proteins_100g", 0),
             "allergens": combined_allergens or fallback_allergens
         }
-
+    
     except Exception:
         # Fallback only (in case of request failure)
         return {
