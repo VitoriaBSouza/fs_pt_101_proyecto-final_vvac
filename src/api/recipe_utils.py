@@ -93,7 +93,7 @@ def get_ingredient_info(name):
         "search_simple": 1,
         "action": "process",
         "json": 1,
-        "page_size": 1
+        "page_size": 10
     }
 
     try:
@@ -102,12 +102,18 @@ def get_ingredient_info(name):
 
         data = response.json()
         products = data.get("products", [])
-        product = products[0] if products else {}
 
-        # Extra check: ensure product name contains the normalized_name
-        product_name = product.get("product_name", "").lower().strip()
-        if normalized_name not in product_name:
-            # Skip mismatched product
+        product = {}
+        for p in products:
+            nutriments = p.get("nutriments", {})
+            if any(
+                nutriments.get(key) not in [None, "", 0]
+                for key in ["energy-kcal_100g", "carbohydrates_100g", "proteins_100g"]
+            ):
+                product = p
+                break
+
+        if not product:
             return {
                 "calories": 0,
                 "fat": 0,
@@ -121,9 +127,6 @@ def get_ingredient_info(name):
 
         api_allergens = [a.replace("en:", "") for a in allergens_tags]
         combined_allergens = list(set(fallback_allergens + api_allergens))
-
-        if not combined_allergens:
-            combined_allergens = fallback_allergens
 
         return {
             "calories": nutriments.get("energy-kcal_100g", 0),
