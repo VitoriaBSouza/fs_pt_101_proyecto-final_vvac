@@ -858,7 +858,6 @@ def get_ingredient(ingredient_id):
     
     return jsonify(ingredient.serialize()), 200
 
-
 # POST new ingredient
 @api.route('/user/ingredients', methods=['POST'])
 @jwt_required()
