@@ -629,8 +629,24 @@ def add_media(recipe_id):
             return jsonify({"error": "Missing data. Failed to upload media."}), 400
         
         #Convert the type_medi to match the enum in MediaTupe database
-        if data["type_media"] == "image" or data["type_media"] == "Image":
+        if data["type_media"].lower() == "image":
             media_type = MediaType.IMAGE
+
+        else:
+            return jsonify({"error": "Invalid media type"}), 400
+        
+        placeholder_url = PLACEHOLDER_IMAGE_URL  # Replace with actual placeholder URL
+
+        existing_placeholder = db.session.execute(
+            select(Media).where(
+                Media.recipe_id == recipe_id,
+                Media.type_media == MediaType.IMAGE,
+                Media.url == placeholder_url
+            )
+        ).scalar_one_or_none()
+
+        if existing_placeholder:
+            db.session.delete(existing_placeholder)
         
         new_media = Media(
             recipe_id=recipe_id,
