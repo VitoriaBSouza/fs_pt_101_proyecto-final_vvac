@@ -83,10 +83,10 @@ def get_ingredient_info(name):
 
     normalized_name = name.lower().strip()
 
-    #Check first if we do not have in our fallback list
+    # Check first if we do not have in our fallback list
     fallback_allergens = COMMON_INGREDIENT_ALLERGENS.get(normalized_name, [])
 
-    #Fetch from API if none found
+    # Fetch from API if none found
     search_url = "https://world.openfoodfacts.org/cgi/search.pl"
     params = {
         "search_terms": normalized_name,
@@ -103,6 +103,18 @@ def get_ingredient_info(name):
         data = response.json()
         products = data.get("products", [])
         product = products[0] if products else {}
+
+        # Extra check: ensure product name contains the normalized_name
+        product_name = product.get("product_name", "").lower().strip()
+        if normalized_name not in product_name:
+            # Skip mismatched product
+            return {
+                "calories": 0,
+                "fat": 0,
+                "carbs": 0,
+                "protein": 0,
+                "allergens": fallback_allergens
+            }
 
         nutriments = product.get("nutriments", {})
         allergens_tags = product.get("allergens_tags", [])

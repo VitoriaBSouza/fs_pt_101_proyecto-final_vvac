@@ -362,36 +362,36 @@ def create_recipe():
         db.session.flush()
 
         total_grams = 0
-    
-        #Add ingredients to the recipe
+
         for ing in data["ingredient"]:
             name = ing["name"]
             quantity = ing["quantity"]
             unit = ing["unit"]
 
-            #Normalize and fetch allergen and nutricional value from API
             normalized_name = name.lower().strip()
             info = get_ingredient_info(normalized_name)
 
+            if not info or not isinstance(info, dict):
+                return jsonify({"error": f"Failed to fetch ingredient info for '{name}'"}), 400
+
+            allergens_list = info.get("allergens", [])
+            if not isinstance(allergens_list, list):
+                allergens_list = []
+            allergens_str = ",".join(a.strip() for a in allergens_list if isinstance(a, str) and a.strip())
+
             ingredient = db.session.query(Ingredient).filter(Ingredient.name == normalized_name).one_or_none()
 
-            #We add ingredient to database if it does not exist
             if not ingredient:
                 ingredient = Ingredient(
                     name=name,
-                    allergens=",".join(info["allergens"])
+                    allergens=allergens_str
                 )
-
                 db.session.add(ingredient)
                 db.session.flush()
 
-            #If found the ingredient we update or add the allergens missings or outdated  
-            new_allergens = ",".join(info.get("allergens", []))
-            
-            if ingredient.allergens != new_allergens:
-                ingredient.allergens = new_allergens
+            if allergens_str and ingredient.allergens != allergens_str:
+                ingredient.allergens = allergens_str
 
-            #We make fetch to Food Facts API for allergens and nutritional values
             calories = info["calories"] if info else None
             fat = info["fat"] if info else None
             carbs = info["carbs"] if info else None
