@@ -43,7 +43,7 @@ export const RecipeCard = () => {
             <div className="row recipe_card_bg2 my-4 p-4 mt-4">
                 <div className="col-6 d-flex mt-2">
                     <div className="card bg-dark text-white">
-                        <img src="https://picsum.photos/450/350?random=1" className="card-img" alt="image"/>
+                        <img src="https://picsum.photos/450/350?random=2" className="card-img" alt="image"/>
                         <div className="card-img-overlay">
                             <button type="button" className="btn btn-info m-2 position-absolute bottom-0 end-0">INCONO LIKE</button>
                         </div>
@@ -68,7 +68,7 @@ export const RecipeCard = () => {
                     </div>
                     <div className="row p-2 recipe_card_prep my-4">
                         <div className="col-6 col-md-3 bg-success">
-                            PREP TIME
+                            
                         </div>
                         <div className="col-6 col-md-3 bg-info">
                             DIFFICULTY LEVEL
@@ -136,7 +136,7 @@ export const RecipeCard = () => {
                     <h3>Steps</h3>
                     <ul className="list-group list-group-flush">
                          {(store.recipes?.steps?.match(/"([^"]+)"/g) || []).map((step, i) => (
-                            <li key={i} className="list-group-item steps_bg mb-2 text_steps">{step.replace(/"/g, '')}</li>
+                            <li key={i} className="list-group-item steps_bg mb-2 text_steps text-light">{step.replace(/"/g, '')}</li>
                         ))}
                     </ul>
                 </div>
