@@ -243,12 +243,6 @@ export const MealPlanner = () => {
                                             </label>
                                             <input id="receta-input" type="text" className="modal-input" placeholder="Write the name..." value={recetaName} onChange={(e) => setRecetaName(e.target.value)} autoFocus />
 
-                                            {/* Campo “URL de imagen” (opcional) */}
-                                            <label htmlFor="image-input" className="modal-label">
-                                                Image url (optional)
-                                            </label>
-                                            <input id="image-input" type="text" className="modal-input" placeholder="https://..." value={recetaImage} onChange={(e) => setRecetaImage(e.target.value)} />
-
                                             {/* Día de la semana (solo lectura) */}
                                             <label htmlFor="dia-input" className="modal-label">
                                                 Week day
@@ -262,10 +256,10 @@ export const MealPlanner = () => {
                                             <input id="meal-input" type="text" className="modal-input"
                                                 value={
                                                     modalMeal === "breakfast"
-                                                        ? "Desayuno"
+                                                        ? "Breakfast"
                                                         : modalMeal === "lunch"
-                                                            ? "Almuerzo"
-                                                            : "Cena"
+                                                            ? "Lunch"
+                                                            : "Dinner"
                                                 }
                                                 readOnly
                                             />
