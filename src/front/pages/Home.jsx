@@ -7,8 +7,8 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 
 //components
-
 import { RecipeCard } from "../components/RecipeCard.jsx";
+import { LogIn } from "../components/LogIn.jsx";
 
 export const Home = () => {
 
