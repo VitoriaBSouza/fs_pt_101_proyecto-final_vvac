@@ -7,10 +7,31 @@ const authHeaders = () => ({
   'Content-Type': 'application/json'
 });
 
-// Like/unlike a recipe
-scoreService.toggleScore = async (recipe_id) => {
+//Get all score of one recipe
+scoreService.getRecipeScores = async (id) => {
   try {
-    const resp = await fetch(url + "/api/user/recipes/" + recipe_id + "/score", {
+    const resp = await fetch(url + "/api/recipes/" + id + "/scores", {
+      method: "GET",
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok) throw new Error(data.error);
+    return data;
+
+  } catch (error) {
+    console.error("Error fetching scores:", error);
+    return [];
+  }
+};
+
+// Like/unlike a recipe
+scoreService.toggleScore = async (id) => {
+  try {
+    const resp = await fetch(url + "/api/user/recipes/" + id + "/score", {
       method: "POST",
       headers: authHeaders(),
     });

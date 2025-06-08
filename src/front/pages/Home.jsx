@@ -8,7 +8,7 @@ import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 
 //components
 
-import { RecipeCard } from "./RecipeDetails.jsx"
+import { RecipeCard } from "../components/RecipeCard.jsx";
 
 export const Home = () => {
 
@@ -37,11 +37,27 @@ export const Home = () => {
 	}
 
 	useEffect(() => {
+		loadMessage()
 	}, [])
 
 	return (
-		<div className="mx-auto">
-			<RecipeCard />
+		<div className="container-fluid">
+			<div className="row">
+				<h3>This is for test as we have pending the Home page</h3>
+				<div className="scroll-container d-flex p-3">
+
+					{/* maping over RecipeCards to create cards based on the data */}
+					{
+						store.recipes?.map((el) => <RecipeCard
+							key={el.id}
+							recipe_id={el.id}
+							title={el.title}
+							url={el.media?.[0]?.url}
+
+						/>)
+					}
+				</div>
+			</div>
 		</div>
 	);
 }; 
