@@ -2,13 +2,17 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Recipe, Ingredient, Comment, Media, UserStatus, Collection, RecipeIngredient, DifficultyType, MediaType
+from api.models import db, User, Recipe, Ingredient, Comment, Media, UserStatus, Collection, RecipeIngredient, DifficultyType, MediaType, RecipeScore
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, func
 from datetime import datetime, timezone
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from werkzeug.security import generate_password_hash, check_password_hash
+from api.email_utils import send_email, get_serializer
+from api.recipe_utils import convert_to_grams, get_ingredient_info, calculate_calories, calculate_carbs, calculate_fat, calculate_protein
+import json
+
 
 api = Blueprint('api', __name__)
 
@@ -172,6 +176,84 @@ def update_user():
     db.session.commit()
     return jsonify(user.serialize()), 200
 
+@api.route('/forgot-password', methods=['POST'])
+def forgot_password():
+    
+    try:
+        email = request.json.get('email')
+        if not email:
+            return jsonify({"error": "Email is required"}), 400
+
+        user = db.session.query(User).filter_by(email=email).first()
+
+        # Evitar revelar si el correo existe
+        if not user or user.status != UserStatus.active:
+            return jsonify({"message": "If that email exists, a reset link was sent."}), 200
+
+        # Create token for limited time
+        serializer = get_serializer()
+        token = serializer.dumps(user.email, salt='password-reset')
+
+        # Generates link to reset password
+        reset_url = url_for('api.reset_password', token=token, _external=True)
+
+        # Personalize email
+        app_name = "Recetea"  # Customize this
+        subject = f"{app_name} - Password Reset Request"
+        body = f"""
+            Hi {user.username},
+
+            We received a request to reset your password for your {app_name} account.
+
+            If you made this request, please reset your password by clicking the link below:
+
+            {reset_url}
+
+            This link will expire in 1 hour. If you didn’t request a password reset, you can ignore this email.
+
+            Best,
+            The {app_name} Team
+            """
+
+        #Sends email with reset link to user
+        send_email(
+            to=user.email,
+            subject=subject,
+            body=body
+        )
+
+        return jsonify({"message": f"If that email exists, a reset link was sent."}), 200
+
+    except Exception as e:
+        print(e)
+        return jsonify({"error": str(e)}), 500
+    
+@api.route('/reset-password/<token>', methods=['POST'])
+def reset_password(token):
+    try:
+        serializer = get_serializer()
+
+        email = serializer.loads(token, salt='password-reset', max_age=3600)
+        data = request.json
+        new_password = data["password"]
+
+        if not new_password:
+            return jsonify({"error": "Add your new password"}), 400
+
+        user = db.session.query(User).filter_by(email=email).first()
+
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        user.password = generate_password_hash(new_password)
+        user.updated_at = datetime.now(timezone.utc)
+        db.session.commit()
+
+        return jsonify({"message": "Password updated successfully"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 #End of user endpoints
 
 #From here all recipe related endpoints
@@ -197,7 +279,7 @@ def get_recipe(recipe_id):
     return jsonify(recipe.serialize()), 200
 
 # GET all recipes created by an user(need to log in)
-@api.route('user/recipes', methods=['GET'])
+@api.route('/user/recipes', methods=['GET'])
 @jwt_required() 
 def get_user_recipes():
 
@@ -217,7 +299,7 @@ def get_user_recipes():
     return jsonify([recipe.serialize() for recipe in recipes]), 200
 
 # GET a specific recipe created by an user(need to log in)
-@api.route('user/recipes/<int:recipe_id>', methods=['GET'])
+@api.route('/user/recipes/<int:recipe_id>', methods=['GET'])
 @jwt_required() 
 def get_user_recipe(recipe_id):
 
@@ -247,6 +329,9 @@ def create_recipe():
         if not data["difficulty_type"]:
             return jsonify({"error": "Please add a difficulty level to your recipe"}), 400
         
+        if not data["portions"] or data["portions"] < 1:
+            return jsonify({"error": "Please set a valid number of portions"}), 400
+        
         if not data["steps"]:
             return jsonify({"error": "Please add all the steps and instructions needed to your recipe"}), 400
 
@@ -254,52 +339,109 @@ def create_recipe():
             return jsonify({"error": "Please add all the igredients details to your recipe"}), 400
 
         #Conditions to turn the string value into the enum value in our database
-        if data["difficulty_type"] == "Easy":
-            setLevel = DifficultyType.EASY
+        difficulty_map = {
+            "Easy": DifficultyType.EASY,
+            "Moderate": DifficultyType.MODERATE,
+            "Hard": DifficultyType.HARD
+        }
 
-        elif data["difficulty_type"] == "Moderate":
-            setLevel = DifficultyType.MODERATE
-            
-        elif data["difficulty_type"] == "Hard":
-            setLevel = DifficultyType.HARD
-
-        else:
+        setLevel = difficulty_map.get(data["difficulty_type"])
+        if setLevel is None:
             return jsonify({"error": "Please choose from one of these options for difficulty level: Easy, Moderate or Hard."}), 400
+        
+        #Convert the steps into JSON to avoid issues on Frontend
+        steps_data = data["steps"]
+
+        if isinstance(steps_data, str):
+            try:
+                steps_list = json.loads(steps_data)
+            except Exception:
+                # fallback: treat it as single string step in a list
+                steps_list = [steps_data]
+        elif isinstance(steps_data, list):
+            steps_list = steps_data
+        else:
+            return jsonify({"error": "Invalid steps format"}), 400
+
+        steps_json = json.dumps(steps_list)
         
         #We add on frontend the control of blank space and lower cases
         new_recipe = Recipe(
             title=data["title"],
             author=user_id,
             difficulty_type=setLevel,
-            steps=data["steps"],
+            prep_time=data["prep_time"],
+            steps=steps_json,
+            portions=data["portions"],
             published=datetime.now(timezone.utc)
         )
         db.session.add(new_recipe)
         db.session.flush()
-    
-        #Add ingredients to the recipe
+
+        total_grams = 0
+
         for ing in data["ingredient"]:
-                name = ing["name"]
-                quantity = ing["quantity"]
-                unit = ing["unit"]
+            name = ing["name"]
+            quantity = ing["quantity"]
+            unit = ing["unit"]
 
-        stmt = select(Ingredient).where(Ingredient.name == name)
-        ingredient = db.session.execute(stmt).scalar_one_or_none()
+            normalized_name = name.lower().strip()
+            info = get_ingredient_info(normalized_name)
 
-        #We add ingredient to database if it does not exist
-        if ingredient is None:
-            ingredient = Ingredient(name=name)
-            db.session.add(ingredient)
-            db.session.flush()
+            if not info or not isinstance(info, dict):
+                return jsonify({"error": f"Failed to fetch ingredient info for '{name}'"}), 400
 
-        recipe_ing = RecipeIngredient(
+            allergens_list = info.get("allergens", [])
+
+            if not isinstance(allergens_list, list):
+                allergens_list = []
+            allergens_str = ",".join(a.strip() for a in allergens_list if isinstance(a, str) and a.strip())
+
+            ingredient = db.session.query(Ingredient).filter(Ingredient.name == normalized_name).one_or_none()
+
+            if not ingredient:
+                ingredient = Ingredient(
+                    name=name,
+                    allergens=allergens_str
+                )
+                db.session.add(ingredient)
+                db.session.flush()
+
+            if allergens_str and ingredient.allergens != allergens_str:
+                ingredient.allergens = allergens_str
+
+            calories = info["calories"] if info else None
+            fat = info["fat"] if info else None
+            saturated_fat = info["saturated_fat"] if info else None
+            carbs = info["carbs"] if info else None
+            sugars = info["sugars"] if info else None
+            fiber = info["fiber"] if info else None
+            protein = info["protein"] if info else None
+            salt = info["salt"] if info else None
+            sodium = info["sodium"] if info else None
+
+            grams = convert_to_grams(name, unit, quantity)
+            total_grams += grams
+
+            recipe_ing = RecipeIngredient(
                 recipe_id=new_recipe.id,
                 ingredient_id=ingredient.id,
                 quantity=quantity,
-                unit=unit
+                unit=unit,
+                calories=calories,
+                fat=fat,
+                saturated_fat=saturated_fat,
+                carbs=carbs,
+                sugars=sugars,
+                fiber=fiber,
+                protein=protein,
+                salt=salt,
+                sodium=sodium
             )
-            
-        db.session.flush(recipe_ing)
+            new_recipe.ingredients.append(recipe_ing)
+            db.session.add(recipe_ing)
+
+        new_recipe.total_grams = total_grams
 
         # Check for media if they added image to the recipe
         media_data = data["media"]
@@ -320,7 +462,7 @@ def create_recipe():
         return jsonify({"error": str(e)}), 500
 
 # PUT a specific recipe created by the user(need to log in)
-@api.route('user/recipes/<int:recipe_id>', methods=['PUT'])
+@api.route('/user/recipes/<int:recipe_id>', methods=['PUT'])
 @jwt_required()
 def edit_recipe(recipe_id):
 
@@ -357,11 +499,29 @@ def edit_recipe(recipe_id):
         else:
             return jsonify({"error": "Please choose from one of these options for difficulty level: Easy, Moderate or Hard."}), 400
         
+        #Convert the steps into JSON to avoid issues on Frontend
+        steps_data = data["steps"]
+
+        if isinstance(steps_data, str):
+            try:
+                steps_list = json.loads(steps_data)
+            except Exception:
+                # fallback: treat it as single string step in a list
+                steps_list = [steps_data]
+        elif isinstance(steps_data, list):
+            steps_list = steps_data
+        else:
+            return jsonify({"error": "Invalid steps format"}), 400
+
+        steps_json = json.dumps(steps_list)
+
         #We add on frontend the control of blank space and lower cases
         recipe.title = data["title"]
         recipe.author = user_id
         recipe.difficulty_type = setLevel
-        recipe.steps = data["steps"]
+        recipe.prep_time=data["prep_time"]
+        recipe.portions = data["portions"]
+        recipe.steps = steps_json
         recipe.published = datetime.now(timezone.utc)
         db.session.flush()
 
@@ -369,42 +529,81 @@ def edit_recipe(recipe_id):
         delete_stmt = delete(RecipeIngredient).where(RecipeIngredient.recipe_id == recipe_id)
         db.session.execute(delete_stmt)
         db.session.flush()
-    
-        #Add ingredients to the recipe
+
+        total_grams = 0
+
         for ing in data["ingredient"]:
             name = ing["name"]
             quantity = ing["quantity"]
             unit = ing["unit"]
 
-        stmt = select(Ingredient).where(Ingredient.name == name)
-        ingredient = db.session.execute(stmt).scalar_one_or_none()
+            normalized_name = name.lower().strip()
 
-        #We add ingredient to database if it does not exist
-        if ingredient is None:
-            ingredient = Ingredient(name=name)
-            db.session.add(ingredient)
-            db.session.flush()
+            stmt = select(Ingredient).where(Ingredient.name == normalized_name)
+            ingredient = db.session.execute(stmt).scalar_one_or_none()
 
-        recipe_ing = RecipeIngredient(
-            recipe_id=recipe.id,
-            ingredient_id=ingredient.id,
-            quantity=quantity,
-            unit=unit
-        )
-            
-        db.session.flush(recipe_ing)
+            info = get_ingredient_info(normalized_name)
+            calories = info["calories"] if info else 0
+            fat = info["fat"] if info else 0
+            saturated_fat = info["saturated_fat"] if info else 0
+            carbs = info["carbs"] if info else 0
+            sugars = info["sugars"] if info else 0
+            fiber = info["fiber"] if info else 0
+            protein = info["protein"] if info else 0
+            salt = info["salt"] if info else 0
+            sodium = info["sodium"] if info else 0
+            allergens = ",".join(info["allergens"]) if info and info.get("allergens") else ""
 
-        # Check for media if they added or deleted image on the recipe
-        media_data = data["media"]
+            if not ingredient:
+                ingredient = Ingredient(
+                    name=normalized_name,
+                    allergens=allergens
+                )
+                db.session.add(ingredient)
+                db.session.flush()
+
+            if allergens and ingredient.allergens != allergens:
+                ingredient.allergens = allergens
+                db.session.flush()
+
+            grams = convert_to_grams(name, unit, quantity)
+            total_grams += grams
+
+            recipe_ing = RecipeIngredient(
+                recipe_id=recipe.id,
+                ingredient_id=ingredient.id,
+                quantity=quantity,
+                unit=unit,
+                calories=calories,
+                fat=fat,
+                saturated_fat=saturated_fat,
+                carbs=carbs,
+                sugars=sugars,
+                fiber=fiber,
+                protein=protein,
+                salt=salt,
+                sodium=sodium,
+            )
+            recipe.ingredients.append(recipe_ing)
+            db.session.add(recipe_ing)
+
+        recipe.total_grams = total_grams
+
+        # Media handling
+        media_data = data.get("media")
 
         if not media_data:
-            # If no media, add a placeholder image
             placeholder_media = Media(
                 recipe_id=recipe.id,
                 type_media=MediaType.IMAGE,
                 url=PLACEHOLDER_IMAGE_URL
             )
-        db.session.add(placeholder_media)
+            db.session.add(placeholder_media)
+        else:
+            if isinstance(media_data, dict):
+                media_data = [media_data]
+            # Here you can add your media update logic for multiple media entries if needed
+
         db.session.commit()
 
         return jsonify({"success": True}), 201
@@ -424,6 +623,10 @@ def delete_one_recipe(recipe_id):
 
     if recipe is None:
         return jsonify({"error": "Recipe not found"}), 404
+    
+    #Delte media from recipe
+    delete_recipe_media = delete(Media).where(Media.recipe_id == recipe_id)
+    db.session.execute(delete_recipe_media)
 
     #Delete recipe from asociation table
     delete_recipe_ingredients = delete(RecipeIngredient).where(RecipeIngredient.recipe_id == recipe_id)
@@ -465,7 +668,7 @@ def get_media_by_id(media_id):
     return jsonify(media.serialize()), 200
 
 # POST new media item
-@api.route('user/recipes/<int:recipe_id>/media', methods=['POST'])
+@api.route('/user/recipes/<int:recipe_id>/media', methods=['POST'])
 @jwt_required()
 def add_media(recipe_id):
 
@@ -486,8 +689,24 @@ def add_media(recipe_id):
             return jsonify({"error": "Missing data. Failed to upload media."}), 400
         
         #Convert the type_medi to match the enum in MediaTupe database
-        if data["type_media"] == "image" or data["type_media"] == "Image":
+        if data["type_media"].lower() == "image":
             media_type = MediaType.IMAGE
+
+        else:
+            return jsonify({"error": "Invalid media type"}), 400
+        
+        placeholder_url = PLACEHOLDER_IMAGE_URL  # Replace with actual placeholder URL
+
+        existing_placeholder = db.session.execute(
+            select(Media).where(
+                Media.recipe_id == recipe_id,
+                Media.type_media == MediaType.IMAGE,
+                Media.url == placeholder_url
+            )
+        ).scalar_one_or_none()
+
+        if existing_placeholder:
+            db.session.delete(existing_placeholder)
         
         new_media = Media(
             recipe_id=recipe_id,
@@ -504,7 +723,7 @@ def add_media(recipe_id):
 
 
 # DELETE a media item
-@api.route('user/recipes/<int:recipe_id>/media/<int:media_id>', methods=['DELETE'])
+@api.route('/user/recipes/<int:recipe_id>/media/<int:media_id>', methods=['DELETE'])
 @jwt_required()
 def delete_media(recipe_id, media_id):
 
@@ -583,7 +802,7 @@ def get_comment(comment_id):
     return jsonify(comment.serialize()), 200
 
 #POST new comment by recipe ID
-@api.route('users/recipes/<int:recipe_id>/comments', methods=['POST'])
+@api.route('/user/recipes/<int:recipe_id>/comments', methods=['POST'])
 @jwt_required()
 def create_comment(recipe_id):
 
@@ -617,7 +836,7 @@ def create_comment(recipe_id):
     
 
 #PUT to update comment
-@api.route('users/recipes/<int:recipe_id>/comments/<int:comment_id>', methods=['PUT'])
+@api.route('/user/recipes/<int:recipe_id>/comments/<int:comment_id>', methods=['PUT'])
 @jwt_required()
 def edit_comment(recipe_id, comment_id):
 
@@ -648,7 +867,7 @@ def edit_comment(recipe_id, comment_id):
 
 
 #DELETE a comment
-@api.route('users/recipes/<int:recipe_id>/comments/<int:comment_id>', methods=['DELETE'])
+@api.route('user/recipes/<int:recipe_id>/comments/<int:comment_id>', methods=['DELETE'])
 @jwt_required()
 def delete_comment(recipe_id, comment_id):
 
@@ -678,128 +897,158 @@ def delete_comment(recipe_id, comment_id):
 # ===============================
 # Ingredient Endpoints
 # ===============================
-
+## Only allowed for dev members, not fir users which is why we do not have frontend service file
 # GET all ingredients(for test)
 @api.route('/ingredients', methods=['GET'])
 def get_all_ingredients():
+
     ingredients = Ingredient.query.all()
+
     return jsonify([ingredient.serialize() for ingredient in ingredients]), 200
 
 
 # GET ingredient by ID(for test)
 @api.route('/ingredients/<int:ingredient_id>', methods=['GET'])
 def get_ingredient(ingredient_id):
+
     ingredient = Ingredient.query.get(ingredient_id)
+
     if not ingredient:
         return jsonify({"error": "Ingredient not found"}), 404
+    
     return jsonify(ingredient.serialize()), 200
-
 
 # POST new ingredient
-@api.route('/ingredients', methods=['POST'])
+@api.route('/user/ingredients', methods=['POST'])
+@jwt_required()
 def create_ingredient():
-    data = request.get_json()
 
-    # Validate required fields
-    if not all(k in data for k in ("name")):
-        return jsonify({"error": "Missing data"}), 400
+    user_id = get_jwt_identity()
 
-    new_ingredient = Ingredient(
-        name=data["name"],
-         ##Sacar unit y quantity porque no es necesario y van en tabla de asociación
-        quantity=data["quantity"],
-        unit=data["unit"]
-    )
+    try:
+        data = request.json
 
-    db.session.add(new_ingredient)
-    db.session.commit()
-    return jsonify(new_ingredient.serialize()), 201
+        stmt = select(User).where(User.id == user_id)
+        user = db.session.execute(stmt).scalar_one_or_none()
 
+        if user is None:
+            return jsonify({"error": "User not found, please log in or sign up."}), 400
+
+        if not data["name"]:
+            return jsonify({"error": "Missing ingredient name."}), 400
+
+        #Need to erase blank spaces before we send for query to avoid duplicates
+        ingredient_name = data["name"].strip()
+        
+        #Need to add lower case to avoid duplicates
+        stmt_ing = select(Ingredient).where(func.lower(Ingredient.name) == ingredient_name.lower())
+        ing = db.session.execute(stmt_ing).scalar_one_or_none()
+
+        if ing:
+            return jsonify({"error": "Ingredient already on database."}), 400
+
+        new_ingredient = Ingredient(
+            name=ingredient_name
+        )
+
+        db.session.add(new_ingredient)
+        db.session.commit()
+
+        return jsonify(new_ingredient.serialize()), 201
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # PUT to update ingredient
-@api.route('/ingredients/<int:ingredient_id>', methods=['PUT'])
+@api.route('/user/ingredients/<int:ingredient_id>', methods=['PUT'])
+@jwt_required()
 def update_ingredient(ingredient_id):
-    ingredient = Ingredient.query.get(ingredient_id)
-    if not ingredient:
-        return jsonify({"error": "Ingredient not found"}), 404
 
-    data = request.get_json()
-    ingredient.name = data.get("name", ingredient.name)
-    ##Sacar unit y quantity porque no es necesario y van en tabla de asociación
-    ingredient.quantity = data.get("quantity", ingredient.quantity)
-    ingredient.unit = data.get("unit", ingredient.unit)
+    user_id = get_jwt_identity()
 
-    db.session.commit()
-    return jsonify(ingredient.serialize()), 200
+    try:
+        data = request.json
+
+        stmt_user = select(User).where(User.id == user_id)
+        user = db.session.execute(stmt_user).scalar_one_or_none()
+
+        if user is None:
+            return jsonify({"error": "User not found, please log in or sign up."}), 400
+
+        if not data["name"]:
+            return jsonify({"error": "Missing ingredient name."}), 400
+
+        #Need to erase blank spaces before we send for query to avoid duplicates
+        ingredient_name = data["name"].strip()
+        
+        #Need to add lower case to avoid duplicates
+        #We check first if the ingredient is on database with same name but different id
+        check_ing = select(Ingredient).where(
+            func.lower(Ingredient.name) == ingredient_name.lower(), 
+            Ingredient.id != ingredient_id
+        )
+        similar = db.session.execute(check_ing).scalars().first()
+
+        if similar:
+            return jsonify({"error": "Another ingredient with this name already exists."}), 400
+
+        #Query existing ingredient by ID to be updated
+        stmt_ing = select(Ingredient).where(Ingredient.id == ingredient_id)
+        ing = db.session.execute(stmt_ing).scalar_one_or_none()
+
+        if not ing:
+            return jsonify({"error": "Ingredient not found."}), 404
+
+        #Edit existing ingredient
+        ing.name = ingredient_name
+
+        db.session.commit()
+
+        return jsonify(ing.serialize()), 201
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 # DELETE an ingredient
-@api.route('/ingredients/<int:ingredient_id>', methods=['DELETE'])
+@api.route('/user/ingredients/<int:ingredient_id>', methods=['DELETE'])
+@jwt_required()
 def delete_ingredient(ingredient_id):
+
+    user_id = get_jwt_identity()
+
+    stmt_user = select(User).where(User.id == user_id)
+    user = db.session.execute(stmt_user).scalar_one_or_none()
+
+    if user is None:
+        return jsonify({"error": "User not found, please log in or sign up."}), 400
+    
     ingredient = Ingredient.query.get(ingredient_id)
+
     if not ingredient:
         return jsonify({"error": "Ingredient not found"}), 404
 
     db.session.delete(ingredient)
     db.session.commit()
+
     return jsonify({"message": "Ingredient deleted"}), 200
 
 # ========================================
 # RecipeIngredient Endpoints (Join Table)
 # ========================================
 
-## Podemos borrar esta tabla y dejar GET para hacer test debido a que recipe endpoint ya hace el post si es necesario
 # GET all ingredients for a recipe (for test)
 @api.route('/recipes/<int:recipe_id>/ingredients', methods=['GET'])
 def get_recipe_ingredients(recipe_id):
+
     ingredients = RecipeIngredient.query.filter_by(recipe_id=recipe_id).all()
+    
     return jsonify([ri.serialize() for ri in ingredients]), 200
 
-# POST to add a new ingredient to a recipe
-@api.route('/recipes/<int:recipe_id>/ingredients', methods=['POST'])
-def add_ingredient_to_recipe(recipe_id):
-    data = request.get_json()
-
-    # Check for required fields
-    if not all(k in data for k in ("ingredient_id", "quantity", "unit")):
-        return jsonify({"error": "Missing data"}), 400
-
-    new_link = RecipeIngredient(
-        recipe_id=recipe_id,
-        ingredient_id=data["ingredient_id"],
-        quantity=data["quantity"],
-        unit=data["unit"]
-    )
-
-    db.session.add(new_link)
-    db.session.commit()
-    return jsonify(new_link.serialize()), 201
-
-# PUT to update quantity/unit for a recipe's ingredient
-@api.route('/recipes/<int:recipe_id>/ingredients/<int:ingredient_id>', methods=['PUT'])
-def update_recipe_ingredient(recipe_id, ingredient_id):
-    ri = RecipeIngredient.query.get((recipe_id, ingredient_id))
-    if not ri:
-        return jsonify({"error": "Ingredient not found in recipe"}), 404
-
-    data = request.get_json()
-    ri.quantity = data.get("quantity", ri.quantity)
-    ri.unit = data.get("unit", ri.unit)
-
-    db.session.commit()
-    return jsonify(ri.serialize()), 200
-
-
-# DELETE an ingredient from a specific recipe
-@api.route('/recipes/<int:recipe_id>/ingredients/<int:ingredient_id>', methods=['DELETE'])
-def delete_recipe_ingredient(recipe_id, ingredient_id):
-    ri = RecipeIngredient.query.get((recipe_id, ingredient_id))
-    if not ri:
-        return jsonify({"error": "Ingredient not found in recipe"}), 404
-
-    db.session.delete(ri)
-    db.session.commit()
-    return jsonify({"message": "Ingredient removed from recipe"}), 200
+#The GET by recipe ID method is on recipe endpoint
+#The POST methos is on recipe. When we create a reipe we add the ingredients quantuty and unit
+#The PUT of any ingrdient is also on recipe method when we edit
+#The ingredient is deleted of the reicipe when we delete it or edit said recipe
 
 # ========================================
 # Collection Endpoints
@@ -808,76 +1057,135 @@ def delete_recipe_ingredient(recipe_id, ingredient_id):
 # GET all saved collections for all users(for test)
 @api.route('/collections', methods=['GET'])
 def get_all_collections():
-    collections = Collection.query.all()
-    return jsonify([c.serialize() for c in collections]), 200
 
+    collections = Collection.query.all()
+
+    return jsonify([c.serialize() for c in collections]), 200
 
 # GET collection of recipe of a specific user
-@api.route('users/<int:user_id>/collections', methods=['GET'])
-def get_user_collections(user_id):
-    collections = Collection.query.filter_by(user_id=user_id).all()
-    return jsonify([c.serialize() for c in collections]), 200
+@api.route('/user/collection', methods=['GET'])
+@jwt_required()
+def get_user_collections():
 
+    user_id = get_jwt_identity()
+
+    stmt_user = select(Collection).where(Collection.user_id == user_id)
+    collection = db.session.execute(stmt_user).scalar_one_or_none()
+
+    if user_id is None:
+        return jsonify({"error": "User not found, please log in or sign up."}), 400
+
+    return jsonify([c.serialize() for c in collection]), 200
 
 # POST to save a recipe to a user's collection
-@api.route('users/<int:user_id>/collections', methods=['POST'])
-def add_to_collection():
-    data = request.get_json()
+@api.route('user/collection/recipes/<int:recipe_id>', methods=['POST'])
+@jwt_required()
+def add_to_collection(recipe_id):
 
-    if not all(k in data for k in ("user_id", "recipe_id")):
-        return jsonify({"error": "Missing user_id or recipe_id"}), 400
+    user_id = get_jwt_identity()
 
-    # Prevent duplicates
-    exists = Collection.query.get((data["recipe_id"], data["user_id"]))
-    if exists:
-        return jsonify({"error": "Recipe already saved"}), 409
-
-    new_entry = Collection(
-        recipe_id=data["recipe_id"],
-        user_id=data["user_id"]
-    )
-
-    db.session.add(new_entry)
-    db.session.commit()
-    return jsonify(new_entry.serialize()), 201
-
-
-# PUT – Usually unnecessary for pure many-to-many, but provided here for consistency
-# (to "transfer" a saved recipe from one user to another — rare use case)
-## Sacarlo porque solo se añade o se quita de la colección
-@api.route('/collections/<int:recipe_id>/<int:user_id>', methods=['PUT'])
-def update_collection(recipe_id, user_id):
-    collection = Collection.query.get((recipe_id, user_id))
-    if not collection:
-        return jsonify({"error": "Collection not found"}), 404
-
-    data = request.get_json()
-    new_user_id = data.get("user_id")
-    new_recipe_id = data.get("recipe_id")
-
-    if new_user_id and new_recipe_id:
-        # Delete the old entry and create a new one
-        db.session.delete(collection)
-        new_collection = Collection(
-            recipe_id=new_recipe_id,
-            user_id=new_user_id
+    try:
+        stmt = select(Collection).where(
+            Collection.user_id == user_id,
+            Collection.recipe_id == recipe_id
         )
-        db.session.add(new_collection)
-        db.session.commit()
-        return jsonify(new_collection.serialize()), 200
-    else:
-        return jsonify({"error": "Missing new user_id or recipe_id"}), 400
+        collection = db.session.execute(stmt).scalar_one_or_none()
 
+        #Check if recipe is already on the list
+        if collection:
+            return jsonify({"error": "Recipe already saved"}), 409
+
+        add_recipe = Collection(
+            recipe_id=recipe_id,
+            user_id=user_id
+        )
+
+        db.session.add(add_recipe)
+        db.session.commit()
+
+        return jsonify(add_recipe.serialize()), 201
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # DELETE a saved recipe from a user's collection
-@api.route('users/<int:user_id>/collections/<int:recipe_id>', methods=['DELETE'])
-def delete_from_collection(recipe_id, user_id):
-    collection = Collection.query.get((recipe_id, user_id))
+@api.route('user/collection/recipes/<int:recipe_id>', methods=['DELETE'])
+@jwt_required()
+def delete_from_collection(recipe_id):
+
+    user_id = get_jwt_identity()
+
+    stmt = select(Collection).where(
+            Collection.user_id == user_id,
+            Collection.recipe_id == recipe_id
+        )
+    collection = db.session.execute(stmt).scalar_one_or_none()
+
     if not collection:
         return jsonify({"error": "Collection not found"}), 404
 
     db.session.delete(collection)
     db.session.commit()
+
     return jsonify({"message": "Recipe removed from collection"}), 200
 
+# ========================================
+# RecipeScore Endpoints
+# ========================================
 
+# GET all saved scores(for test)
+@api.route('/scores', methods=['GET'])
+def get_all_scores():
+
+    stmt = select(RecipeScore)
+    scores = db.session.execute(stmt).scalars().all()
+
+    return jsonify([c.serialize() for c in scores]), 200
+
+# GET all saved scores for a recipe
+@api.route('/recipes/<int:recipe_id>/scores', methods=['GET'])
+def get_recipe_scores(recipe_id):
+
+    ingredients = RecipeScore.query.filter_by(recipe_id=recipe_id).all()
+    
+    return jsonify([score.serialize() for score in ingredients]), 200
+
+##We do not need to set for recipe as it's serrialized so it will be shown on recipe endpoint
+
+# POST score on recipe
+@api.route('/user/recipes/<int:recipe_id>/score', methods=['POST'])
+@jwt_required()
+def add_score(recipe_id):
+
+    user_id = get_jwt_identity()
+
+    try:
+
+        stmt = select(RecipeScore).where(
+            RecipeScore.user_id == user_id,
+            RecipeScore.recipe_id == recipe_id
+        )
+        liked = db.session.execute(stmt).scalar_one_or_none()
+
+        #Check if recipe is already on the list. If liked it will delete the like (decrease -1)
+        if liked:
+            db.session.delete(liked)
+            db.session.commit()
+            return jsonify({"message": "Like removed", "liked": False}), 200
+        
+        #Add it and sum +1 if not liked
+        else:
+            new_like = RecipeScore(
+                user_id=user_id,
+                recipe_id=recipe_id,
+                score=1 
+            )
+
+            db.session.add(new_like)
+            db.session.commit()
+            return jsonify({"message": "Like added", "liked": True}), 201
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+##No need for delete as on POST we already delete the like if it exists

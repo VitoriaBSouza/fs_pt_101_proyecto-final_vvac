@@ -1,59 +1,41 @@
-import PropTypes from "prop-types";
+import { useNavigate} from "react-router-dom";
+import { useEffect } from "react";
 
-/**
- * RecipeCard muestra:
- *  - imagen (o placeholder si no hay), (ok)
- *  - nombre del producto/receta, (ok)
- *  - nutriscore (si existe), (ok)
- *  - botón para “save/unsave” en función de savedItems, (ok)
- *  - opcionalmente, un callback onClick para ir a detalle. (ok)
- * ----> ¿onToggleSave, por?
- */
+//hooks
+import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+
+//services
+import recipeServices from "../services/recetea_API/recipeServices.js"
 
 
-export const RecipeCard = ({ id, name, imageUrl, nutriScore, isSaved, onToggleSave, onClick, }) => {
+export const RecipeCard = (props) => {
 
-    return (
-        <div className="recipe-card">
-            <div className="card-image-container" onClick={()=> onClick(id)}>
-                {imageUrl ? (
-                    <img src={imageUrl} alt={name} className="card-image" />
-                ):(
-                    <div className="no-image-placeholder"> No image </div>
-                )}
-            </div>
-                
-            <div className="card-body">
-                <h5 className="card-title" onClick={() => onClick(id) }> {name} </h5>
-                {nutriScore && (
-                    <p className="card-nutri"> Nutriscore: <strong>{nutriScore.toUpperCase()}</strong></p>
-                )}
-            </div>
+    const navigate = useNavigate()
+    const {store, dispatch} = useGlobalReducer();
 
-            <div className="card-actions">
-                <button className={`btn-save ${isSaved ? "saved" : ""}`} onClick={() => onToggleSave(id)}>
-                    {isSaved ? "★ Saved" : "☆ Save"}
-                </button>
+    const getOneRecipe = async () => recipeServices.getOneRecipe(props.recipe_id).then(data=>{
+        dispatch({type: 'get_one_recipe', payload:data});
+    })
+
+    const handleClick = (e) => {
+        navigate("/recipes/" + props.recipe_id)
+        getOneRecipe()
+    } 
+
+    useEffect(() => {
+        getOneRecipe();
+    }, []);
+
+    return(
+        <div className="col-12 col-sm-6 col-md-5 col-lg-4 w-50">
+            <div 
+            className="card bg-dark text-white mx-2" 
+            onClick={handleClick}>
+                <img src={props.url} className="card-img recipe_img" alt="recipe_img"/>
+                <div className="card-img-overlay img_bg_overlay">
+                    <h2 className="card-title">{props.title}</h2>
+                </div>
             </div>
         </div>
     )
 }
-
-RecipeCard.propTypes = {
-  id: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  imageUrl: PropTypes.string,
-  nutriScore: PropTypes.string,
-  isSaved: PropTypes.bool,
-  onToggleSave: PropTypes.func.isRequired,
-//   onClick: PropTypes.func, 
-};
-
-
-
-RecipeCard.defaultProps = {
-  imageUrl: "",
-  nutriScore: null,
-  isSaved: false,
-  onClick: () => {},
-};
