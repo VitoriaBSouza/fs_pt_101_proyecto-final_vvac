@@ -11,7 +11,7 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_requir
 from werkzeug.security import generate_password_hash, check_password_hash
 from api.email_utils import send_email, get_serializer
 from api.recipe_utils import convert_to_grams, get_ingredient_info, calculate_calories, calculate_carbs, calculate_fat, calculate_protein
-
+import json
 
 
 api = Blueprint('api', __name__)
@@ -349,13 +349,29 @@ def create_recipe():
         if setLevel is None:
             return jsonify({"error": "Please choose from one of these options for difficulty level: Easy, Moderate or Hard."}), 400
         
+        #Convert the steps into JSON to avoid issues on Frontend
+        steps_data = data["steps"]
+
+        if isinstance(steps_data, str):
+            try:
+                steps_list = json.loads(steps_data)
+            except Exception:
+                # fallback: treat it as single string step in a list
+                steps_list = [steps_data]
+        elif isinstance(steps_data, list):
+            steps_list = steps_data
+        else:
+            return jsonify({"error": "Invalid steps format"}), 400
+
+        steps_json = json.dumps(steps_list)
+        
         #We add on frontend the control of blank space and lower cases
         new_recipe = Recipe(
             title=data["title"],
             author=user_id,
             difficulty_type=setLevel,
             prep_time=data["prep_time"],
-            steps=data["steps"],
+            steps=steps_json,
             portions=data["portions"],
             published=datetime.now(timezone.utc)
         )
@@ -483,13 +499,29 @@ def edit_recipe(recipe_id):
         else:
             return jsonify({"error": "Please choose from one of these options for difficulty level: Easy, Moderate or Hard."}), 400
         
+        #Convert the steps into JSON to avoid issues on Frontend
+        steps_data = data["steps"]
+
+        if isinstance(steps_data, str):
+            try:
+                steps_list = json.loads(steps_data)
+            except Exception:
+                # fallback: treat it as single string step in a list
+                steps_list = [steps_data]
+        elif isinstance(steps_data, list):
+            steps_list = steps_data
+        else:
+            return jsonify({"error": "Invalid steps format"}), 400
+
+        steps_json = json.dumps(steps_list)
+
         #We add on frontend the control of blank space and lower cases
         recipe.title = data["title"]
         recipe.author = user_id
         recipe.difficulty_type = setLevel
         recipe.prep_time=data["prep_time"]
         recipe.portions = data["portions"]
-        recipe.steps = data["steps"]
+        recipe.steps = steps_json
         recipe.published = datetime.now(timezone.utc)
         db.session.flush()
 

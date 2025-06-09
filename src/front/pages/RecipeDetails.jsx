@@ -38,13 +38,25 @@ export const RecipeDetails = () => {
     const splitSteps = (steps) => {
         if (!steps) return [];
 
+        let parsedSteps;
+
+        try {
+            parsedSteps = JSON.parse(steps);
+        } catch (e) {
+            parsedSteps = steps; // If parsing fails, treat it as a plain string
+        }
+        // If parsedSteps is an array, join it into a single string
+        if (Array.isArray(parsedSteps)) {
+            return parsedSteps.map(step => step.trim()).filter(step => step.length > 0);
+        }
+
         return steps
-            .split(/(?:\n|\r|\d+\.\s*|[-•]\s*|Step\s*\d+:?\s*)/i)
+            .split(/(?<=[.?!])\s+(?=[A-Z])|(?:\r?\n|^\d+[\.\)]|[-•]|\bStep\s*\d+:?)/gm)
             .map(step => step.trim())
             .filter(step => step.length > 0);
     };
 
-    const stepsArray = splitSteps(store.recipe?.steps);
+    const stepsArray = splitSteps(store.recipe?.steps);    
 
     // Loops through the ingredients nutricional values and stores it to return the total of each
     //If value is null or none will be 0. Otherwise, will provide a sum of the values stored.
