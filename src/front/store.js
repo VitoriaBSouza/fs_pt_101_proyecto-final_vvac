@@ -32,6 +32,12 @@ export default function storeReducer(store, action = {}) {
         ...store,
         user: null
       };
+    
+    case 'logIn':
+      return {
+        ...store,
+        user: action.payload
+      };
 
     case 'get_user':
       return {

@@ -57,6 +57,7 @@ export const Home = () => {
 						/>)
 					}
 				</div>
+				<LogIn />
 			</div>
 		</div>
 	);
