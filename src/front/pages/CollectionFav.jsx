@@ -36,36 +36,8 @@ export const CollectionFav = () => {
         });
     };
 
-    //-----------------------------------------
-    //FETCH "All" de la API (OpenFoodFacts):
-    // PD: Aqui o mejor todo en otro archivo??? *MIRAR POKEMON!!!!
-    //-----------------------------------------
 
-    const fetchAllItems = async () => {
-        setLoading(true);
-        setError(null);
-
-        //---------------------------------------------
-        //
-        // PENDIENTE RETIFICAR/PROBAR CON POSTMANN!!!!!!
-        // A partir de "page_size=12" se puede cambiar o incorporar filtros
-        //
-        //---------------------------------------------
-
-        try {
-            const resp = await fetch(
-                "https://world.openfoodfacts.org/cgi/search.pl?search_simple=1&json=1&page_size=12"
-            );
-            const data = await resp.json();
-            if (!resp.ok) throw new Error("Error fetching products!");
-            setAllItems(statusbar.products || []);
-        } catch (err) {
-            console.error(err);
-            setError("Failed to LOAD 'All' items!");
-        } finally {
-            setLoading(false);
-        }
-    };
+// Pendiente Fetch API....
 
     //---------------------------------------------
     //
@@ -90,12 +62,12 @@ export const CollectionFav = () => {
                     const formatted = arr.map((r) => ({
                         id: r._id,
                         name: r.tittle,
-                        imageUrl: r.media?.[0]?.url || "", //propuesta chatGPT, para definir guardar imagen
+                        imageUrl: r.media?.[0]?.url || "", //Opción para aparecer imagen... Pero no termina de funcionar, pendiente fetch.
                         nutriScore: r.nutri_score || null,
                     }));
                     setRecipeItems(formatted);
                 })
-                .catch((rerr) => {
+                .catch((err) => {
                     console.error(err);
                     setError("Failed to LOAD 'Your recipes'!");
                 })

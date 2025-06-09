@@ -4,6 +4,8 @@ import { RightMenu } from "../components/RightMenu"
 
 export const MealPlanner = () => {
 
+    // const { store, dispatch } = useGlobalReducer() ---> verificar si queda pendiente incorporar acciones.
+
     // Funciones para incorporar fecha y meal: 
 
     const [startDate, setStartDate] = useState("2025-06-02");
@@ -211,6 +213,7 @@ export const MealPlanner = () => {
                                         {weekDays.map((dia) => (
                                             <tr key={dia}>
                                                 <td className="cell-day">
+                                                    {/* Para capitalizar dia de la semana: */}
                                                     {dia.charAt(0).toUpperCase() + dia.slice(1)}
                                                 </td>
                                                 {renderCells(dia)}

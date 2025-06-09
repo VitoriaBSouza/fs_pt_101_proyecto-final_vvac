@@ -46,11 +46,9 @@ RecipeCard.propTypes = {
   nutriScore: PropTypes.string,
   isSaved: PropTypes.bool,
   onToggleSave: PropTypes.func.isRequired,
-  onClick: PropTypes.func, // opcional, si quieres mostrar detalle
+//   onClick: PropTypes.func, 
 };
 
-
-// Aqui o en otro archivo?!?!?!
 
 
 RecipeCard.defaultProps = {
