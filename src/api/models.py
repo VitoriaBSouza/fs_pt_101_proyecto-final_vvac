@@ -258,3 +258,39 @@ class ShoppingListItem(db.Model):
             "unit": self.unit,
             "created_at": self.created_at.isoformat() if self.created_at else None
         }
+
+class MealType(enum.Enum):
+    BREAKFAST = "breakfast"
+    MORNING_SNACK = "morning_snack"
+    BRUNCH = "brunch"
+    LUNCH = "lunch"
+    AFTERNOON_SNACK = "afternoon_snack"
+    DINNER = "dinner"
+    SUPPER = "supper"
+    SNACK = "snack"
+    PRE_WORKOUT = "pre_workout"
+    POST_WORKOUT = "post_workout"
+    OTHER = "other"
+
+class MealPlanEntry(db.Model):
+    __tablename__ = 'meal_plan_entries'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id"), nullable=False)
+
+    meal_type: Mapped[MealType] = mapped_column(Enum(MealType), nullable=False)
+    date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    user: Mapped["User"] = relationship()
+    recipe: Mapped["Recipe"] = relationship()
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "recipe_id": self.recipe_id,
+            "recipe_title": self.recipe.title,
+            "meal_type": self.meal_type.value,
+            "date": self.date.date().isoformat()
+        }

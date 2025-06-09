@@ -2,7 +2,7 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User, Recipe, Ingredient, Comment, Media, UserStatus, Collection, RecipeIngredient, DifficultyType, MediaType, RecipeScore, ShoppingListItem
+from api.models import db, User, Recipe, Ingredient, Comment, Media, UserStatus, Collection, RecipeIngredient, DifficultyType, MediaType, RecipeScore, ShoppingListItem, MealPlanEntry, MealType
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from sqlalchemy import select, delete, func
@@ -1248,3 +1248,101 @@ def clear_shopping_list():
     deleted = db.session.query(ShoppingListItem).filter_by(user_id=user_id).delete()
     db.session.commit()
     return jsonify({"message": f"{deleted} items deleted from shopping list"}), 200
+
+# =======================================
+# Meal Plan Endpoints
+# =======================================
+
+# GET: All meal plan entries for the logged-in user, ordered by date
+@api.route('/user/mealplan', methods=['GET'])
+@jwt_required()
+def get_meal_plan():
+    user_id = get_jwt_identity()
+    entries = MealPlanEntry.query.filter_by(user_id=user_id).order_by(MealPlanEntry.date).all()
+    return jsonify([entry.serialize() for entry in entries]), 200
+
+# GET: Meal plan entries by specific date for the logged-in user
+@api.route('/user/mealplan/<string:date>', methods=['GET'])
+@jwt_required()
+def get_meal_plan_by_date(date):
+    user_id = get_jwt_identity()
+    entries = MealPlanEntry.query.filter_by(user_id=user_id, date=date).order_by(MealPlanEntry.meal_type).all()
+    return jsonify([entry.serialize() for entry in entries]), 200
+
+# POST: Add a new meal plan entry
+@api.route('/user/mealplan', methods=['POST'])
+@jwt_required()
+def add_meal_plan_entry():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+
+    date = data.get("date")
+    recipe_id = data.get("recipe_id")
+    meal_type = data.get("meal_type")
+
+    if not date or not recipe_id or not meal_type:
+        return jsonify({"error": "Missing required fields: date, recipe_id, meal_type"}), 400
+
+    try:
+        entry = MealPlanEntry(
+            user_id=user_id,
+            recipe_id=recipe_id,
+            date=date,
+            meal_type=MealType[meal_type.upper()]
+        )
+        db.session.add(entry)
+        db.session.commit()
+        return jsonify(entry.serialize()), 201
+
+    except KeyError:
+        return jsonify({"error": f"'{meal_type}' is not a valid meal type."}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# PUT: Update an existing meal plan entry
+@api.route('/user/mealplan/<int:entry_id>', methods=['PUT'])
+@jwt_required()
+def update_meal_plan_entry(entry_id):
+    user_id = get_jwt_identity()
+    data = request.get_json()
+
+    entry = MealPlanEntry.query.filter_by(id=entry_id, user_id=user_id).first()
+    if not entry:
+        return jsonify({"error": "Entry not found"}), 404
+
+    try:
+        entry.date = data.get("date", entry.date)
+        entry.recipe_id = data.get("recipe_id", entry.recipe_id)
+        if "meal_type" in data:
+            entry.meal_type = MealType[data["meal_type"].upper()]
+        db.session.commit()
+        return jsonify(entry.serialize()), 200
+
+    except KeyError:
+        return jsonify({"error": f"'{data.get('meal_type')}' is not a valid meal type"}), 400
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# DELETE: Remove a single meal plan entry
+@api.route('/user/mealplan/<int:entry_id>', methods=['DELETE'])
+@jwt_required()
+def delete_meal_plan_entry(entry_id):
+    user_id = get_jwt_identity()
+
+    entry = MealPlanEntry.query.filter_by(id=entry_id, user_id=user_id).first()
+    if not entry:
+        return jsonify({"error": "Entry not found"}), 404
+
+    db.session.delete(entry)
+    db.session.commit()
+    return jsonify({"message": "Entry deleted"}), 200
+
+# DELETE: Clear the entire meal plan for the logged-in user
+@api.route('/user/mealplan', methods=['DELETE'])
+@jwt_required()
+def clear_meal_plan():
+    user_id = get_jwt_identity()
+
+    deleted = db.session.query(MealPlanEntry).filter_by(user_id=user_id).delete()
+    db.session.commit()
+    return jsonify({"message": f"{deleted} entries deleted from meal plan"}), 200
