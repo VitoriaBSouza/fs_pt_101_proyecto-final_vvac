@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 
 export const PopOver = ({ title, content, children })=> {
 
@@ -9,7 +9,7 @@ export const PopOver = ({ title, content, children })=> {
     useEffect(() => {
         const popover = new bootstrap.Popover(ref.current, {
         trigger: "hover",
-        title,
+        html: true,
         content:popOverText,
         placement: "top",
         });

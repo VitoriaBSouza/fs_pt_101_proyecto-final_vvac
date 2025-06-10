@@ -30,7 +30,7 @@ export const LogIn = () => {
             const data = await userServices.login(formData);
             
             if (data.token) { // Ensure token exists before saving
-                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data));
             }
 
             if (data.success){

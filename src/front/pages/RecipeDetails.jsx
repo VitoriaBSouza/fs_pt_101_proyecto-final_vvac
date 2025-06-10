@@ -1,5 +1,5 @@
 import { useNavigate, useParams} from "react-router-dom";
-import { useEffect} from "react";
+import React, { useEffect, useRef } from "react";
 
 //hooks
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
@@ -10,7 +10,6 @@ import recipeServices from "../services/recetea_API/recipeServices.js"
 //icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBook } from '@fortawesome/free-solid-svg-icons'
-import { faSquareShareNodes } from '@fortawesome/free-solid-svg-icons'
 import { faCartPlus } from '@fortawesome/free-solid-svg-icons'
 import { faCalendarDays } from '@fortawesome/free-solid-svg-icons'
 import { faClock } from '@fortawesome/free-regular-svg-icons'
@@ -18,15 +17,17 @@ import { faUtensils } from '@fortawesome/free-solid-svg-icons'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
 import { LikeButton } from '../components/likeButton.jsx';
 import { LogOut } from "../components/LogOut.jsx";
+import { ShareButton } from "../components/shareButton.jsx";
 
 export const RecipeDetails = () => {
 
     const {store, dispatch} = useGlobalReducer();
+    const printRef = useRef();
     
     const { id } = useParams();
-    const title = store.recipe?.title;
     const portions = store.recipe?.portions;
 
+    // Convert published date into more user friendly
     const formattedDate = new Date(store.recipe?.published).toLocaleString("en-US", {
         year: "numeric",
         month: "long",
@@ -36,6 +37,8 @@ export const RecipeDetails = () => {
         hour12: false,
     });
 
+    // This will split the steps depending on the separation used
+    //We should set on create recipe front end to store with a simple method easier to split later
     const splitSteps = (steps) => {
         if (!steps) return [];
 
@@ -99,65 +102,67 @@ export const RecipeDetails = () => {
         sodium: 0 
     };
 
+    // Fetch of the recipe by recipe_id
     const getOneRecipe = async () => recipeServices.getOneRecipe(id).then(data=>{
         dispatch({type: 'get_one_recipe', payload:data});
     })
 
     console.log(store.user?.token);
-    
 
     useEffect(() => {
         getOneRecipe();
-    }, []);
+    }, [id]);
 
     return(
-        <div className="container-fluid recipe_card_bg1 mx-auto">
+        <div className="container-fluid recipe_card_bg1 mx-auto" ref={printRef}>
             <LogOut />
-            <div className="row recipe_card_bg2 my-4 p-4 mt-4">
+            <div className="row recipe_card_bg2 my-4 p-4 mt-4 ">
                 
                 <div className="col-12 col-md-6 d-flex mt-2">
 
-                    <div className="card-body">
-                        {/* Recipe foto and like button overlayed */}
-                        <div className="card bg-dark text-white overflow-auto">
+                    {/* Recipe foto and like button overlayed */}
+                    <div className="card bg-dark text-white overflow-auto recipe_img border-0">
 
-                             {/* We set carousel in case there is more than one image */}
-                            {store.recipe?.media?.length > 0 && (
-                                <div id="recipeCarousel" className="carousel slide" data-bs-ride="carousel">
-                                    <div className="carousel-inner">
+                        {/* We set carousel in case there is more than one image */}
+                        {store.recipe?.media?.length > 0 && (
+                            <div id="recipeCarousel" className="carousel slide" data-bs-ride="carousel">
+                                <div className="carousel-inner">
                                     {store.recipe.media.map((item, index) => (
                                         <div key={index} className={`carousel-item ${index === 0 ? "active" : ""}`} data-bs-interval="6000">
 
-                                            <img src={item.url} className="img-fluid d-block w-100 recipe_img" alt={`Recipe image ${index + 1}`}/>
+                                            <img src={item.url} 
+                                            className="img-fluid d-block w-100 recipe_img" 
+                                            alt={`Recipe image ${index + 1}`}
+                                            
+                                            />
                                             
                                         </div>
                                     ))}
-                                    </div>
-                                    {store.recipe.media.length > 1 && (
-                                    <>
-                                        {/* Navigation buttons */}
-                                        <button className="carousel-control-prev" type="button" data-bs-target="#recipeCarousel" data-bs-slide="prev">
-                                            <span className="carousel-control-prev-icon" aria-hidden="true" />
-                                            <span className="visually-hidden">Previous</span>
-                                        </button>
-                                        <button className="carousel-control-next" type="button" data-bs-target="#recipeCarousel" data-bs-slide="next">
-                                            <span className="carousel-control-next-icon" aria-hidden="true" />
-                                            <span className="visually-hidden">Next</span>
-                                        </button>
-                                    </>
-                                    )}
                                 </div>
-                            )}
+                                {store.recipe.media.length > 1 && (
+                                <>
+                                    {/* Navigation buttons */}
+                                    <button className="carousel-control-prev" type="button" data-bs-target="#recipeCarousel" data-bs-slide="prev">
+                                        <span className="carousel-control-prev-icon" aria-hidden="true" />
+                                        <span className="visually-hidden">Previous</span>
+                                    </button>
+                                    <button className="carousel-control-next" type="button" data-bs-target="#recipeCarousel" data-bs-slide="next">
+                                        <span className="carousel-control-next-icon" aria-hidden="true" />
+                                        <span className="visually-hidden">Next</span>
+                                    </button>
+                                </>
+                                )}
+                            </div>
+                        )}
 
-                            <LikeButton recipe_id = {id}/>
-                        </div>
+                        <LikeButton recipe_id = {id}/>
                     </div>
 
                 </div>
                 <div className="col-12 col-md-6 mt-3 mt-md-0">
                     <div className="row p-2">
                         <div className="col-12">
-                            <h1>{title}</h1>
+                            <h1>{store.recipe?.title}</h1>
                         </div>
                     </div>
 
@@ -203,7 +208,7 @@ export const RecipeDetails = () => {
                     <div className="row ps-2">
                         <div className="col-12 d-flex">
                             <div className=" pe-3 fs-2 color_icons border-end border-secondary"><FontAwesomeIcon icon={faBook} /></div>
-                            <div className="pe-3 ms-4 fs-2 color_icons border-end border-secondary"><FontAwesomeIcon icon={faSquareShareNodes} /></div>
+                            <ShareButton text="Check this out!" url={window.location.href} printRef={printRef} />
                             <div className="pe-3 ms-4 fs-2 color_icons border-end border-secondary"><FontAwesomeIcon icon={faCartPlus} /></div>
                             <div className=" ms-4 fs-2 color_icons"><FontAwesomeIcon icon={faCalendarDays} /></div>
                         </div>
@@ -224,10 +229,10 @@ export const RecipeDetails = () => {
             </div>
             <div className="row py-2">
 
-                <div className="col-12 col-md-6 ingredients_bg">
+                <div className="col-12 col-md-6 ingredients_bg p-3">
                     
-                    <div className="row">
-                        <div className="col-12 mb-2 ms-4">
+                    <div className="row m-1">
+                        <div className="col-12 mb-2 ms-3">
                             <h3>
                                 Ingredients
                             </h3>
@@ -236,7 +241,7 @@ export const RecipeDetails = () => {
                         
                     <div className="row m-2">
                         <div className="col-4 col-md-6 d-flex">
-                            <FontAwesomeIcon icon={faUser} className='color_icons fs-4'/>
+                            <FontAwesomeIcon icon={faUser} className='color_icons fs-4 ms-4'/>
 
                             <p className="ms-2 me-3 text_ing1 mt-1 color_icons fs-5">
                                 {portions}
@@ -244,13 +249,13 @@ export const RecipeDetails = () => {
                         </div>
 
                         <div className="col-8 col-md-6 text-end">
-                            <p className="text_ing1 fs-5 color_icons">
+                            <p className="text_ing1 fs-5 color_icons me-3">
                                 {(store.recipe?.total_grams / portions).toFixed(1)}g / portion
                             </p>
                         </div>
                     </div>
                             
-                    <div className="row m-2">
+                    <div className="row m-3">
                         <div className="col-12">
                             {/* Ingredient list */}
                             <ul>

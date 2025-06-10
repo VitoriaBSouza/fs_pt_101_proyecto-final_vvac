@@ -96,6 +96,7 @@ export const LikeButton = (props) => {
     }
 
     useEffect(() => {
+        
         getAllScores();
 
         // Re-run effect if recipe_id or user login status changes
@@ -111,11 +112,11 @@ export const LikeButton = (props) => {
    }, [userId, isLiked, store.scores]);
 
     return(
-        <div className="card-img-overlay btn_overlay">
+        <div className="card-img-overlay">
             {userId ? 
                 <button 
                 type="button" 
-                className="btn m-2 p-3 position-absolute bottom-0 end-0 bg-warning rounded-circle"
+                className="btn m-2 p-3 position-absolute bottom-0 end-0 bg-warning rounded-circle btn_overlay"
                 onClick={handleLikes}>
                     {isLiked ? 
                         <FontAwesomeIcon icon={faHeart} className='text-danger fs-2'/> 
@@ -132,7 +133,7 @@ export const LikeButton = (props) => {
                     </button>
                 </PopOver>
             }
-            <div className='rounded-circle like_btn text-light m-3 fs-6'>
+            <div className='rounded-circle like_btn text-light m-3 fs-6 btn_overlay'>
                 {(store.scores[props.recipe_id]?.length ?? 0)}
             </div>   
         
