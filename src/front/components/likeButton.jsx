@@ -1,25 +1,20 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 //hooks
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
 //services
 import scoreService from "../services/recetea_API/scoreServices.js"
-import userServices from "../services/recetea_API/userServices.js"
 
 //icon
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart } from '@fortawesome/free-solid-svg-icons'
 import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons'
+import { PopOver } from './popOver.jsx';
 
 export const LikeButton = (props) => {
 
     const { store, dispatch } = useGlobalReducer()
-    const navigate = useNavigate()
-
-    const popOverText = "You need to <strong>log in </strong> or <strong>register </strong> in order to like this recipe"
-    const popoverInitializedRef = useRef(false); // To prevent multiple popover initializations
 
     // Function to get user ID from token
     const getUserId = () => {
@@ -103,33 +98,8 @@ export const LikeButton = (props) => {
     useEffect(() => {
         getAllScores();
 
-        // Popovers for the non-logged-in button.
-        if (!userId && !popoverInitializedRef.current) {
-            // Use a specific selector to target THIS button instance
-            const popoverEl = document.querySelector(`button[data-bs-toggle="popover"][data-recipe-id="${props.recipe_id}"]`);
-            if (popoverEl && typeof bootstrap !== 'undefined' && bootstrap.Popover) {
-                new bootstrap.Popover(popoverEl, {
-                    trigger: 'hover focus',
-                    customClass: "popover_text",
-                    html: true,
-                    content: popOverText,
-                    placement: 'left'
-                });
-                popoverInitializedRef.current = true; // Mark as initialized
-            }
-        }
-        // Cleanup function for popovers if component unmounts
-        return () => {
-            if (popoverInitializedRef.current) {
-                const popoverEl = document.querySelector(`button[data-bs-toggle="popover"][data-recipe-id="${props.recipe_id}"]`);
-                if (popoverEl && bootstrap.Popover.getInstance(popoverEl)) {
-                    bootstrap.Popover.getInstance(popoverEl).dispose();
-                }
-            }
-        };
-
         // Re-run effect if recipe_id or user login status changes
-    }, [props.recipe_id, dispatch]); 
+    }, [props.recipe_id, dispatch, userId]); 
 
     // Debugging logs
      useEffect(() => {
@@ -154,18 +124,13 @@ export const LikeButton = (props) => {
                     }
                 </button> 
                 :
-                <button 
-                type="button" 
-                className="btn m-2 p-3 position-absolute bottom-0 end-0 bg-warning rounded-circle" 
-                data-bs-container="body" 
-                data-bs-trigger="hover focus"
-                data-bs-toggle="popover" 
-                aria-label="Login required to like recipe"
-                data-bs-placement="left" 
-                data-bs-content={popOverText}
-                ata-recipe-id={props.recipe_id}>
-                    <FontAwesomeIcon icon={faHeartRegular} className='text-light fs-1'/>
-                </button>
+                <PopOver>
+                    <button 
+                    type="button" 
+                    className="btn m-2 p-3 position-absolute bottom-0 end-0 bg-warning rounded-circle">
+                        <FontAwesomeIcon icon={faHeartRegular} className='text-light fs-1'/>
+                    </button>
+                </PopOver>
             }
             <div className='rounded-circle like_btn text-light m-3 fs-6'>
                 {(store.scores[props.recipe_id]?.length ?? 0)}

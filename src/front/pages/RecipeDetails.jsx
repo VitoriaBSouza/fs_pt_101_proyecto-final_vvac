@@ -17,6 +17,7 @@ import { faClock } from '@fortawesome/free-regular-svg-icons'
 import { faUtensils } from '@fortawesome/free-solid-svg-icons'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
 import { LikeButton } from '../components/likeButton.jsx';
+import { LogOut } from "../components/LogOut.jsx";
 
 export const RecipeDetails = () => {
 
@@ -102,14 +103,18 @@ export const RecipeDetails = () => {
         dispatch({type: 'get_one_recipe', payload:data});
     })
 
+    console.log(store.user?.token);
+    
+
     useEffect(() => {
         getOneRecipe();
     }, []);
 
     return(
         <div className="container-fluid recipe_card_bg1 mx-auto">
-            
+            <LogOut />
             <div className="row recipe_card_bg2 my-4 p-4 mt-4">
+                
                 <div className="col-12 col-md-6 d-flex mt-2">
 
                     <div className="card-body">
