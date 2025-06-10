@@ -29,13 +29,19 @@ export const LogIn = () => {
         try {
             const data = await userServices.login(formData);
             
+            if (data.token) { // Ensure token exists before saving
+                localStorage.setItem('token', data.token);
+            }
+
             if (data.success){
                 // Add navigate here after we have made the route
                 dispatch({type: 'logIn', payload:data});
+                navigate("/")
                 console.log(data, "user logged");
                 
             } else{
                 window.alert(data.message)
+                navigate("/demo")
             }
         } catch(error){
             window.alert(error)

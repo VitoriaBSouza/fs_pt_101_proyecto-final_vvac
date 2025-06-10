@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 //hooks
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
 //services
 import scoreService from "../services/recetea_API/scoreServices.js"
+import userServices from "../services/recetea_API/userServices.js"
 
 //icon
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -13,71 +15,142 @@ import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons'
 
 export const LikeButton = (props) => {
 
-    const {store, dispatch} =useGlobalReducer();
-    const [score, setScore] = useState([]);
-    
-    const popOverText = "You need to <strong>log in </strong> or <strong>register </strong> in order to like this recipe"
+    const { store, dispatch } = useGlobalReducer()
+    const navigate = useNavigate()
 
-    // Select all elements with data-bs-toggle="popover"
-    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
-    
-    // Initialize popovers with dismiss on those buttons
-    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-        return new bootstrap.Popover(popoverTriggerEl, {
-            trigger: 'hover focus',
-            customClass: "popover_text",
-            html: true
-        });
-    });
+    const popOverText = "You need to <strong>log in </strong> or <strong>register </strong> in order to like this recipe"
+    const popoverInitializedRef = useRef(false); // To prevent multiple popover initializations
+
+    // Function to get user ID from token
+    const getUserId = () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            console.log("No token found in localStorage.");
+            return null;
+        };
+
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const userId = payload.sub; // Or `payload.user_id` depending on your token
+            console.log("User  ID: " + userId);
+            return userId; // Return the user ID
+
+        } catch (e) {
+            console.error("Error decoding token:", e);
+            return null;
+        }
+    };
+
+    const userId = getUserId();
 
     const getAllScores = async () => {
         try {
-            const data = await scoreService.getRecipeScores(props.recipe_id);
-            dispatch({ type: 'get_all_scores', payload: data });
+            const data = await scoreService.getRecipeScores(props.recipe_id);;
+
+            const actualScoresArray = Array.isArray(data) ? data : (data.scores || []);
+
+            console.log(data);
+            
+            dispatch({
+                type: 'get_recipe_score',
+                payload: { recipe_id: props.recipe_id, scores: actualScoresArray }
+            });
+
         } catch (error) {
-            console.error("Error:", error);
+            console.error(`Error fetching scores for recipe ${props.recipe_id}:`, error);
         }
     };
-    
-    const handleClick = async () => {
+
+    // Check if the current user has liked this specific recipe
+    const isLiked = store.scores?.[props.recipe_id]?.some(
+        (like) => String(like.user_id) === String(userId)
+    );
+
+    const handleLikes = async () => {
+        if (!userId) { 
+            // Check if user is logged in and we have the userId
+            console.warn("User not logged in. Cannot toggle like.");
+            return window.alert("User is not logged in");
+        }
+
         try {
             const data = await scoreService.toggleScore(props.recipe_id);
 
-            // Update local component state based if already liked or not
-            if (data.liked) {
-                // If not liked will add to score table and sum +1
-                setScore(prev => [...prev, props.recipe_id]);
-            } else {
-                //Otherwise, if already on table will filter to delete it and rest -1
-                setScore(prev => prev.filter(id => id !== props.recipe_id));
-            }
+            if (data.liked) {            
+                dispatch({
+                    type: 'like',
+                    payload: { recipe_id: props.recipe_id, user_id: userId }
+                });
+                console.log(data);
+                return data;
 
-            // Update global store so other components can reflect this
-            dispatch({
-                type: data.liked ? 'like' : 'unlike',
-                payload: { recipe_id: props.recipe_id, liked: data.liked }
-            });
-        }catch (error) {
+            } else {
+
+                dispatch({
+                    type: 'unlike',
+                    payload: { recipe_id: props.recipe_id, user_id: userId }
+                });
+
+                console.log(data);
+                return data;
+            }
+        } catch (error) {
+            console.log(error);
             return error;
         }
     }
 
     useEffect(() => {
         getAllScores();
-        popoverList
-    }, []);
+
+        // Popovers for the non-logged-in button.
+        if (!userId && !popoverInitializedRef.current) {
+            // Use a specific selector to target THIS button instance
+            const popoverEl = document.querySelector(`button[data-bs-toggle="popover"][data-recipe-id="${props.recipe_id}"]`);
+            if (popoverEl && typeof bootstrap !== 'undefined' && bootstrap.Popover) {
+                new bootstrap.Popover(popoverEl, {
+                    trigger: 'hover focus',
+                    customClass: "popover_text",
+                    html: true,
+                    content: popOverText,
+                    placement: 'left'
+                });
+                popoverInitializedRef.current = true; // Mark as initialized
+            }
+        }
+        // Cleanup function for popovers if component unmounts
+        return () => {
+            if (popoverInitializedRef.current) {
+                const popoverEl = document.querySelector(`button[data-bs-toggle="popover"][data-recipe-id="${props.recipe_id}"]`);
+                if (popoverEl && bootstrap.Popover.getInstance(popoverEl)) {
+                    bootstrap.Popover.getInstance(popoverEl).dispose();
+                }
+            }
+        };
+
+        // Re-run effect if recipe_id or user login status changes
+    }, [props.recipe_id, dispatch]); 
+
+    // Debugging logs
+     useEffect(() => {
+       console.log(`User  ID: ${userId}`);
+       console.log(`Scores:`, store.scores);
+       console.log(`Is Liked: ${isLiked}`);
+       console.log("user toke: " + store.user?.token);
+       
+   }, [userId, isLiked, store.scores]);
 
     return(
-        <div className="card-img-overlay">
-            {store.user?.id ? 
+        <div className="card-img-overlay btn_overlay">
+            {userId ? 
                 <button 
                 type="button" 
                 className="btn m-2 p-3 position-absolute bottom-0 end-0 bg-warning rounded-circle"
-                onClick={handleClick}>
-                    {store.recipes?.id === props.recipe_id && store.score?.liked ? 
+                onClick={handleLikes}>
+                    {isLiked ? 
                         <FontAwesomeIcon icon={faHeart} className='text-danger fs-2'/> 
                         : 
-                        <FontAwesomeIcon icon={faHeartRegular} className='text-light fs-1'/>
+                        <FontAwesomeIcon icon={faHeartRegular} className='text-light fs-2'/>
                     }
                 </button> 
                 :
@@ -89,12 +162,13 @@ export const LikeButton = (props) => {
                 data-bs-toggle="popover" 
                 aria-label="Login required to like recipe"
                 data-bs-placement="left" 
-                data-bs-content={popOverText}>
+                data-bs-content={popOverText}
+                ata-recipe-id={props.recipe_id}>
                     <FontAwesomeIcon icon={faHeartRegular} className='text-light fs-1'/>
                 </button>
             }
             <div className='rounded-circle like_btn text-light m-3 fs-6'>
-                {(store.scores ?? []).length}
+                {(store.scores[props.recipe_id]?.length ?? 0)}
             </div>   
         
         </div>

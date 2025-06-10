@@ -115,15 +115,23 @@ table {
 
 }
 
-.popover_text{
-	font-size: 1rem;
+div.scroll-container {
+    overflow: auto;
+    white-space: nowrap;
 }
-@media (max-width: 768px) {
-  .popover_text {
-    font-size: 1.2rem;
-  }
+  
+/* End of recipe details CSS classes */
+
+/* Here starts the recipe card css */
+/* We also used recipe_img class on the scroll galery for home page */
+
+.img_bg_overlay{
+	background-color: rgba(0, 0, 0, 0.386);
 }
 
+/* End of recipe details CSS classes */
+
+/* Here starts the like button css */
 .like_btn {
   position: absolute;
   bottom: -0.3125rem;     
@@ -141,18 +149,17 @@ table {
   box-shadow: 0 0 0.125rem rgba(0, 0, 0, 0.5); /* 2px */
 }
 
-div.scroll-container {
-    overflow: auto;
-    white-space: nowrap;
+.popover_text{
+	font-size: 1rem;
 }
-  
-/* End of recipe details CSS classes */
-
-/* Here starts the recipe card css */
-/* We also used recipe_img class on the scroll galery for home page */
-
-.img_bg_overlay{
-	background-color: rgba(0, 0, 0, 0.386);
+@media (max-width: 768px) {
+  .popover_text {
+    font-size: 1.2rem;
+  }
 }
 
-/* End of recipe details CSS classes */
+.btn_overlay{
+	z-index: 3;
+}
+
+/* End of like button CSS */

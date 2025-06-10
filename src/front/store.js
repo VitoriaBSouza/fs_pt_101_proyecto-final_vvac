@@ -4,7 +4,7 @@ export const initialStore=()=>{
     recipes: [],
     recipe: null,
     collections: null,
-    scores: null,
+    scores: [],
     message: null,
     todos: [
       {
@@ -62,24 +62,47 @@ export default function storeReducer(store, action = {}) {
         recipe: action.payload
       };
 
-    case 'get_all_scores':
+    case 'get_recipe_score': {
+      const { recipe_id, scores } = action.payload;
       return {
         ...store,
-        scores: action.payload
+        scores: {
+          ...store.scores,
+          [recipe_id]: scores,
+        }
       };
+    }
 
-    case 'like':
+    case 'like': {
+      const { recipe_id, user_id } = action.payload;
+      const newScoreEntry = {
+        recipe_id: recipe_id,
+        user_id: user_id,
+        score: 1
+      };
       return {
         ...store,
-        scores: [...store.scores, action.payload.recipe_id]
+        scores: {
+        ...store.scores,
+        // Filter out the old entry for this user/recipe if it existed, then add the new one
+        [recipe_id]: [...(store.scores[recipe_id] ?? []).filter(
+            (scoreItem) => String(scoreItem.user_id) !== String(user_id)
+        ), newScoreEntry]
+        }
       };
+    }
+
     
-    case 'unlike':
-      localStorage.removeItem('recipe_id')
+    case 'unlike': {
+      const { recipe_id, user_id } = action.payload;
       return {
         ...store,
-        scores: store.scores.filter(id => id !== action.payload.recipe_id)
+        scores: {
+          ...store.scores,
+          [recipe_id]: (store.scores[recipe_id] ?? []).filter(score => score.user_id !== user_id)
+        }
       };
+    }
     case 'set_hello':
       return {
         ...store,
