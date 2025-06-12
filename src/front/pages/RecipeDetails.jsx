@@ -156,13 +156,13 @@ export const RecipeDetails = () => {
                         {/* Prep time info */}
                         <div className="col-12 col-md-6 justify-content-center prep-border mt-2 mt-md-0 d-flex">
                             <FontAwesomeIcon icon={faClock} className='me-3 fs-4 text-light' />
-                            <h7 className='mt-1 text-light fw-bold'>{store.recipe?.prep_time} minutes</h7>
+                            <h6 className='mt-1 text-light fw-bold'>{store.recipe?.prep_time} minutes</h6>
                         </div>
 
                         {/* difficulty_type info */}
                         <div className="col-12 col-md-6 text-center justify-content-center text-capitalize mt-2 mt-md-0 d-flex">
                             <FontAwesomeIcon icon={faUtensils} className='me-3 fs-4 text-light' />
-                            <h7 className='mt-1 text-light'>{store.recipe?.difficulty_type}</h7>
+                            <h6 className='mt-1 text-light'>{store.recipe?.difficulty_type}</h6>
                         </div>
 
                     </div>
