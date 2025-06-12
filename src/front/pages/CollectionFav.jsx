@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react"
 import { LinksMenu } from "../components/LinksMenu"
 import { RightMenu } from "../components/RightMenu"
-import { RecipeCard } from "../components/RecipeCard";
-
+import { RecipeCard } from "../components/RecipeCard"
+import useGlobalReducer from "../hooks/useGlobalReducer.jsx"
+import recipeServices from "../services/recetea_API/recipeServices.js"
+import collectionServices from "../services/recetea_API/collectionServices.js"
 
 export const CollectionFav = () => {
+
+    const { store, dispatch } = useGlobalReducer();
 
     //Datos para all, your recipes y saved
 
@@ -15,12 +19,55 @@ export const CollectionFav = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null)
 
+
+
+    // Pendiente Fetch API en collectionServices....?
+
+    const fetchAllItems = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+            //petición con token y CORS, funcionará??
+
+            const data = await collectionServices.getUserCollections();
+
+
+            // const resp = await recipeServices.getAllRecipes();
+
+            //Si la API devuelve correctamente...:
+
+            const arr = Array.isArray(data.collection)
+                ? data.collection
+                : data.collection || [];
+            setAllItems(arr)
+            dispatch({ type: 'get_user_collections', payload: arr });
+            // const arr = Array.isArray(resp) ? resp : resp.recipes || [];
+            // const formatted = arr.map((p) => ({
+            // code: p._id || p.code,
+            // product_name: p.tittle || p.name,
+            // image_front_small_url: p.media?.[0]?.url || "",
+            // nutrition_grades: p.nutri_score || null,
+
+
+            // setAllItems(formatted);
+            // // Opcional: despacha al store global
+            // dispatch({ type: "SET_ALL_RECIPES", payload: formatted });
+        } catch (err) {
+            console.error(err);
+            setError("Failed to LOAD 'All recipes'!");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
     //-----------------------------------------
     //Recuperar "savedItems" de localStorage + guardarlos :
     //-----------------------------------------
 
     useEffect(() => {
         const saved = JSON.parse(localStorage.getItem("savedRecipes")) || []; setSavedItems(saved);
+        console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!SE HA RECUPERADO DEL LOCALSTORAGEEEEEE (saved)--------------> " + JSON.stringify(saved))
     }, []);
 
     const toggleSaveItem = (id) => {
@@ -29,7 +76,7 @@ export const CollectionFav = () => {
             if (prev.includes(id)) {
                 updated = prev.filter((code) => code !== id);
             } else {
-                update = [...prev, id];
+                updated = [...prev, id];
             }
             localStorage.setItem("savedRecipes", JSON.stringify(updated));
             return updated;
@@ -37,7 +84,6 @@ export const CollectionFav = () => {
     };
 
 
-// Pendiente Fetch API....
 
     //---------------------------------------------
     //
@@ -58,11 +104,13 @@ export const CollectionFav = () => {
             recipeServices
                 .getAllUserRecipes()
                 .then((resp) => {
-                    const arr = Array.isArray(resp) ? resp : resp.recipes || [];
+                    console.log("a ver chato....................... " + Array.isArray(resp) + "    ççççç " + JSON.stringify(JSON.parse(resp)))
+                    // const arr = Array.isArray(resp) ? resp : resp.recipes || [];
+                    const arr = Array.isArray(resp) ? resp : JSON.parse(resp).recipes || [];
                     const formatted = arr.map((r) => ({
-                        id: r._id,
-                        name: r.tittle,
-                        imageUrl: r.media?.[0]?.url || "", //Opción para aparecer imagen... Pero no termina de funcionar, pendiente fetch.
+                        id: r.recipe_id,
+                        name: r.title,
+                        imageUrl: r.url?.[0]?.url || "", //Opción para aparecer imagen... Pero no termina de funcionar, pendiente fetch.
                         nutriScore: r.nutri_score || null,
                     }));
                     setRecipeItems(formatted);
@@ -92,18 +140,17 @@ export const CollectionFav = () => {
 
         return (
             <div className="cards-grid">
-                {allItems.map((item) => {
-                    const code = item.code;
+                {allItems?.map((item) => {
                     return (
                         <RecipeCard
-                            key={code}
-                            id={code}
+                            key={item.code}
+                            id={item.code}
                             name={item.product_name || "No name..."}
                             imageUrl={item.image_front_small_url || ""}
                             nutriScore={item.nutrition_grades || null}
-                            isSaved={savedItems.includes(code)}
+                            isSaved={savedItems.includes(item.code)}
                             onToggleSave={toggleSaveItem}
-                            onClick={() => { console.log("Clicked detail for", code); }}   // PARA INCORPORAR PAGINA DE DETALLE RECETA, pendiente algo como navigate(`/recipe/${code}`) 
+                            onClick={() => { console.log("Clicked detail for", item.code); }}   // PARA INCORPORAR PAGINA DE DETALLE RECETA, pendiente algo como navigate(`/recipe/${item.code}`) 
 
                         />
                     )
