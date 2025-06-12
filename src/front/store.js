@@ -25,8 +25,7 @@ export default function storeReducer(store, action = {}) {
   switch(action.type){
     case 'logout':
 
-      //remove the client token and info from local
-      localStorage.removeItem('token')
+      //remove the client token and user info from local
       localStorage.removeItem('user')
       return {
         ...store,

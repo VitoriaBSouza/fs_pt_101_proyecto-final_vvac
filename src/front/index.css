@@ -60,7 +60,7 @@ table {
 .recipe_img{
 	object-fit: cover;
 	width: 100%;
-	height: 27rem;
+	height: 24rem;
 
 }
 
@@ -167,7 +167,7 @@ div.scroll-container {
 /*
 /* Here starts the share button css */
 .btn_share{
-	font-size: 3rem;
+	font-size: 2rem;
 }
 
 .whatts_btn{
@@ -194,20 +194,5 @@ div.scroll-container {
 	color:rgb(136, 136, 179)
 }
 
-@media print {
-	.carousel-item {
-		display: block !important;
-		visibility: visible !important;
-		opacity: 1 !important;
-		position: static !important; /* to prevent absolute/fixed positioning issues */
-		height: auto !important;
-	}
-  
-	/* Optional: hide carousel controls on print */
-	.carousel-control-prev,
-	.carousel-control-next,
-	.carousel-indicators {
-		display: none !important;
-  	}
-}
+
 /* End of share button CSS */
