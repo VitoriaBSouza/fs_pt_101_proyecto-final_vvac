@@ -5,35 +5,28 @@ const recipeServices = {};
 
 // Utility: Add JWT token
 const authHeaders = () => ({
-    // Fuerzo el token sacado del postman .. al final de la linea esta lo que deberá haber quitando este token.
-  'Authorization': 'Bearer ' + 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc0ODQ2MDUwOSwianRpIjoiYTk4ODJiMDEtM2ZmNy00NmZkLWJkYzEtNTY2ZTNiNjdiYWExIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjExIiwibmJmIjoxNzQ4NDYwNTA5LCJjc3JmIjoiNzI4MjZlMmUtZjYwMi00MGQ3LThlMDgtN2FmYzM3ZGFkYjUzIiwiZXhwIjoxNzQ4NDYxNDA5fQ.ZjQciimHrl7QjWwNdWCD1E_7w2QspXBJ6TV7zD3016g', //localStorage.getItem('token'),
+  'Authorization': 'Bearer ' + localStorage.getItem('token'),
   'Content-Type': 'application/json'
 });
 
 // Get all recipes (guests)
 recipeServices.getAllRecipes = async () => {
-    // // MIENTRAS LA API NO FUNCIONE, FORZAMOS LOS DATOS DEVUELTOS.
-    // try {
-    //     const resp = await fetch(url + "/api/recipes", {
-    //         method: 'GET',
-    //         // mode: 'cors',
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         }
-    //     });
+    try {
+        const resp = await fetch(url + "/api/recipes", {
+            method: 'GET',
+            // mode: 'cors',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
 
-    //     const data = await resp.json();
-    //     if (!resp.ok) throw new Error(data.error || data.message);
-    //     console.log("PASAAAAAAAAAAAANDO de estos errores de la API..... forzando la ingesta de datos a mano....");
-    //     data = '{"recipe_id":231,"title":"masssaaaassss","nutri_score":4,"name":"teestststst"}';
-    //     return data;
-    // } catch (error) {
-    //     console.error("Error fetching all recipes:", error);
-    //     return error;
-    // }
-        console.log("getAllRecipes ---- PASAAAAAAAAAAAANDO de estos errores de la API..... forzando la ingesta de datos a mano....");
-        let data = '{"recipes":[{"recipe_id":1,"name":"testttt","url":"http://www.google.es","nutri_score":5},{"recipe_id":2,"name":"testttt222","url":"http://www.googl3333e.es","nutri_score":5}]}'
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || data.message);
         return data;
+    } catch (error) {
+        console.error("Error fetching all recipes:", error);
+        return error;
+    }
 };
 
 // Get a specific recipe by ID (guests)
@@ -57,23 +50,19 @@ recipeServices.getOneRecipe = async (id) => {
 //For mis recetas option
 //Get all recipes (need to log in)
 recipeServices.getAllUserRecipes = async () => {
-    // // LO MISMO, FUERZO DATOS MIENTRAS LA API NO FUNCIONE.
-    // try {
-    //     const resp = await fetch(url + "/api/user/recipes", {
-    //     method: 'GET',
-    //     headers: authHeaders()
-    //     });
+    try {
+        const resp = await fetch(url + "/api/user/recipes", {
+        method: 'GET',
+        headers: authHeaders()
+        });
 
-    //     const data = await resp.json();
-    //     if (!resp.ok) throw new Error(data.error || data.message);
-    //     return data;
-    // } catch (error) {
-    //     console.error("Error fetching user recipes:", error);
-    //     return error;
-    // }
-    let test434 = '{"recipes":[{"recipe_id":1,"name":"testttt","url":"http://www.google.es","nutri_score":5},{"recipe_id":2,"name":"testttt222","url":"http://www.googl3333e.es","nutri_score":5}]}'
-    console.log("---> GETALLUSERrecipes .. forzamos a: " + test434);
-    return test434;
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || data.message);
+        return data;
+    } catch (error) {
+        console.error("Error fetching user recipes:", error);
+        return error;
+    }
 }
 
 // GET a specific recipe (need to log in)
