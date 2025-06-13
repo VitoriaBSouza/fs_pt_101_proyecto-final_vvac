@@ -41,7 +41,6 @@ with app.app_context():
             title=f"Receta {i+1}",
             difficulty_type=choice(list(DifficultyType)),
             portions=randint(1, 6),
-            total_grams=uniform(200, 1000),
             prep_time=randint(10, 60),
             steps=f"Paso 1 de la receta {i+1}. Paso 2 de la receta {i+1}."
         )
