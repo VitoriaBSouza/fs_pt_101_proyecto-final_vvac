@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from "react";
-import { Popover } from "bootstrap";
 
 export const PopOver = ({ title, content, children })=> {
 

@@ -92,7 +92,7 @@ export const LikeButton = (props) => {
                 <PopOver>
                     <button
                         type="button"
-                        className="btn m-2 p-3 position-absolute bottom-0 end-0 bg-warning rounded-circle">
+                        className="btn m-2 p-3 position-absolute bottom-0 end-0 bg-warning rounded-circle btn_overlay">
                         <FontAwesomeIcon icon={faHeartRegular} className='text-light fs-2' />
                     </button>
                 </PopOver>

@@ -98,7 +98,7 @@ export const CollectionButton = (props) =>{
                     {isAdded ? 
                         ""
                         :
-                        <FontAwesomeIcon icon={faBook} className="pe-3 btn_share color_icons border-end border-secondary"/>
+                        <FontAwesomeIcon icon={faBook} className="pe-3 buttons_recipe color_icons border-end border-secondary"/>
                     }
                 </button>
 
@@ -107,7 +107,7 @@ export const CollectionButton = (props) =>{
                 <PopOver>
                     <button type="button" 
                     className="btn border-0">
-                        <FontAwesomeIcon icon={faBook} className="pe-3 color_icons border-end border-secondary"/>
+                        <FontAwesomeIcon icon={faBook} className="pe-3 buttons_recipe color_icons border-end border-secondary"/>
                     </button>
                 </PopOver>
             }

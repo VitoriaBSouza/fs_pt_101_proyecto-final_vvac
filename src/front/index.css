@@ -159,14 +159,14 @@ div.scroll-container {
 }
 
 .btn_overlay{
-	z-index: 3;
+	z-index: 7;
 	max-height: 5rem;
 }
 
 /* End of like button CSS */
 /*
 /* Here starts the share button css */
-.btn_share{
+.buttons_recipe{
 	font-size: 2rem;
 }
 
