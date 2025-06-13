@@ -17,11 +17,14 @@ collectionService.getUserCollections = async () => {
 
     const data = await resp.json();
 
-    if (!resp.ok) throw new Error(data.error);
-    return data;
+    if (!resp.ok) {
+      return { success: false, error: data.error };
+    }
+
+    return { success: true, ...data };
 
   } catch (error) {
-    return error;
+    return { success: false, error: error.message }
   }
 };
 

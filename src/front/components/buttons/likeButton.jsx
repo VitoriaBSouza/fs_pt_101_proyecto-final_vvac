@@ -6,11 +6,13 @@ import useGlobalReducer from "../../hooks/useGlobalReducer.jsx";
 //services
 import scoreService from "../../services/recetea_API/scoreServices.js"
 
+//components
+import { PopOver } from './popOver.jsx';
+
 //icon
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart } from '@fortawesome/free-solid-svg-icons'
 import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons'
-import { PopOver } from './popOver.jsx';
 
 export const LikeButton = (props) => {
 
@@ -20,13 +22,12 @@ export const LikeButton = (props) => {
         try {
             const data = await scoreService.getRecipeScores(props.recipe_id);;
 
-            const actualScoresArray = Array.isArray(data) ? data : (data.scores || []);
-
-            console.log(data);
+            //Make sure is an array before we save it on store
+            const arrayScores = Array.isArray(data) ? data : (data.scores || []);
 
             dispatch({
                 type: 'get_recipe_score',
-                payload: { recipe_id: props.recipe_id, scores: actualScoresArray }
+                payload: { recipe_id: props.recipe_id, scores: arrayScores }
             });
 
         } catch (error) {
@@ -40,11 +41,8 @@ export const LikeButton = (props) => {
     );
 
     const handleLikes = async () => {
-        if (!store.user?.user_id) {
-            // Check if user is logged in and we have the store.user?.user_id
-            console.warn("User not logged in. Cannot toggle like.");
-            return window.alert("User is not logged in");
-        }
+        
+        if (!store.user?.user_id) return alert("Log in to save recipes");
 
         try {
             const data = await scoreService.toggleScore(props.recipe_id);
@@ -54,7 +52,6 @@ export const LikeButton = (props) => {
                     type: 'like',
                     payload: { recipe_id: props.recipe_id, user_id: store.user?.user_id }
                 });
-                console.log(data);
                 return data;
 
             } else {
@@ -63,8 +60,6 @@ export const LikeButton = (props) => {
                     type: 'unlike',
                     payload: { recipe_id: props.recipe_id, user_id: store.user?.user_id }
                 });
-
-                console.log(data);
                 return data;
             }
         } catch (error) {
@@ -79,15 +74,6 @@ export const LikeButton = (props) => {
 
         // Re-run effect if recipe_id or user login status changes
     }, [props.recipe_id, dispatch, store.user?.user_id]);
-
-    // Debugging logs
-    useEffect(() => {
-        console.log(`User  ID: ${store.user?.user_id}`);
-        console.log(`Scores:`, store.scores);
-        console.log(`Is Liked: ${isLiked}`);
-        console.log("user toke: " + store.user?.token);
-
-    }, [store.user?.user_id, isLiked, store.scores]);
 
     return (
         <div className="card-img-overlay">

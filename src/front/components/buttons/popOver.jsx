@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { Popover } from "bootstrap";
 
 export const PopOver = ({ title, content, children })=> {
 
@@ -20,10 +21,10 @@ export const PopOver = ({ title, content, children })=> {
     // Attach ref and data attribute to child button
     return (
         <>
-        {React.cloneElement(children, {
-            ref,
-            "data-bs-toggle": "popover",
-        })}
+            {React.cloneElement(children, {
+                ref,
+                "data-bs-toggle": "popover",
+            })}
         </>
     );
 }

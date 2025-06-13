@@ -7,18 +7,20 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 //services
 import recipeServices from "../services/recetea_API/recipeServices.js"
 
+//components
+import { LikeButton } from '../components/buttons/likeButton.jsx';
+import { LogOut } from "../components/LogOut.jsx";
+import { ShareButton } from "../components/buttons/shareButton.jsx";
+import { NutricionalTable } from "../components/NutricionalTable.jsx";
+import { CollectionButton } from "../components/collectionButton.jsx";
+
 //icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBook } from '@fortawesome/free-solid-svg-icons'
 import { faCartPlus } from '@fortawesome/free-solid-svg-icons'
 import { faCalendarDays } from '@fortawesome/free-solid-svg-icons'
 import { faClock } from '@fortawesome/free-regular-svg-icons'
 import { faUtensils } from '@fortawesome/free-solid-svg-icons'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
-import { LikeButton } from '../components/buttons/likeButton.jsx';
-import { LogOut } from "../components/LogOut.jsx";
-import { ShareButton } from "../components/buttons/shareButton.jsx";
-import { NutricionalTable } from "../components/NutricionalTable.jsx";
 
 export const RecipeDetails = () => {
 
@@ -68,10 +70,6 @@ export const RecipeDetails = () => {
         dispatch({ type: 'get_one_recipe', payload: data });
     })
 
-    console.log(store.user?.token);
-    console.log("My store.user: ", store.user);
-    
-
     useEffect(() => {
         getOneRecipe();
     }, [id]);
@@ -119,6 +117,7 @@ export const RecipeDetails = () => {
                         )}
 
                         <LikeButton recipe_id={id} />
+                        
                     </div>
 
                 </div>
@@ -139,6 +138,7 @@ export const RecipeDetails = () => {
                                 <div className="col-12 col-md-3 d-flex justify-content-center justify-content-md-end">
                                     <img src="https://i.pravatar.cc/400" className="float-start user_img" alt="user_img" />
                                 </div>
+
                                 {/* Username */}
                                 <div className="col-12 col-md-6 
                                 d-flex mt-2 mt-sm-0 g-0 d-flex 
@@ -156,13 +156,13 @@ export const RecipeDetails = () => {
                         {/* Prep time info */}
                         <div className="col-12 col-md-6 justify-content-center prep-border mt-2 mt-md-0 d-flex">
                             <FontAwesomeIcon icon={faClock} className='me-3 fs-4 text-light' />
-                            <h7 className='mt-1 text-light fw-bold'>{store.recipe?.prep_time} minutes</h7>
+                            <h6 className='mt-1 text-light fw-bold'>{store.recipe?.prep_time} minutes</h6>
                         </div>
 
                         {/* difficulty_type info */}
                         <div className="col-12 col-md-6 text-center justify-content-center text-capitalize mt-2 mt-md-0 d-flex">
                             <FontAwesomeIcon icon={faUtensils} className='me-3 fs-4 text-light' />
-                            <h7 className='mt-1 text-light'>{store.recipe?.difficulty_type}</h7>
+                            <h6 className='mt-1 text-light'>{store.recipe?.difficulty_type}</h6>
                         </div>
 
                     </div>
@@ -170,7 +170,7 @@ export const RecipeDetails = () => {
                     {/* All buttons: Shopping list, menu plan, share and add to collection */}
                     <div className="row ps-2">
                         <div className="col-12 d-flex">
-                            <div className=" pe-3 fs-2 color_icons border-end border-secondary"><FontAwesomeIcon icon={faBook} /></div>
+                            <CollectionButton recipe_id={id}/>
                             <ShareButton
                                 text="Check this out!"
                                 url={window.location.href}

@@ -1069,13 +1069,16 @@ def get_user_collections():
 
     user_id = get_jwt_identity()
 
-    stmt_user = select(Collection).where(Collection.user_id == user_id)
-    collection = db.session.execute(stmt_user).scalar_one_or_none()
-
     if user_id is None:
         return jsonify({"error": "User not found, please log in or sign up."}), 400
 
-    return jsonify([c.serialize() for c in collection]), 200
+    stmt_user = select(Collection).where(Collection.user_id == user_id)
+    collection = db.session.execute(stmt_user).scalars().all()
+
+    return jsonify({ 
+        "data": [c.serialize() for c in collection],  
+        "exists": bool(collection),
+        "success": True }), 200
 
 # POST to save a recipe to a user's collection
 @api.route('user/collection/recipes/<int:recipe_id>', methods=['POST'])
@@ -1103,7 +1106,7 @@ def add_to_collection(recipe_id):
         db.session.add(add_recipe)
         db.session.commit()
 
-        return jsonify(add_recipe.serialize()), 201
+        return jsonify({"data": add_recipe.serialize(), "success": True}), 201
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
