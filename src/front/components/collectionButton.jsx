@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 //hooks
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
@@ -12,93 +12,112 @@ import { PopOver } from '../components/buttons/popOver.jsx';
 //icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBook } from '@fortawesome/free-solid-svg-icons'
+import { faBookMedical } from '@fortawesome/free-solid-svg-icons'
 
 export const CollectionButton = (props) =>{
 
     const { store, dispatch } = useGlobalReducer()
     
+    console.log('Token:', localStorage.getItem('token'));
+
     const getUserCollection = async () => collectionServices.getUserCollections().then(data => {
 
-        if (!store.user?.user_id) return alert("Log in to save recipes");
+        if (!store.user?.user_id) return alert("Log in to save or remove recipes");
 
-        dispatch({ type: 'get_user_collection', payload: data });
+        //Need to map on the data list to find only the recipe_id to make easier to display later and filter
+        const addedList = data.data.map(item => item.recipe_id);
+
+        //We update the store to match the backend DB
+        dispatch({ type: 'get_user_collection', payload: addedList });
+
+        console.log("User collection (recipe IDs):", addedList);
+        return addedList;
+        
     })
-
-    console.log("collections", store.collections);
-    console.log("collections for user", store.collections?.[store.user?.user_id]);
-
-    // Check if the current user has added already this recipe to list
-    const isAdded = Array.isArray(store.collections)
-    ? store.collections.some(r => r.recipe_id === props.recipe_id)
-    : false;
-
-    //Fetch POST for adding collection to database under user_id and recipe_id
-    const addToCollection = async () => collectionServices.addToCollection(props.recipe_id).then(data => {
-
-        getUserCollection()
-
-        const arrayCollections = Array.isArray(data.data) ? data.data : [];
-
-        dispatch({
-            type: 'add_recipe',
-            payload: { user_id: store.user?.user_id, collections: arrayCollections }
-        });
-
-        console.log("recipe added to collection", data);
-        return data;
-    })
-
-    const removeFromCollection = async () => collectionServices.collectionServices.removeFromCollection(props.recipe_id).then(data => {
-
-        getUserCollection()
-
-        const arrayCollections = Array.isArray(data.data) ? data.data : [];
-
-        dispatch({
-            type: 'remove_recipe',
-            payload: { user_id: store.user?.user_id, collections: arrayCollections }
-        });
-
-        console.log("recipe removed from collection", data);
-        return data;
-    })
-
-    const handleCollection = (e) =>{
-        e.preventDefault()
-
-        if(!isAdded){
-            addToCollection()
-        }else{
-            removeFromCollection
-        }
-
-    }
     
-    useEffect(() => {
-        store.collections?.user_id
-        // Re-run effect if recipe_id or user login status changes
-    }, [props.recipe_id, dispatch, store.user?.user_id]);
+    const addToCollection = async () => {
 
-     // Debugging logs
-    useEffect(() => {
-        console.log(`UserID: ${store.user?.user_id}`);
-        console.log(`Collections:`, store.collections);
-        console.log(`Is Added: ${isAdded}`);
-        console.log("user token: " + store.user?.token);
+        //update store to latest list
+        const updatedCollection = await getUserCollection();
 
-    }, [store.user?.user_id, isAdded, store.collections]);
+        //if recpe_id is not found we will add it
+        if(!updatedCollection.includes(Number(props.recipe_id))){
+
+            //fetch POST method to add to collection table
+            const data = await collectionServices.addToCollection(props.recipe_id);
+
+            if (data.success) {
+
+                //Fetch again updated list with new recipe_id added
+                const newList = await getUserCollection();
+
+                //update store.collections
+                dispatch({ type: 'add_recipe', payload: newList });
+
+                console.log("Recipe was added to collection");
+
+            } else {
+                console.error("Error from service:", data.error);
+            }
+        }
+    };
+
+    const removeFromCollection = async () => {
+
+        const updatedCollection = await getUserCollection();
+
+        if(updatedCollection.includes(Number(props.recipe_id))){
+            
+            const data = await collectionServices.removeFromCollection(props.recipe_id);
+
+            if (data.success) {
+
+                //Fetch again updated list
+                const newList = await getUserCollection();
+
+                //update store.collections
+                dispatch({ type: 'remove_recipe', payload: newList });
+
+                console.log("Recipe was removed from collection: ", data);
+                
+            } else {
+                console.error("Error from service:", data.error);
+            }
+        }
+    };
+
+    const isAdded = store.collections?.includes(Number(props.recipe_id));
+
+    console.log(isAdded);
+    console.log(store.collections);
+    console.log(typeof props.recipe_id, props.recipe_id);
+    
+    
+    //will reload only if user logs in or out from account
+    useEffect(() => {
+        if (store.user?.user_id) {
+            getUserCollection();
+        }
+    }, [store.user?.user_id]);
+
+    //will reload every time we change the collection list
+    useEffect(() => {
+
+        store.collections || [];
+
+    }, [store.collections]);
 
     return(
         <div>
             {store.user?.user_id ?
 
                 <button type="button" 
-                className="bnt border-0"
-                onClick={handleCollection}>
+                className="btn border-0"
+                onClick={() => isAdded ? removeFromCollection() : addToCollection()}>
                     {isAdded ? 
-                        ""
+                        <FontAwesomeIcon icon={faBook} className="pe-3 buttons_recipe color_icons border-end border-secondary" />
                         :
-                        <FontAwesomeIcon icon={faBook} className="pe-3 buttons_recipe color_icons border-end border-secondary"/>
+                        <FontAwesomeIcon icon={faBookMedical} className="pe-3 buttons_recipe color_icons border-end border-secondary" />
                     }
                 </button>
 

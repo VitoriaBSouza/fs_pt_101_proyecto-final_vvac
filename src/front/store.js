@@ -110,37 +110,21 @@ export default function storeReducer(store, action = {}) {
     case 'get_user_collection': {
       return {
         ...store,
-        
-        // Store only the data array, assuming it belongs to the current user
-        collections: action.payload?.data || []
+        collections: action.payload || []
       };
     }
 
     case 'add_recipe': {
-      const { recipe_id, user_id } = action.payload;
-
       return {
-        ...store,
-        collections: {
-          ...store.collections,
-          [user_id]: [
-            // Filter out the recipe_id if already exists, then add it at the end
-            ...(store.collections[user_id] ?? []).filter(id => id !== recipe_id),
-            recipe_id
-          ]
-        }
+      ...store,
+        collections: action.payload
       };
     }
 
     case 'remove_recipe': {
-      const { recipe_id, user_id } = action.payload;
       return {
-        ...store,
-        collections: {
-          ...store.collections,
-          [user_id]: (store.collections[user_id] ?? []).filter(id => id !== recipe_id)
-        }
-      };
+        ...store, collections: action.payload
+      }
     }
 
     case 'set_hello':

@@ -38,11 +38,14 @@ collectionService.addToCollection = async (recipe_id) => {
 
     const data = await resp.json();
 
-    if (!resp.ok) throw new Error(data.error);
-    return data;
+    if (!resp.ok) {
+      return { success: false, error: data.error || 'Unknown error' };
+    }
+
+    return { success: true, ...data };
 
   } catch (error) {
-    return error;
+    return { success: false, error: error.message };
   }
 };
 
@@ -56,11 +59,14 @@ collectionService.removeFromCollection = async (recipe_id) => {
 
     const data = await resp.json();
 
-    if (!resp.ok) throw new Error(data.error);
-    return data;
+    if (!resp.ok) {
+      return { success: false, error: data.error || 'Unknown error' };
+    }
+
+    return { success: true, ...data };
 
   } catch (error) {
-    return error;
+    return { success: false, error: error.message };
   }
 };
 

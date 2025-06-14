@@ -1081,7 +1081,7 @@ def get_user_collections():
         "success": True }), 200
 
 # POST to save a recipe to a user's collection
-@api.route('user/collection/recipes/<int:recipe_id>', methods=['POST'])
+@api.route('/user/collection/recipes/<int:recipe_id>', methods=['POST'])
 @jwt_required()
 def add_to_collection(recipe_id):
 
@@ -1112,7 +1112,7 @@ def add_to_collection(recipe_id):
         return jsonify({"error": str(e)}), 500
 
 # DELETE a saved recipe from a user's collection
-@api.route('user/collection/recipes/<int:recipe_id>', methods=['DELETE'])
+@api.route('/user/collection/recipes/<int:recipe_id>', methods=['DELETE'])
 @jwt_required()
 def delete_from_collection(recipe_id):
 

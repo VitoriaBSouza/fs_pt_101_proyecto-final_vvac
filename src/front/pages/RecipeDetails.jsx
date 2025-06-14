@@ -77,9 +77,9 @@ export const RecipeDetails = () => {
     return (
         <div className="container-fluid recipe_card_bg1 mx-auto" ref={printRef}>
             <LogOut />
-            <div className="row recipe_card_bg2 my-4 p-4 mt-4 ">
+            <div className="row recipe_card_bg2 my-4 -2 p-4 mt-4">
 
-                <div className="col-12 col-md-5 d-flex mt-2">
+                <div className="col-12 col-md-12 col-lg-5 col-xl-6 d-flex mt-2 my-4 mx-auto">
 
                     {/* Recipe foto and like button overlayed */}
                     <div className="card bg-dark text-white overflow-auto recipe_img border-0">
@@ -121,48 +121,49 @@ export const RecipeDetails = () => {
                     </div>
 
                 </div>
-                <div className="col-12 col-md-6 mt-3 mt-md-0">
-                    <div className="row p-2">
+                <div className="col-12 col-md-12 col-lg-6 col-xl-5 mt-3 mt-md-0">
+                    <div className="row p-2 mx-auto">
                         <div className="col-12">
                             <h3>{store.recipe?.title}</h3>
                         </div>
                     </div>
 
-                    <div className="border-bottom my-2 bg-secondary"></div>
+                    <div className="border-bottom my-2 bg-secondary mx-auto"></div>
 
-                    <div className="row p-2">
-                        <div className="col-12">
-                            <div className="row text-center">
+                    <div className="row text-center p-2">
 
-                                {/* User image profile */}
-                                <div className="col-12 col-md-3 d-flex justify-content-center justify-content-md-end">
-                                    <img src="https://i.pravatar.cc/400" className="float-start user_img" alt="user_img" />
-                                </div>
-
-                                {/* Username */}
-                                <div className="col-12 col-md-6 
-                                d-flex mt-2 mt-sm-0 g-0 d-flex 
-                                justify-content-center justify-content-md-start">
-                                    <h5 className="align-self-end text-start">
-                                        @{store.recipe?.username}
-                                    </h5>
-                                </div>
-                            </div>
+                        {/* User image profile */}
+                        <div className="col-12 col-sm-3 col-md-4 col-lg-3 col-xl-2
+                        g-0 my-sm-1 d-flex justify-content-center justify-content-sm-end mx-auto">
+                            <img src="https://i.pravatar.cc/400" className="float-start user_img" alt="user_img" />
                         </div>
+
+                        {/* Username */}
+                        <div className="col-12 col-sm-9 col-md-8 bg-info col-lg-8 col-lx-10
+                        ms-sm-2 my-sm-1 d-flex mt-2 mt-sm-0 d-flex 
+                        justify-content-center justify-content-sm-start mx-auto">
+                            <h5 className="align-self-end text-center">
+                                @{store.recipe?.username}
+                            </h5>
+                        </div>
+                        
                     </div>
 
-                    <div className="row p-2 recipe_card_prep my-4 justify-content-around ms-2">
+                    <div className="row p-1 my-4 ms-2 
+                    recipe_card_prep justify-content-around text-light">
 
                         {/* Prep time info */}
-                        <div className="col-12 col-md-6 justify-content-center prep-border mt-2 mt-md-0 d-flex">
-                            <FontAwesomeIcon icon={faClock} className='me-3 fs-4 text-light' />
-                            <h6 className='mt-1 text-light fw-bold'>{store.recipe?.prep_time} minutes</h6>
+                        <div className="col-12 col-md-12 col-lg-6 
+                        justify-content-center prep_border p-2 p-md-2 p-lg-1 d-flex">
+                            <FontAwesomeIcon icon={faClock} className='me-3 mt-1 icon_prep_type' />
+                            <p className='pt-2 text_prep_type'>{store.recipe?.prep_time} minutes</p>
                         </div>
 
                         {/* difficulty_type info */}
-                        <div className="col-12 col-md-6 text-center justify-content-center text-capitalize mt-2 mt-md-0 d-flex">
-                            <FontAwesomeIcon icon={faUtensils} className='me-3 fs-4 text-light' />
-                            <h6 className='mt-1 text-light'>{store.recipe?.difficulty_type}</h6>
+                        <div className="col-12 col-md-12 col-lg-6 
+                        justify-content-center text-capitalized p-1 p-md-2 p-lg-1 d-flex">
+                            <FontAwesomeIcon icon={faUtensils} className='me-3 mt-1 icon_prep_type' />
+                            <p className='pt-2 text_prep_type'>{store.recipe?.difficulty_type}</p>
                         </div>
 
                     </div>
@@ -186,8 +187,8 @@ export const RecipeDetails = () => {
                     <div className="row">
                         {store.user?.user_id ? 
                         <div className="col-12 text-capitalize mt-1">
-                            <h6 className="mb-2">Allergens: </h6>
-                            <p>{store.recipe?.allergens.join(", ")}</p>
+                            <h5 className="mb-2">Allergens: </h5>
+                            <p className="fs-5">{store.recipe?.allergens.join(", ")}</p>
                         </div>
                         :
                         ""}
@@ -199,11 +200,11 @@ export const RecipeDetails = () => {
             </div>
             <div className="row py-2">
 
-                <div className="col-12 col-md-6 ingredients_bg p-3">
+                <div className="col-12 col-md-6 ingredients_bg p-3 mt-3">
 
                     <div className="row m-1">
-                        <div className="col-12 mb-2 ms-3">
-                            <h4>
+                        <div className="col-12 mb-3 mb-md-2 ms-3">
+                            <h4 className="title_ing_steps">
                                 Ingredients
                             </h4>
                         </div>
@@ -211,15 +212,15 @@ export const RecipeDetails = () => {
 
                     <div className="row m-2">
                         <div className="col-4 col-md-6 d-flex">
-                            <FontAwesomeIcon icon={faUser} className='color_icons fs-5 ms-4' />
+                            <FontAwesomeIcon icon={faUser} className='color_icons fs-4 ms-4' />
 
-                            <p className="ms-2 me-3 text_ing1 mt-1 color_icons fs-6">
+                            <p className="ms-2 me-3 text_ing1 mt-1 color_icons">
                                 {portions}
                             </p>
                         </div>
 
                         <div className="col-8 col-md-6 text-end">
-                            <p className="text_ing1 fs-6 color_icons me-3">
+                            <p className="text_ing1 color_icons me-3">
                                 {(store.recipe?.total_grams / portions).toFixed(1)}g / portion
                             </p>
                         </div>
@@ -230,9 +231,9 @@ export const RecipeDetails = () => {
                             {/* Ingredient list */}
                             <ul>
                                 {store.recipe?.ingredients?.map((ing, i) => (
-                                    <li key={i} className="m-0 d-flex fs-6">
-                                        <p className="text_ing1 me-1" >{ing.quantity} {ing.unit}</p>
-                                        <p>of <span className='text-capitalized'>{ing.ingredient_name}</span></p>
+                                    <li key={i} className="m-0 p-0 d-flex">
+                                        <p className="text_ing1 me-2" >{ing.quantity} {ing.unit}</p>
+                                        <p className="text_ing_steps">of <span className='text-capitalized'>{ing.ingredient_name}</span></p>
                                     </li>
                                 ))}
                             </ul>
@@ -243,14 +244,14 @@ export const RecipeDetails = () => {
                 <div className="col-12 col-md-6 p-4 steps_bg g-0 mb-2">
                     <div className="row m-2">
                         <div className="col-12">
-                            <h4>Steps</h4>
+                            <h4 className="title_ing_steps">Steps</h4>
                         </div>
                     </div>
                     <div className="row m-2">
                         <div className="col-12">
                             <ul className="list-group list-group-flush">
                                 {stepsArray.map((step, i) => (
-                                    <li key={i} className="list-group-item steps_bg mb-2 text_steps text-light fs-6">
+                                    <li key={i} className="list-group-item steps_bg py-3 border_steps text_ing_steps text-light">
                                         {step.trim()}
                                     </li>
                                 ))}
