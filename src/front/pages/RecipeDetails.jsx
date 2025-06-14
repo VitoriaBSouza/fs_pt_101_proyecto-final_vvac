@@ -75,11 +75,11 @@ export const RecipeDetails = () => {
     }, [id]);
 
     return (
-        <div className="container-fluid recipe_card_bg1 mx-auto" ref={printRef}>
+        <div className="container-fluid recipe_card_bg1" ref={printRef}>
             <LogOut />
             <div className="row recipe_card_bg2 my-4 -2 p-4 mt-4">
 
-                <div className="col-12 col-md-12 col-lg-5 col-xl-6 d-flex mt-2 my-4 mx-auto">
+                <div className="col-12 col-md-12 col-lg-7 col-xl-7 d-flex mt-2 my-4 justify-content-center">
 
                     {/* Recipe foto and like button overlayed */}
                     <div className="card bg-dark text-white overflow-auto recipe_img border-0">
@@ -89,10 +89,12 @@ export const RecipeDetails = () => {
                             <div id="recipeCarousel" className="carousel slide" data-bs-ride="carousel">
                                 <div className="carousel-inner">
                                     {store.recipe.media.map((item, index) => (
-                                        <div key={index} className={`carousel-item ${index === 0 ? "active" : ""}`} data-bs-interval="6000">
+                                        <div key={index} 
+                                        className={`carousel-item ${index === 0 ? "active" : ""}`} 
+                                        data-bs-interval="6000"> {/*Set timer carousel*/}
 
                                             <img src={item.url}
-                                                className="img-fluid d-block w-100 recipe_img"
+                                                className="text-center d-block recipe_img"
                                                 alt={`Recipe image ${index + 1}`}
 
                                             />
@@ -121,10 +123,10 @@ export const RecipeDetails = () => {
                     </div>
 
                 </div>
-                <div className="col-12 col-md-12 col-lg-6 col-xl-5 mt-3 mt-md-0">
-                    <div className="row p-2 mx-auto">
+                <div className="col-12 col-md-12 col-lg-5 col-xl-5 mt-3 mt-md-0">
+                    <div className="row p-2">
                         <div className="col-12">
-                            <h3>{store.recipe?.title}</h3>
+                            <h1 className="fs-1">{store.recipe?.title}</h1>
                         </div>
                     </div>
 
@@ -133,16 +135,16 @@ export const RecipeDetails = () => {
                     <div className="row text-center p-2">
 
                         {/* User image profile */}
-                        <div className="col-12 col-sm-3 col-md-4 col-lg-3 col-xl-2
-                        g-0 my-sm-1 d-flex justify-content-center justify-content-sm-end mx-auto">
+                        <div className="col-12 col-md-12 col-lg-3 col-xl-2
+                        g-0 my-sm-1 d-flex justify-content-center justify-content-lg-end">
                             <img src="https://i.pravatar.cc/400" className="float-start user_img" alt="user_img" />
                         </div>
 
                         {/* Username */}
-                        <div className="col-12 col-sm-9 col-md-8 bg-info col-lg-8 col-lx-10
+                        <div className="col-12 col-md-12 col-lg-8 col-lx-10
                         ms-sm-2 my-sm-1 d-flex mt-2 mt-sm-0 d-flex 
-                        justify-content-center justify-content-sm-start mx-auto">
-                            <h5 className="align-self-end text-center">
+                        justify-content-center justify-content-lg-start">
+                            <h5 className="align-self-end text-center text-md-start fs-3">
                                 @{store.recipe?.username}
                             </h5>
                         </div>
@@ -200,40 +202,38 @@ export const RecipeDetails = () => {
             </div>
             <div className="row py-2">
 
-                <div className="col-12 col-md-6 ingredients_bg p-3 mt-3">
+                <div className="col-12 col-md-12 col-lg-6 ingredients_bg p-3 mt-3 mx-auto">
 
                     <div className="row m-1">
                         <div className="col-12 mb-3 mb-md-2 ms-3">
-                            <h4 className="title_ing_steps">
+                            <h4 className="title_ing_steps text-center text-lg-start">
                                 Ingredients
                             </h4>
                         </div>
                     </div>
 
                     <div className="row m-2">
-                        <div className="col-4 col-md-6 d-flex">
-                            <FontAwesomeIcon icon={faUser} className='color_icons fs-4 ms-4' />
+                        <div className="col-12 d-flex justify-content-around justify-content-lg-between mx-autp">
 
-                            <p className="ms-2 me-3 text_ing1 mt-1 color_icons">
-                                {portions}
-                            </p>
-                        </div>
+                            <div className="color_icons d-flex">
+                                <FontAwesomeIcon icon={faUser} className='color_icons fs-3 me-3' />
+                                <p className="text_ing1 py-3">{portions}</p>
+                            </div>
 
-                        <div className="col-8 col-md-6 text-end">
-                            <p className="text_ing1 color_icons me-3">
-                                {(store.recipe?.total_grams / portions).toFixed(1)}g / portion
-                            </p>
+                            <div className="mt-2 color_icons">
+                                <p className="text_ing1">{(store.recipe?.total_grams / portions).toFixed(1)}g / portion</p>
+                            </div>
                         </div>
                     </div>
 
                     <div className="row m-3">
-                        <div className="col-12">
+                        <div className="col-12 mx-auto">
                             {/* Ingredient list */}
                             <ul>
                                 {store.recipe?.ingredients?.map((ing, i) => (
-                                    <li key={i} className="m-0 p-0 d-flex">
+                                    <li key={i} className="m-0 p-0 d-flex justify-content-center justify-content-lg-start">
                                         <p className="text_ing1 me-2" >{ing.quantity} {ing.unit}</p>
-                                        <p className="text_ing_steps">of <span className='text-capitalized'>{ing.ingredient_name}</span></p>
+                                        <p className="text_ing_steps">of <span className='text-capitapzed'>{ing.ingredient_name}</span></p>
                                     </li>
                                 ))}
                             </ul>
@@ -241,17 +241,18 @@ export const RecipeDetails = () => {
                     </div>
                 </div>
                 {/* Steps of the recipe */}
-                <div className="col-12 col-md-6 p-4 steps_bg g-0 mb-2">
+                <div className="col-12 col-lg-6 p-4 steps_bg g-0 mb-2">
                     <div className="row m-2">
                         <div className="col-12">
-                            <h4 className="title_ing_steps">Steps</h4>
+                            <h4 className="title_ing_steps text-center text-lg-start">Steps</h4>
                         </div>
                     </div>
                     <div className="row m-2">
                         <div className="col-12">
                             <ul className="list-group list-group-flush">
                                 {stepsArray.map((step, i) => (
-                                    <li key={i} className="list-group-item steps_bg py-3 border_steps text_ing_steps text-light">
+                                    <li key={i} className="list-group-item py-3 text-light text-center text-lg-start 
+                                    steps_bg border_steps text_ing_steps">
                                         {step.trim()}
                                     </li>
                                 ))}
