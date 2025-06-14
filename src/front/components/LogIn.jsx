@@ -45,7 +45,7 @@ export const LogIn = () => {
                 if (data.success){
                 // Add navigate here after we have made the route
                 dispatch({type: 'logIn', payload:userData});
-                navigate("/")
+                navigate("/profile")
                 console.log(userData, "user logged");
                 
                 } else{

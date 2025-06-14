@@ -66,6 +66,7 @@ export default function storeReducer(store, action = {}) {
         ...store,
         recipes: action.payload
       };
+      
     case 'get_one_recipe':
       return {
         ...store,
