@@ -17,7 +17,7 @@ collectionService.getUserCollections = async () => {
 
     const data = await resp.json();
 
-    if (!resp.ok) throw new Error(data.error);
+    if (!resp.ok) throw new Error(data.error || data.message);    //Test Alice --> incorporar 1nuevo error para llegar al catch del componente recipeCards!! 
     return data;
 
   } catch (error) {

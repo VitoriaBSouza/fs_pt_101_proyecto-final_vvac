@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react"
+import { TurnHome } from "../components/buttons/TurnHome";
 import { LinksMenu } from "../components/LinksMenu"
 import { RightMenu } from "../components/RightMenu"
 import { RecipeCard } from "../components/RecipeCard"
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx"
 import recipeServices from "../services/recetea_API/recipeServices.js"
 import collectionServices from "../services/recetea_API/collectionServices.js"
+import { useNavigate } from "react-router-dom";
 
 export const CollectionFav = () => {
+
+    const navigate = useNavigate();
 
     const { store, dispatch } = useGlobalReducer();
 
@@ -31,16 +35,24 @@ export const CollectionFav = () => {
 
             const data = await collectionServices.getUserCollections();
 
+            const formatted = (Array.isArray(data.collection) ? data.collection : [])
+                .map(
+                    item => ({
+                        recipe_id: item.code,
+                        url: item.image_front_small_url || "",
+                        title: item.product_name || "No name",
+                    })
+                )
+            setAllItems(formatted)
+            dispatch({ type: 'get_user_collections', payload: formatted })
 
-            // const resp = await recipeServices.getAllRecipes();
 
             //Si la API devuelve correctamente...:
 
-            const arr = Array.isArray(data.collection)
-                ? data.collection
-                : data.collection || [];
-            setAllItems(arr)
-            dispatch({ type: 'get_user_collections', payload: arr });
+            // const arr = Array.isArray(data.collection)
+            //     ? data.collection : [];
+            //     setAllItems(arr)
+            //     dispatch({ type: 'get_user_collections', payload: arr });
             // const arr = Array.isArray(resp) ? resp : resp.recipes || [];
             // const formatted = arr.map((p) => ({
             // code: p._id || p.code,
@@ -68,6 +80,7 @@ export const CollectionFav = () => {
     useEffect(() => {
         const saved = JSON.parse(localStorage.getItem("savedRecipes")) || []; setSavedItems(saved);
         console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!SE HA RECUPERADO DEL LOCALSTORAGEEEEEE (saved)--------------> " + JSON.stringify(saved))
+
     }, []);
 
     const toggleSaveItem = (id) => {
@@ -104,14 +117,13 @@ export const CollectionFav = () => {
             recipeServices
                 .getAllUserRecipes()
                 .then((resp) => {
-                    console.log("a ver chato....................... " + Array.isArray(resp) + "    ççççç " + JSON.stringify(JSON.parse(resp)))
-                    // const arr = Array.isArray(resp) ? resp : resp.recipes || [];
-                    const arr = Array.isArray(resp) ? resp : JSON.parse(resp).recipes || [];
+                    const arr = Array.isArray(resp) ? resp : resp.recipes || [];
                     const formatted = arr.map((r) => ({
-                        id: r.recipe_id,
+                        id: r.id,
                         name: r.title,
-                        imageUrl: r.url?.[0]?.url || "", //Opción para aparecer imagen... Pero no termina de funcionar, pendiente fetch.
-                        nutriScore: r.nutri_score || null,
+                        // imageUrl: r.url?.[0]?.url || "", //[codigo original!!] Opción para aparecer imagen... Pero no termina de funcionar, pendiente fetch.
+                        imageUrl: r.media[0]?.url || "", //ahora se pasa bien la url
+                        nutriScore: r.nutri_score || null, // NO EXISTE EL NUTRIscore o no te lo devuelve desde la aPI y por tanto siempre sera null!!!
                     }));
                     setRecipeItems(formatted);
                 })
@@ -178,6 +190,7 @@ export const CollectionFav = () => {
                         onToggleSave={toggleSaveItem}
                         onClick={() => { console.log("User recipe detail", item.id); }}  // PARA INCORPORAR PAGINA DE DETALLE RECETA DE USUARIO, pendiente navigate... 
                     />
+                    
                 ))}
             </div>
         );
@@ -238,9 +251,12 @@ export const CollectionFav = () => {
 
                 <div className="container text-center sidebar-left-profile">
                     <div className="row align-items-start">
-                        <div className="col-3">
+                        <div className="col-12 col-md-3">
 
-                            <LinksMenu />
+                            <div className="d-flex align-items-start">
+                                <TurnHome />
+                                <LinksMenu />
+                            </div>
 
                         </div>
 
