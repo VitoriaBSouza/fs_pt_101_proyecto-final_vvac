@@ -19,7 +19,7 @@ time, mark, audio, video {
 	margin: 0;
 	padding: 0;
 	border: 0;
-	font-size: 100%;
+	font-size: 70%;
 	font: inherit;
 	vertical-align: baseline;
 }
@@ -94,7 +94,7 @@ table {
 
 .text_ing1{
 	font-weight: 500;
-  font-size: 1.5rem;
+  font-size: 2rem;
 }
 
 .text_ing_steps{
@@ -112,7 +112,7 @@ table {
 }
 
 .text_published{
-	font-size: 1.25rem;
+	font-size: 1.2rem;
 	font-style: italic;
 }
 
@@ -834,6 +834,10 @@ div.scroll-container {
 
 @media (max-width: 62rem) {
 
+  html{
+    font-size: 115%;
+  }
+
   .popover_text {
     font-size: 1.2rem;
   }
@@ -889,6 +893,10 @@ div.scroll-container {
 }
 
 @media (min-width: 62.1rem), (max-width: 75rem){
+
+  html{
+    font-size: 110%;
+  }
   
   .popover_text {
     font-size: 1.2rem;
@@ -897,7 +905,7 @@ div.scroll-container {
   .recipe_img{
     object-fit: cover;
     width: 90%;
-    height: 30rem;
+    height: 24rem;
 
   }
 
