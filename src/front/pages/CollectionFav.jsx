@@ -41,10 +41,10 @@ export const CollectionFav = () => {
         .getUserCollections()
         .then(data => {
           const formatted = (Array.isArray(data.collection) ? data.collection : []).map(item => ({
-            code: item.code,
-            product_name: item.product_name || "No name",
-            image_front_small_url: item.image_front_small_url || "",
-            nutrition_grades: item.nutri_score || null,
+            id: item.code,
+            name: item.name || "No name",
+            imageUrl: item.imageUrl || "",
+            nutriScore: item.nutri_score || null,
           }))
           setAllItems(formatted)
           dispatch({ type: "get_user_collections", payload: formatted })
@@ -91,13 +91,14 @@ export const CollectionFav = () => {
             setSavedRecipes([])
             return
           }
-          const scores = await scoreServices.getAllScoresUser(user.user_id)
-          if (!scores.length) {
+          const likes = await scoreServices.getAllScoresUser(user.user_id)
+          if (!likes.length) {
             setSavedRecipes([])
-          } else {
+          } else {            
             const fetched = await Promise.all(
-              scores.map(s => recipeServices.getOneRecipe(s.recipe_id))
+              likes.map(recetaId => recipeServices.getOneRecipe(recetaId))
             )
+
             setSavedRecipes(fetched)
           }
         } catch (err) {
@@ -127,9 +128,9 @@ export const CollectionFav = () => {
           <RecipeCard
             key={item.code}
             id={item.code}
-            name={item.product_name}
-            imageUrl={item.image_front_small_url}
-            nutriScore={item.nutrition_grades}
+            name={item.name || "No name..."}
+            imageUrl={item.imageUrl || ""}
+            nutriScore={item.nutriScore || null}
             isSaved={false}
             onClick={() => console.log("Detail for", item.code)}
           />
@@ -193,6 +194,7 @@ export const CollectionFav = () => {
   return (
     <div className="main-row-all vh-100">
       <div className="profile-container">
+        {/* COLUMNA LATERAL IZQ */}
         <div className="container text-center sidebar-left-profile">
           <div className="row align-items-start">
             <div className="col-12 col-md-3">
@@ -201,39 +203,24 @@ export const CollectionFav = () => {
                 <LinksMenu />
               </div>
             </div>
-
+            {/* COLUMNA PRINCIPAL  */}
             <div className="col-6 main-column-content">
               <div className="d-flex align-items-start flex-column mb-3 edit-perfil">
                 <h2 className="mb-3">Collection</h2>
                 <p>All, Your Recipes & Saved</p>
-
+                {/* Nav tabs: */}
                 <ul className="nav nav-tabs">
                   <li className="nav-item">
-                    <button
-                      className={`nav-link ${activeTab === "all" ? "active" : ""}`}
-                      onClick={() => setActiveTab("all")}
-                    >
-                      All
-                    </button>
+                    <button className={`nav-link ${activeTab === "all" ? "active" : ""}`} onClick={() => setActiveTab("all")}>All</button>
                   </li>
                   <li className="nav-item">
-                    <button
-                      className={`nav-link ${activeTab === "your-recipes" ? "active" : ""}`}
-                      onClick={() => setActiveTab("your-recipes")}
-                    >
-                      Your Recipes
-                    </button>
+                    <button className={`nav-link ${activeTab === "your-recipes" ? "active" : ""}`} onClick={() => setActiveTab("your-recipes")}>Your Recipes</button>
                   </li>
                   <li className="nav-item">
-                    <button
-                      className={`nav-link ${activeTab === "saved" ? "active" : ""}`}
-                      onClick={() => setActiveTab("saved")}
-                    >
-                      Saved
-                    </button>
+                    <button className={`nav-link ${activeTab === "saved" ? "active" : ""}`} onClick={() => setActiveTab("saved")}>Saved</button>
                   </li>
                 </ul>
-
+                {/* //Contenido pestaña activa// */}
                 <div className="tab-content">
                   {activeTab === "all" && <div className="tab-pane active">{renderAllCards()}</div>}
                   {activeTab === "your-recipes" && (
@@ -243,7 +230,7 @@ export const CollectionFav = () => {
                 </div>
               </div>
             </div>
-
+            {/* COLUMNA LATERAL DERECHA */}
             <div className="col-3 right-profile">
               <div className="d-grid row-gap-5 b-grids-right h-100">
                 <RightMenu />

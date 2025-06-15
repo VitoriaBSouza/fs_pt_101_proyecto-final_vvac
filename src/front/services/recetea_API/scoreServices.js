@@ -51,7 +51,7 @@ scoreService.getAllScoresUser = async (user_id) => {
     return contador;
 
   } catch (error) {
-    console.error("Error fetching scores:", error);
+      console.error("Error fetching scores:", error);
     return [];
   }
 };
