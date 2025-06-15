@@ -28,6 +28,7 @@ export const LogIn = () => {
         e.preventDefault();
         try {
             const data = await userServices.login(formData);
+            console.log("Login response data:", data);
             
             // Ensure token exists before saving
             if (data.token) { 
@@ -37,6 +38,8 @@ export const LogIn = () => {
 
                 // Store full user data on store to easy fetch
                 localStorage.setItem("user", JSON.stringify(data.user));
+                console.log(data.user);
+                
 
                 if (data.success){
                     // Dispatch user data including token if needed
@@ -44,7 +47,6 @@ export const LogIn = () => {
 
                     //Will keep on home page but for users
                     navigate("/")
-                    console.log(userData, "user logged");
                 
                 } else{
                     //we can set another page here or change to a banner

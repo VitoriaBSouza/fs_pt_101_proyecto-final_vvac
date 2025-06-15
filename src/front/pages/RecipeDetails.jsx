@@ -33,11 +33,32 @@ export const RecipeDetails = () => {
     const { id } = useParams();
     const portions = store.recipe?.portions;
 
+    // Fetch of the recipe by recipe_id
+    const getOneRecipe = async () => recipeServices.getOneRecipe(id).then(data => {
+        dispatch({ type: 'get_one_recipe', payload: data });
+    })   
+    
+    //Generats random color
+    function getRandomColor() {
+        return Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+    }
+
+    //Gets brightness based on random color
+    function getBrightness(hexColor) {
+        const r = parseInt(hexColor.substring(0, 2), 16);
+        const g = parseInt(hexColor.substring(2, 4), 16);
+        const b = parseInt(hexColor.substring(4, 6), 16);
+        return (299 * r + 587 * g + 114 * b) / 1000;
+    }
+
     //Takes first letter from username
     const firstLetter = store.recipe?.username?.charAt(0).toUpperCase() || "R"
 
+    //check bringhtness to stablish the letter color
+    const textColor = getBrightness(getRandomColor()) < 125 ? 'fff' : '000';
+
     //creates place holder image with random background and letter
-    const placeHolderImage = `https://ui-avatars.com/api/?name=${firstLetter}&background=random&color=fff`
+    const placeHolderImage = `https://ui-avatars.com/api/?name=${firstLetter}&background=random&color=${textColor}`
 
     // Convert published date into more user friendly
     const formattedDate = new Date(store.recipe?.published).toLocaleString("en-US", {
@@ -72,15 +93,7 @@ export const RecipeDetails = () => {
             .filter(step => step.length > 0);
     };
 
-    const stepsArray = splitSteps(store.recipe?.steps);
-
-    // Fetch of the recipe by recipe_id
-    const getOneRecipe = async () => recipeServices.getOneRecipe(id).then(data => {
-        dispatch({ type: 'get_one_recipe', payload: data });
-    })
-
-    console.log(store.recipe?.user_photo);
-    
+    const stepsArray = splitSteps(store.recipe?.steps); 
 
     useEffect(() => {
         getOneRecipe();

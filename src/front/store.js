@@ -1,7 +1,7 @@
 export const initialStore=()=>{
   return{
-    token: localStorage.getItem('user')? JSON.parse(localStorage.getItem('user')) : null,
-    user:null,
+    token: localStorage.getItem("token") || null,
+    user:localStorage.getItem("user") || null,
     recipes: [],
     recipe: null,
     collections: [],
@@ -27,6 +27,9 @@ export const initialStore=()=>{
 export default function storeReducer(store, action = {}) {
   switch(action.type){
     case 'logout':
+
+    //remove the client token and user info from local
+      localStorage.removeItem('token')
 
       //remove the client token and user info from local
       localStorage.removeItem('user')

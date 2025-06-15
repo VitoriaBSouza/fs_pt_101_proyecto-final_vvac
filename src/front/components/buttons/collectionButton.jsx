@@ -18,11 +18,9 @@ export const CollectionButton = (props) =>{
 
     const { store, dispatch } = useGlobalReducer()
     
-    console.log('Token:', localStorage.getItem('token'));
-
     const getUserCollection = async () => collectionServices.getUserCollections().then(data => {
 
-        if (!store.user?.user_id) return alert("Log in to save or remove recipes");
+        if (!store.user?.id) return alert("Log in to save or remove recipes");
 
         //Need to map on the data list to find only the recipe_id to make easier to display later and filter
         const addedList = data.data.map(item => item.recipe_id);
@@ -30,7 +28,6 @@ export const CollectionButton = (props) =>{
         //We update the store to match the backend DB
         dispatch({ type: 'get_user_collection', payload: addedList });
 
-        console.log("User collection (recipe IDs):", addedList);
         return addedList;
         
     })
@@ -87,18 +84,13 @@ export const CollectionButton = (props) =>{
     };
 
     const isAdded = store.collections?.includes(Number(props.recipe_id));
-
-    console.log(isAdded);
-    console.log(store.collections);
-    console.log(typeof props.recipe_id, props.recipe_id);
-    
     
     //will reload only if user logs in or out from account
     useEffect(() => {
-        if (store.user?.user_id) {
+        if (store.user?.id) {
             getUserCollection();
         }
-    }, [store.user?.user_id]);
+    }, [store.user?.id]);
 
     //will reload every time we change the collection list
     useEffect(() => {
@@ -109,7 +101,7 @@ export const CollectionButton = (props) =>{
 
     return(
         <div>
-            {store.user?.user_id ?
+            {store.user?.id ?
 
                 <button type="button" 
                 className="btn border-0"

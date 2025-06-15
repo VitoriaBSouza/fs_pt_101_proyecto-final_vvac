@@ -37,12 +37,12 @@ export const LikeButton = (props) => {
 
     // Check if the current user has liked this specific recipe
     const isLiked = store.scores?.[props.recipe_id]?.some(
-        (like) => String(like.user_id) === String(store.user?.user_id)
+        (like) => String(like.user_id) === String(store.user?.id)
     );
 
     const handleLikes = async () => {
         
-        if (!store.user?.user_id) return alert("Log in to save recipes");
+        if (!store.user?.id) return alert("Log in to save recipes");
 
         try {
             const data = await scoreService.toggleScore(props.recipe_id);
@@ -50,7 +50,7 @@ export const LikeButton = (props) => {
             if (data.liked) {
                 dispatch({
                     type: 'like',
-                    payload: { recipe_id: props.recipe_id, user_id: store.user?.user_id }
+                    payload: { recipe_id: props.recipe_id, user_id: store.user?.id }
                 });
                 return data;
 
@@ -58,7 +58,7 @@ export const LikeButton = (props) => {
 
                 dispatch({
                     type: 'unlike',
-                    payload: { recipe_id: props.recipe_id, user_id: store.user?.user_id }
+                    payload: { recipe_id: props.recipe_id, user_id: store.user?.id }
                 });
                 return data;
             }
@@ -68,20 +68,22 @@ export const LikeButton = (props) => {
         }
     }
 
+
+
     useEffect(() => {
 
         getAllScores();
 
         // Re-run effect if recipe_id or user login status changes
-    }, [props.recipe_id, dispatch, store.user?.user_id]);
+    }, [props.recipe_id, dispatch, store.user?.id]);
 
     return (
         <div className="card-img-overlay">
-            {store.user?.user_id ?
+            {store.user?.id ?
                 <button
                     type="button"
-                    className="btn m-2 p-3 position-absolute bottom-0 end-0 
-                    bg-warning rounded-circle btn_overlay like_btn"
+                    className="btn m-3 position-absolute bottom-0 end-0 
+                    bg-warning btn_overlay like_btn"
                     onClick={handleLikes}>
                     {isLiked ?
                         <FontAwesomeIcon icon={faHeart} className='text-danger fs-3' />
