@@ -62,7 +62,7 @@ export const RecipeDetails = () => {
             .filter(step => step.length > 0);
     };
 
-    //desde aqui
+    //desde aqui (alice)
     const handleToggleCollection = async (e) => {
         e.preventDefault();
         try {

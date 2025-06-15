@@ -177,10 +177,21 @@ def update_user():
 
    # The update does not requiere to add all fields on the body, just what you need to change
    # Sistem will not allow same email or username
-    user.email = data["email"]
-    user.password = generate_password_hash(data["password"])
-    user.username = data["username"]
+    if ('email' in data):
+        user.email = data["email"]
+    if ('password' in data):
+        user.password = generate_password_hash(data["password"])
+    if ('username' in data):
+        user.username = data["username"]
+    ## (Alice) he actualizado esta funcion para evitar errores cuando no se pasa algun dato (email o password o username)
+    ## El codigo que había:
+    ### user.email = data["email"]
+    ### user.password = generate_password_hash(data["password"])
+    ### user.username = data["username"]
     user.updated_at = datetime.now(timezone.utc)
+
+
+    
 
     db.session.commit()
     return jsonify(user.serialize()), 200
