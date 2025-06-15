@@ -22,10 +22,6 @@ export const RecipeCard = (props) => {
         getOneRecipe()
     } 
 
-    useEffect(() => {
-        getOneRecipe();
-    }, []);
-
     return(
         <div className="col-12 col-sm-6 col-md-5 col-lg-4 w-50">
             <div 
