@@ -8,11 +8,13 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import recipeServices from "../services/recetea_API/recipeServices.js"
 
 //components
-import { LikeButton } from '../components/buttons/likeButton.jsx';
 import { LogOut } from "../components/LogOut.jsx";
-import { ShareButton } from "../components/buttons/shareButton.jsx";
 import { NutricionalTable } from "../components/NutricionalTable.jsx";
-import { CollectionButton } from "../components/collectionButton.jsx";
+
+//buttons
+import { LikeButton } from '../components/buttons/likeButton.jsx';
+import { ShareButton } from "../components/buttons/shareButton.jsx";
+import { CollectionButton } from "../components/buttons/collectionButton.jsx";
 
 //icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
