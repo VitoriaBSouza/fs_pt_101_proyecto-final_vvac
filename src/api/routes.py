@@ -1070,12 +1070,12 @@ def get_user_collections():
     user_id = get_jwt_identity()
 
     stmt_user = select(Collection).where(Collection.user_id == user_id)
-    collection = db.session.execute(stmt_user).scalar_one_or_none()
+    collection = db.session.execute(stmt_user).scalars().all()
 
     if user_id is None:
         return jsonify({"error": "User not found, please log in or sign up."}), 400
 
-    # Añado este pequeño control por si no hay ninguna coleccion para el usuario dado, avitar el error.
+    # Añado este pequeño control por si no hay ninguna coleccion para el usuario dado, evitar el error.
     # return jsonify([c.serialize() for c in collection]), 200
     if collection is None:
         return '[]'
