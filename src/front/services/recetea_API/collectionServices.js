@@ -1,6 +1,6 @@
 const url = import.meta.env.VITE_BACKEND_URL;
 
-const collectionService = {};
+const collectionServices = {};
 
 const authHeaders = () => ({
   'Authorization': 'Bearer ' + localStorage.getItem('token'),
@@ -8,7 +8,7 @@ const authHeaders = () => ({
 });
 
 // Get current user's collection
-collectionService.getUserCollections = async () => {
+collectionServices.getUserCollections = async () => {
   try {
     const resp = await fetch(url + "/api/user/collection", {
       method: "GET",
@@ -26,7 +26,7 @@ collectionService.getUserCollections = async () => {
 };
 
 // Add recipe to collection
-collectionService.addToCollection = async (recipe_id) => {
+collectionServices.addToCollection = async (recipe_id) => {
   try {
     const resp = await fetch(url + "/api/user/collection/recipes/" + recipe_id, {
       method: "POST",
@@ -44,7 +44,7 @@ collectionService.addToCollection = async (recipe_id) => {
 };
 
 // Remove recipe from collection
-collectionService.removeFromCollection = async (recipe_id) => {
+collectionServices.removeFromCollection = async (recipe_id) => {
   try {
     const resp = await fetch(url + "/api/user/collection/recipes/" + recipe_id, {
       method: "DELETE",
@@ -61,4 +61,4 @@ collectionService.removeFromCollection = async (recipe_id) => {
   }
 };
 
-export default collectionService;
+export default collectionServices;

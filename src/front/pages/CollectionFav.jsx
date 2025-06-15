@@ -7,132 +7,115 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx"
 import recipeServices from "../services/recetea_API/recipeServices.js"
 import collectionServices from "../services/recetea_API/collectionServices.js"
 import { useNavigate } from "react-router-dom"
-import scoreServices from "../services/recetea_API/scoreServices.js"
 
 export const CollectionFav = () => {
   const navigate = useNavigate()
-  const { store, dispatch } = useGlobalReducer()
+  const { dispatch } = useGlobalReducer()
 
-  // ——————————————————————————————————————————————————
-  // Tabs & data for “All” / “Your Recipes”:
-  // ——————————————————————————————————————————————————
   const [activeTab, setActiveTab] = useState("all")
-  const [allItems, setAllItems] = useState([])
-  const [recipeItems, setRecipeItems] = useState([])
+
+  // crudos/minimales
+  const [recipeItemsRaw, setRecipeItemsRaw] = useState([])
+  const [collectionItemsRaw, setCollectionItemsRaw] = useState([])
+
+  // para “All” con detalles completos
+  const [allRecipes, setAllRecipes] = useState([])
+
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-
-  // ——————————————————————————————————————————————————
-  // Data for “Saved” tab:
-  // ——————————————————————————————————————————————————
-  const [savedRecipes, setSavedRecipes] = useState(null)   // null = loading
-  const [savedLoading, setSavedLoading] = useState(false)
-  const [savedError, setSavedError] = useState(null)
   const user = JSON.parse(localStorage.getItem("user") || "{}")
 
-  // ——————————————————————————————————————————————————
-  // Fetch “All” and “Your Recipes” based on activeTab
-  // ——————————————————————————————————————————————————
   useEffect(() => {
-    if (activeTab === "all" && allItems.length === 0) {
-      setLoading(true)
-      setError(null)
-      collectionServices
-        .getUserCollections()
-        .then(data => {
-          const formatted = (Array.isArray(data.collection) ? data.collection : []).map(item => ({
-            id: item.code,
-            name: item.name || "No name",
-            imageUrl: item.imageUrl || "",
-            nutriScore: item.nutri_score || null,
-          }))
-          setAllItems(formatted)
-          dispatch({ type: "get_user_collections", payload: formatted })
-        })
-        .catch(err => {
-          console.error(err)
-          setError("Failed to load “All recipes”")
-        })
-        .finally(() => setLoading(false))
-    } else if (activeTab === "your-recipes" && recipeItems.length === 0) {
-      setLoading(true)
-      setError(null)
-      recipeServices
-        .getAllUserRecipes()
-        .then(resp => {
-          const arr = Array.isArray(resp) ? resp : resp.recipes || []
-          const formatted = arr.map(r => ({
-            id: r.id,
-            name: r.title,
-            imageUrl: r.media?.[0]?.url || "",
-            nutriScore: r.nutri_score || null,
-          }))
-          setRecipeItems(formatted)
-        })
-        .catch(err => {
-          console.error(err)
-          setError("Failed to load “Your recipes”")
-        })
-        .finally(() => setLoading(false))
+    const fetchYourRaw = async () => {
+      const resp = await recipeServices.getAllUserRecipes()
+      const arr = Array.isArray(resp) ? resp : resp.recipes || []
+      return arr.map(r => ({
+        id: r.id,
+        name: r.title,
+        imageUrl: r.media?.[0]?.url || "",
+        nutriScore: r.nutri_score ?? null,
+      }))
     }
-  }, [activeTab, allItems.length, recipeItems.length, dispatch])
 
-  // ——————————————————————————————————————————————————
-  // Fetch “Saved” recipes when user selects that tab
-  // ——————————————————————————————————————————————————
-  useEffect(() => {
-    if (activeTab === "saved" && savedRecipes === null) {
-      setSavedLoading(true)
-      setSavedError(null)
+    const fetchCollectionsRaw = async () => {
+      const data = await collectionServices.getUserCollections()
+      const formatted = (Array.isArray(data) ? data : data.collection || []).map(item => ({
+        id: item.recipe_id,               // aquí recipe_id
+        userId: item.user_id,
+      }))
+      dispatch({ type: "get_user_collections", payload: formatted })
+      return formatted
+    }
 
-      const fetchSaved = async () => {
-        try {
-          if (!user.user_id) {
-            setSavedRecipes([])
-            return
-          }
-          const likes = await scoreServices.getAllScoresUser(user.user_id)
-          if (!likes.length) {
-            setSavedRecipes([])
-          } else {            
-            const fetched = await Promise.all(
-              likes.map(recetaId => recipeServices.getOneRecipe(recetaId))
-            )
+    const load = async () => {
+      setLoading(true)
+      setError(null)
+      try {
+        if (activeTab === "all") {
+          // 1) traemos los crudos
+          const [yourRaw, collRaw] = await Promise.all([
+            fetchYourRaw(),
+            fetchCollectionsRaw(),
+          ])
+          setRecipeItemsRaw(yourRaw)
+          setCollectionItemsRaw(collRaw)
 
-            setSavedRecipes(fetched)
-          }
-        } catch (err) {
-          console.error("Error fetching saved recipes", err)
-          setSavedError(err)
-          setSavedRecipes([])
-        } finally {
-          setSavedLoading(false)
+          // 2) extraemos IDs y deduplicamos
+          const ids = [
+            ...yourRaw.map(r => r.id),
+            ...collRaw.map(c => c.id),
+          ]
+          const uniqueIds = Array.from(new Set(ids))
+
+          // 3) por cada id, getOneRecipe
+          const full = await Promise.all(
+            uniqueIds.map(id => recipeServices.getOneRecipe(id))
+          )
+          setAllRecipes(full)
         }
+        else if (activeTab === "your-recipes") {
+          const yourRaw = await fetchYourRaw()
+          setRecipeItemsRaw(yourRaw)
+        }
+        else if (activeTab === "collections") {
+          const collRaw = await fetchCollectionsRaw()
+          const ids = [
+            ...collRaw.map(c => c.id),
+          ]
+          const uniqueIds = Array.from(new Set(ids))
+          const fullColl = await Promise.all(
+            uniqueIds.map(id => recipeServices.getOneRecipe(id))
+          )
+          setCollectionItemsRaw(fullColl)
+
+        }
+      } catch (err) {
+        console.error(err)
+        setError("Error cargando datos")
+      } finally {
+        setLoading(false)
       }
-
-      fetchSaved()
     }
-  }, [activeTab, user.user_id, savedRecipes])
+    load()
+  }, [activeTab, dispatch])
 
-  // ——————————————————————————————————————————————————
-  // Renderers for each tab
-  // ——————————————————————————————————————————————————
   const renderAllCards = () => {
-    if (loading) return <p>Please wait, loading recipes…</p>
+    if (loading) return <p>Cargando todas tus recetas…</p>
     if (error) return <p className="text-danger">{error}</p>
-    if (!allItems.length) return <p>Sorry! No recipes found.</p>
+    if (!allRecipes.length)
+      return <p>No hay recetas para mostrar en “All”.</p>
 
     return (
       <div className="cards-grid">
-        {allItems.map(item => (
+        {allRecipes.map(recipe => (
           <RecipeCard
-            key={item.code}
-            id={item.code}
-            name={item.name || "No name..."}
-            imageUrl={item.imageUrl || ""}
-            nutriScore={item.nutriScore || null}
+            key={recipe.id}
+            id={recipe.id}
+            name={recipe.title}
+            imageUrl={recipe.media?.[0]?.url || ""}
+            nutriScore={recipe.nutriScore}
             isSaved={false}
-            onClick={() => console.log("Detail for", item.code)}
+            onClick={() => console.log("Detalle", recipe.id)}
           />
         ))}
       </div>
@@ -140,61 +123,55 @@ export const CollectionFav = () => {
   }
 
   const renderYourRecipes = () => {
-    if (loading) return <p>Please wait, loading YOUR recipes…</p>
+    if (loading) return <p>Cargando tus recetas de usuario…</p>
     if (error) return <p className="text-danger">{error}</p>
-    if (!recipeItems.length) return <p>Wait! You still have no personal recipes…</p>
+    if (!recipeItemsRaw.length)
+      return <p>No tienes recetas personales todavía.</p>
 
     return (
       <div className="cards-grid">
-        {recipeItems.map(item => (
+        {recipeItemsRaw.map((r, idx) => (
           <RecipeCard
-            key={item.id}
-            id={item.id}
-            name={item.name}
-            imageUrl={item.imageUrl}
-            nutriScore={item.nutriScore}
+            // key={`your-${r.id}-${idx}`}
+            key={r.id}
+            id={r.id}
+            name={r.name}
+            imageUrl={r.imageUrl}
+            nutriScore={r.nutriScore}
             isSaved={false}
-            onClick={() => console.log("User recipe detail", item.id)}
+            onClick={() => console.log("Detalle usuario", r.id)}
           />
         ))}
       </div>
     )
   }
 
-  const renderSavedCards = () => {
-    if (savedLoading) return <p>Please wait, loading saved recipes…</p>
-    if (savedError) return <p className="text-danger">Error: {savedError.message}</p>
-    if (!savedRecipes || savedRecipes.length === 0)
-      return (
-        <p>
-          Aún no tienes recetas guardadas. Ve a “All” o “Your Recipes” y haz clic en el icono de guardar.
-        </p>
-      )
-
+  const renderCollectionCards = () => {
+    if (loading) return <p>Cargando tus collections…</p>
+    if (error) return <p className="text-danger">{error}</p>
+    if (!collectionItemsRaw.length)
+      return <p>No tienes elementos en tu colección.</p>
+      
     return (
       <div className="cards-grid">
-        {savedRecipes.map(recipe => (
+        {collectionItemsRaw.map((c, idx) => (
           <RecipeCard
-            key={recipe.id}
-            id={recipe.id}
-            name={recipe.name}
-            imageUrl={recipe.imageUrl}
-            nutriScore={recipe.nutriScore}
+            key={c.id}
+            id={c.id}
+            name={c.title}
+            imageUrl={c.media?.[0]?.url || ""}
+            nutriScore={c.nutriScore}
             isSaved={true}
-            onClick={() => console.log("Detalle de guardado", recipe.id)}
+            onClick={() => console.log("Colección detalle", c.id)}
           />
         ))}
       </div>
     )
   }
 
-  // ——————————————————————————————————————————————————
-  // Main render
-  // ——————————————————————————————————————————————————
   return (
     <div className="main-row-all vh-100">
       <div className="profile-container">
-        {/* COLUMNA LATERAL IZQ */}
         <div className="container text-center sidebar-left-profile">
           <div className="row align-items-start">
             <div className="col-12 col-md-3">
@@ -203,34 +180,37 @@ export const CollectionFav = () => {
                 <LinksMenu />
               </div>
             </div>
-            {/* COLUMNA PRINCIPAL  */}
+
             <div className="col-6 main-column-content">
               <div className="d-flex align-items-start flex-column mb-3 edit-perfil">
                 <h2 className="mb-3">Collection</h2>
-                <p>All, Your Recipes & Saved</p>
-                {/* Nav tabs: */}
+                <p>All, Your Recipes & Collections</p>
+
                 <ul className="nav nav-tabs">
-                  <li className="nav-item">
-                    <button className={`nav-link ${activeTab === "all" ? "active" : ""}`} onClick={() => setActiveTab("all")}>All</button>
-                  </li>
-                  <li className="nav-item">
-                    <button className={`nav-link ${activeTab === "your-recipes" ? "active" : ""}`} onClick={() => setActiveTab("your-recipes")}>Your Recipes</button>
-                  </li>
-                  <li className="nav-item">
-                    <button className={`nav-link ${activeTab === "saved" ? "active" : ""}`} onClick={() => setActiveTab("saved")}>Saved</button>
-                  </li>
+                  {["all", "your-recipes", "collections"].map(tab => (
+                    <li className="nav-item" key={tab}>
+                      <button
+                        className={`nav-link ${activeTab === tab ? "active" : ""}`}
+                        onClick={() => setActiveTab(tab)}
+                      >
+                        {tab === "all" ? "All" : tab === "your-recipes" ? "Your Recipes" : "Collections"}
+                      </button>
+                    </li>
+                  ))}
                 </ul>
-                {/* //Contenido pestaña activa// */}
+
                 <div className="tab-content">
                   {activeTab === "all" && <div className="tab-pane active">{renderAllCards()}</div>}
                   {activeTab === "your-recipes" && (
                     <div className="tab-pane active">{renderYourRecipes()}</div>
                   )}
-                  {activeTab === "saved" && <div className="tab-pane active">{renderSavedCards()}</div>}
+                  {activeTab === "collections" && (
+                    <div className="tab-pane active">{renderCollectionCards()}</div>
+                  )}
                 </div>
               </div>
             </div>
-            {/* COLUMNA LATERAL DERECHA */}
+
             <div className="col-3 right-profile">
               <div className="d-grid row-gap-5 b-grids-right h-100">
                 <RightMenu />
