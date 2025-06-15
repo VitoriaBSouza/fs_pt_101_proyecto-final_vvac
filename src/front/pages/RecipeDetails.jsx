@@ -218,8 +218,8 @@ export const RecipeDetails = () => {
                         <div className="col-10 d-flex justify-content-around justify-content-lg-between mx-auto">
 
                             <div className="color_icons d-flex">
-                                <FontAwesomeIcon icon={faUser} className='color_icons fs-3 me-3' />
-                                <h1 className="text_ing1 py-3 vw-1">{portions}</h1>
+                                <FontAwesomeIcon icon={faUser} className='color_icons fs-4 me-2' />
+                                <h1 className="text_ing1 p-0 mt-2 align-self-end">{portions}</h1>
                             </div>
 
                             <div className="mt-2 color_icons">
@@ -228,7 +228,7 @@ export const RecipeDetails = () => {
                         </div>
                     </div>
 
-                    <div className="row m-3">
+                    <div className="row my-4 m-3">
                         <div className="col-12 mx-auto">
                             {/* Ingredient list */}
                             <ul>

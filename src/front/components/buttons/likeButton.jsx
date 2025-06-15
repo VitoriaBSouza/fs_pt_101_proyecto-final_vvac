@@ -80,7 +80,8 @@ export const LikeButton = (props) => {
             {store.user?.user_id ?
                 <button
                     type="button"
-                    className="btn m-2 p-3 position-absolute bottom-0 end-0 bg-warning rounded-circle btn_overlay"
+                    className="btn m-2 p-3 position-absolute bottom-0 end-0 
+                    bg-warning rounded-circle btn_overlay like_btn"
                     onClick={handleLikes}>
                     {isLiked ?
                         <FontAwesomeIcon icon={faHeart} className='text-danger fs-3' />
@@ -91,13 +92,14 @@ export const LikeButton = (props) => {
                 :
                 <PopOver>
                     <button
-                        type="button"
-                        className="btn m-2 p-3 position-absolute bottom-0 end-0 bg-warning rounded-circle btn_overlay">
-                        <FontAwesomeIcon icon={faHeartRegular} className='text-light fs-2' />
+                    type="button"
+                    className="btn m-3 position-absolute bottom-0 end-0 
+                    bg-warning btn_overlay like_btn">
+                        <FontAwesomeIcon icon={faHeartRegular} className='text-light fs-3' />
                     </button>
                 </PopOver>
             }
-            <div className='rounded-circle like_btn text-light m-3 fs-6 btn_overlay'>
+            <div className='rounded-circle like_btn2 text-light m-3 fs-6 btn_overlay'>
                 {(store.scores[props.recipe_id]?.length ?? 0)}
             </div>
 

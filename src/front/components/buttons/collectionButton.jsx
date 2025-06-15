@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 
 //hooks
-import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import useGlobalReducer from "../../hooks/useGlobalReducer.jsx";
 
 //services
-import collectionServices from "../services/recetea_API/collectionServices.js"
+import collectionServices from "../../services/recetea_API/collectionServices.js"
 
 //components
-import { PopOver } from '../components/buttons/popOver.jsx';
+import { PopOver } from './popOver.jsx';
 
 //icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
