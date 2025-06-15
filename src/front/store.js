@@ -137,7 +137,7 @@ export default function storeReducer(store, action = {}) {
     case 'get_all_comments': {
       return {
         ...store, 
-        comments: action.payload
+        comments: action.payload || []
       }
     }
 

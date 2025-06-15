@@ -19,11 +19,11 @@ commentServices.getCommentsByRecipe = async (recipe_id) => {
     const data = await resp.json();
 
     if (!resp.ok) throw new Error(data.error || data.message);
-    return data;
+    return data ? data : [];
 
   } catch (error) {
     console.error("Error fetching comments:", error);
-    return error;
+    return [];
   }
 };
 

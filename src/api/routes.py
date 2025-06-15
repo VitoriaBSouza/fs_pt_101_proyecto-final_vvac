@@ -20,7 +20,7 @@ api = Blueprint('api', __name__)
 CORS(api)
 
 #Placeholder image URL for recipes without images
-PLACEHOLDER_IMAGE_URL = "https://via.placeholder.com/400x300?text=No+Image"
+PLACEHOLDER_IMAGE_URL = "https://placehold.co/400x300?text=No+Image"
 
 @api.route('/hello', methods=['POST', 'GET'])
 def handle_hello():
@@ -796,10 +796,6 @@ def get_comment(recipe_id):
 
     stmt = select(Comment).where(Comment.recipe_id == recipe_id)
     comments = db.session.execute(stmt).scalars().all()
-
-    if not comments:
-
-        return jsonify({"error": "No comments found"}), 404
     
     return jsonify([comment.serialize() for comment in comments]), 200
 

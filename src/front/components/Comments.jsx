@@ -30,7 +30,7 @@ export const Comments = (props) => {
     //Just like recipe page we will set the random placehold image to have
     //the first letter of user + random background. We will map outside so it applies to each comment
     //we also set to make the color of the letter change depending on the brightness
-    const placeHolderImg = store.comments.map((comment) => {
+    const placeHolderImg = Array.isArray(store.comments) && ((comment) => {
 
         const randomColor = getRandomColor();
         const brightness = getBrightness(randomColor);
@@ -44,7 +44,7 @@ export const Comments = (props) => {
         return (
             <div className="row mb-4 ms-4" key={comment.id}>
                 <div className="col-3 col-sm-2 col-md-1 col-lg-1 mt-1 me-1
-                                g-0 my-sm-1 d-flex justify-content-start">
+                g-0 my-sm-1 d-flex justify-content-start">
                     <img
                     src={comment.user_photo || placeHolderImage}
                     className="float-start comment_img bg-info"
@@ -81,7 +81,7 @@ export const Comments = (props) => {
     return(
         <div className="row comment_row">
             <h2 className="m-4">Comments</h2>
-            {placeHolderImg}
+           {store.comments > 0 ?  {placeHolderImg} : ""}
         </div>
     );
 }
