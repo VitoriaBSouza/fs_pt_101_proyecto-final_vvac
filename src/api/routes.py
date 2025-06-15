@@ -1075,8 +1075,13 @@ def get_user_collections():
     if user_id is None:
         return jsonify({"error": "User not found, please log in or sign up."}), 400
 
-    return jsonify([c.serialize() for c in collection]), 200
-
+    # Añado este pequeño control por si no hay ninguna coleccion para el usuario dado, avitar el error.
+    # return jsonify([c.serialize() for c in collection]), 200
+    if collection is None:
+        return '[]'
+    else:
+        return jsonify([c.serialize() for c in collection]), 200
+    
 # POST to save a recipe to a user's collection
 @api.route('user/collection/recipes/<int:recipe_id>', methods=['POST'])
 @jwt_required()
