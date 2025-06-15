@@ -150,7 +150,6 @@ div.scroll-container {
 /* Here starts the like button css */
 .like_btn{
   min-width: 50px;
-  max-height: 50px;
   max-width: 50px;
   height: 50px !important;
   border: none;
@@ -214,6 +213,26 @@ div.scroll-container {
 
 .print_btn{
 	color:rgb(136, 136, 179)
+}
+
+/*Comments CSS */
+
+.comment_img{
+	border-radius: 50%;
+	min-width: 4rem;
+	max-width: 4rem;
+	min-height: 3rem;
+	max-height: 4rem;
+	object-fit: cover;
+	display: block;
+}
+
+.comment_row{
+  background-color: white;
+}
+
+.comment_box{
+  border-color: rgba(128, 128, 128, 0.767);
 }
 
 

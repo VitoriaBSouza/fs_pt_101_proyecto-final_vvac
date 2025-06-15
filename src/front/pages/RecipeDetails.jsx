@@ -9,6 +9,7 @@ import recipeServices from "../services/recetea_API/recipeServices.js"
 
 //components
 import { LogOut } from "../components/LogOut.jsx";
+import { Comments } from "../components/Comments.jsx";
 import { NutricionalTable } from "../components/NutricionalTable.jsx";
 
 //buttons
@@ -31,6 +32,12 @@ export const RecipeDetails = () => {
 
     const { id } = useParams();
     const portions = store.recipe?.portions;
+
+    //Takes first letter from username
+    const firstLetter = store.recipe?.username?.charAt(0).toUpperCase() || "R"
+
+    //creates place holder image with random background and letter
+    const placeHolderImage = `https://ui-avatars.com/api/?name=${firstLetter}&background=random&color=fff`
 
     // Convert published date into more user friendly
     const formattedDate = new Date(store.recipe?.published).toLocaleString("en-US", {
@@ -72,6 +79,9 @@ export const RecipeDetails = () => {
         dispatch({ type: 'get_one_recipe', payload: data });
     })
 
+    console.log(store.recipe?.user_photo);
+    
+
     useEffect(() => {
         getOneRecipe();
     }, [id]);
@@ -96,7 +106,7 @@ export const RecipeDetails = () => {
                                         data-bs-interval="6000"> {/*Set timer carousel*/}
 
                                             <img src={item.url}
-                                                className="text-center d-block recipe_img"
+                                                className="img-fluid text-center d-block w-100 recipe_img"
                                                 alt={`Recipe image ${index + 1}`}
 
                                             />
@@ -139,7 +149,7 @@ export const RecipeDetails = () => {
                         {/* User image profile */}
                         <div className="col-12 col-md-12 col-lg-3 col-xl-2
                         g-0 my-sm-1 d-flex justify-content-center justify-content-lg-end">
-                            <img src="https://i.pravatar.cc/400" className="float-start user_img" alt="user_img" />
+                            <img src={store.recipe?.user_photo || placeHolderImage} className="float-start user_img" alt="user_img" />
                         </div>
 
                         {/* Username */}
@@ -270,9 +280,9 @@ export const RecipeDetails = () => {
 
                 </div>
             </div>
-            <div>
-                COMMENTS WILL BE ANOTHER COMPONENT
-            </div>
+
+            <Comments recipe_id={id} />
+
             <div>
                 Sugerencias
             </div>

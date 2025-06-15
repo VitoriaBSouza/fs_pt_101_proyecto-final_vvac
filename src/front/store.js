@@ -1,10 +1,13 @@
 export const initialStore=()=>{
   return{
-    user: localStorage.getItem('user')? JSON.parse(localStorage.getItem('user')) : null,
+    token: localStorage.getItem('user')? JSON.parse(localStorage.getItem('user')) : null,
+    user:null,
     recipes: [],
     recipe: null,
     collections: [],
     scores: [],
+    comments:[],
+    comment:null,
     message: null,
     todos: [
       {
@@ -35,7 +38,8 @@ export default function storeReducer(store, action = {}) {
     case 'logIn':
       return {
         ...store,
-        user: action.payload
+        token: action.payload.token,
+        user: action.payload.user
       };
 
     case 'get_user':
@@ -124,6 +128,13 @@ export default function storeReducer(store, action = {}) {
     case 'remove_recipe': {
       return {
         ...store, collections: action.payload
+      }
+    }
+
+    case 'get_all_comments': {
+      return {
+        ...store, 
+        comments: action.payload
       }
     }
 

@@ -103,7 +103,7 @@ def login():
        #Generate str token as it's not possible to be a number
         token = create_access_token(identity=str(user.id))
   
-        return jsonify({"success": True, "token": token}), 200
+        return jsonify({"success": True, "token": token, "user": user.serialize()}), 200
     
     except Exception as e:
         print(e)
@@ -792,14 +792,16 @@ def get_comments(comment_id):
 
 ## GET all comments by recipe ID
 @api.route('/recipes/<int:recipe_id>/comments', methods=['GET'])
-def get_comment(comment_id):
+def get_comment(recipe_id):
 
-    comment = Comment.query.get(comment_id)
+    stmt = select(Comment).where(Comment.recipe_id == recipe_id)
+    comments = db.session.execute(stmt).scalars().all()
 
-    if comment is None:
-        return jsonify({"error": "Comment not found"}), 404
+    if not comments:
+
+        return jsonify({"error": "No comments found"}), 404
     
-    return jsonify(comment.serialize()), 200
+    return jsonify([comment.serialize() for comment in comments]), 200
 
 #POST new comment by recipe ID
 @api.route('/user/recipes/<int:recipe_id>/comments', methods=['POST'])
