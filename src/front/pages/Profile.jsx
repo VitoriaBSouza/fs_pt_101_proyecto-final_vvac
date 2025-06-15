@@ -4,10 +4,51 @@ import { Link } from "react-router-dom";
 import useGlobalReducer from "../hooks/useGlobalReducer";
 import { RightMenu } from "../components/RightMenu";
 import { useNavigate } from "react-router-dom";
+import userServices from "../services/recetea_API/userServices.js"
 
 export const Profile = () => {
-
     const navigate = useNavigate();
+
+
+    //desde aqui
+    const handleChangeEmail = async (e) => {
+        e.preventDefault();
+        try {
+            //ToDo-- ver que tiene el userData para poder cambiar SOLO el correo.
+            const resultado = await userServices.editUser("userData")
+            
+        } catch (error) {
+            window.alert("Something went wrong. Please try again: " + error)
+        }
+    }
+
+    const handleUpdatePasswd = async (e) => {
+        e.preventDefault();
+        try {
+            
+            //ToDo-- ver que tiene el userData para poder cambiar SOLO el correo.
+            
+            console.log("vamos a cambiar de esta contraseña!")
+            // const resultado = await userServices.editUser("userData")
+
+        } catch (error) {
+            window.alert("Something went wrong. Please try again: " + error)
+        }
+    }
+
+    const handleDeleteAccount = async (e) => {
+        e.preventDefault();
+        try {
+            const resultado = await userServices.deleteUser()
+            window.alert("Resultado de la eliminación de la cuenta: " + resultado)
+            navigate("/")
+        } catch (error) {
+            window.alert("Something went wrong. Please try again: " + error)
+        }
+    }
+    // hasta aqui
+
+
 
     return (
 
@@ -56,11 +97,12 @@ export const Profile = () => {
 
                                     <p className="change-email">
                                         {/* Link no existe aun! o sera solo un modal?? */}
-                                        <Link to="/change-email">CHANGE E-MAIL</Link>
+                                        <Link to="/change-email" onClick={handleChangeEmail}>CHANGE E-MAIL</Link>
                                     </p>
 
                                 </div>
-
+                            </form>
+                            <form className="text-start form-perfil w-75" id="passwdchange">
                                 <div className="form-group mb-3">
                                     <label htmlFor="curren-password" className="form-label">Change password</label>
                                     <input type="password" className="form-control" id="current-password" placeholder="*Current password" />
@@ -69,8 +111,8 @@ export const Profile = () => {
                                 </div>
                                 <div className="actions-profile">
 
-                                    <button type="submit" className="btn btn-secondary">Update</button>
-                                    <button type="button" className="btn btn-danger ms-2">Cancel</button>
+                                    <button type="submit" className="btn btn-secondary" onClick={handleUpdatePasswd}>Update</button>
+                                    <button type="reset" className="btn btn-danger ms-2">Cancel</button>
                                 </div>
                             </form>
 
@@ -88,7 +130,9 @@ export const Profile = () => {
                             <RightMenu />
 
                             <div className="align-self-end">
-                                <button type="button" className="btn btn-secondary">Delete account</button>
+                                {/* ABRIR MODAL PARA CONFIRMAR EL BORRADO DE LA CUENTA */}
+                                {/* ESE MODAL TAN SOLO TIENE QUE LLAMAR A:  */}
+                                <button type="button" className="btn btn-secondary" >Delete account</button>
                             </div>
 
                         </div>
