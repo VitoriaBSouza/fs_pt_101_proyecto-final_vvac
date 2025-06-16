@@ -125,29 +125,20 @@ export const Profile = () => {
                                     </div>
                                     <form className="text-start form-perfil w-75 mx-auto" onSubmit={handleSubmit}>
 
-                                        <div className="mb-3">
-                                            <label htmlFor="username" className="form label my-3 fw-bold">Username</label>
-                                            <input type="text" 
-                                            className="form-control"
-                                            name="username" 
-                                            id="username" 
-                                            onChange={handleChange}
-                                            placeholder={formData?.username || ""} />
-                                            <p className="change-email text-danger fw-bold" onClick={handleSubmit}>
-                                                CHANGE USERNAME
+                                        <div className="mb-3 ">
+                                            <label htmlFor="username" className="form label mt-3">Username </label>
+                                            <input type="text" className="form-control" id="username" onChange={handleInputChangeUsername} placeholder={store.user?.username} />
+                                            <p className="change-email">
+                                                {/* Link no existe aun! o sera solo un modal?? */}
+                                                <Link to="/change-email" onClick={handleChangeUsername}>CHANGE USERNAME</Link>
                                             </p>
-                                        </div>
-                                        <div className="mb-3">
-                                            <label htmlFor="Email1" className="form-label my-3 fw-bold">Email address</label>
-                                            <input type="email" 
-                                            className="form-control"
-                                            name="email" 
-                                            id="Email1" 
-                                            onChange={handleChange}
-                                            placeholder={store.user?.email || ""} />
 
-                                            <p className="change-email text-danger fw-bold" onClick={handleSubmit}>
-                                                CHANGE E-MAIL
+                                            <label htmlFor="Email1" className="form-label">Email address</label>
+                                            <input type="email" className="form-control" id="Email1" onChange={handleInputChangeMail} placeholder={store.user?.email} />
+
+                                            <p className="change-email">
+                                                {/* Link no existe aun! o sera solo un modal?? */}
+                                                <Link to="/change-email" onClick={handleChangeEmail}>CHANGE E-MAIL</Link>
                                             </p>
                                             {/* Mensaje de OK o error */}
                                             {store.user?.success && (
