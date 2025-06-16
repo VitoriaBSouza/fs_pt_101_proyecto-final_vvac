@@ -46,7 +46,33 @@ table {
 	border-collapse: collapse;
 	border-spacing: 0;
 }
+/* From here is LogIn CSS classes */
 
+.logIn_title{
+  color: #b8212e;
+  font-size: 3.5rem;
+  text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.516);
+}
+
+.logIn_background {
+  background-color: #f3e8d98b;
+  background-image: radial-gradient(#e6394764 5px, transparent 6px);
+  background-size: 50px 50px;
+}
+
+/* From here is SignUp CSS classes */
+
+.sigUp_title{
+  color: #b8212e;
+  font-size: 3.5rem;
+  text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.516);
+}
+
+.sigUp_background {
+  background-color: #b30c1a18;
+  background-image: radial-gradient(#e0c19689 5px, transparent 6px);
+  background-size: 50px 50px;
+}
 
 /* From here is recipe details CSS classes */
 .recipe_card_bg1 {
@@ -61,20 +87,45 @@ table {
 .recipe_img{
 	object-fit: cover;
 	width: 100%;
-	height: 24rem;
+  min-height: 24rem;
+	max-height: 24rem;
 
 }
 
+.icon_prep_type{
+  font-size: 1.7rem;
+}
+
+.prep_border {
+  border-right: 0.15rem solid #f1ecd1;
+  border-bottom: none;
+}
+
+.text_prep_type{
+  font-weight: 600;
+  font-size: 0.5rem;
+}
+
+
 .steps_bg{
-    background-color: #C25C52;
+  background-color: #C25C52;
+}
+
+.border_steps{
+	border-bottom: dashed #ffd67d;
+}
+
+.title_ing_steps{
+  font-size: 1rem;
 }
 
 .text_ing1{
 	font-weight: 500;
+  font-size: 2rem;
 }
 
-.text_steps{
-	border-bottom: 30px dashed #e4a10f;
+.text_ing_steps{
+  font-size: 1.5rem;
 }
 
 .user_img{
@@ -88,23 +139,13 @@ table {
 }
 
 .text_published{
-	font-size: 1rem;
+	font-size: 1.2rem;
 	font-style: italic;
 }
 
 .recipe_card_prep{
-    background-color: #C25C52;
-}
-
-.prep-border {
-  border-bottom: 2px solid #f1ecd1;
-}
-
-@media (min-width: 768px) {
-  .prep-border {
-    border-bottom: none;
-    border-right: 2px solid #ccc;
-  }
+  background-color: #C25C52;
+  width: 45%;
 }
 
 .nutricional_title{
@@ -133,7 +174,16 @@ div.scroll-container {
 /* End of recipe details CSS classes */
 
 /* Here starts the like button css */
-.like_btn {
+.like_btn{
+  min-width: 50px;
+  max-width: 50px;
+  height: 50px !important;
+  border: none;
+  padding: 0;
+  border-radius: 15rem;
+}
+
+.like_btn2 {
   position: absolute;
   bottom: -0.3125rem;     
   right: -0.3125rem;    
@@ -153,23 +203,19 @@ div.scroll-container {
 .popover_text{
 	font-size: 1rem;
 }
-@media (max-width: 768px) {
-  .popover_text {
-    font-size: 1.2rem;
-  }
-}
 
 .btn_overlay{
-	z-index: 3;
+	z-index: 7;
 	max-height: 5rem;
 }
 
 /* End of like button CSS */
 /*
 /* Here starts the share button css */
-.btn_share{
-	font-size: 2rem;
+.buttons_recipe{
+	font-size: 1rem;
 }
+
 
 .whatts_btn{
 	color: #25D366;
@@ -195,6 +241,26 @@ div.scroll-container {
 	color:rgb(136, 136, 179)
 }
 
+/*Comments CSS */
+
+.comment_img{
+	border-radius: 50%;
+	min-width: 4rem;
+	max-width: 4rem;
+	min-height: 3rem;
+	max-height: 4rem;
+	object-fit: cover;
+	display: block;
+}
+
+.comment_row{
+  background-color: white;
+}
+
+.comment_box{
+  border-color: rgba(128, 128, 128, 0.767);
+}
+
 
 /* End of share button CSS */
 
@@ -218,8 +284,9 @@ div.scroll-container {
 
 /* CSS left sidebar profile (Alice) */
 
+
 .sidebar-left-profile {
-    flex: 0 0 240px;
+  flex: 0 0 240px;
 }
 
 .links-menu {
@@ -260,6 +327,32 @@ div.scroll-container {
 
 .links-menu .menu-link.active {
   background-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 20%;
+  background-color: #d4cbcb;
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: background-color 0.3s;
+}
+
+
+
+.back-button-container {
+ 
+  left: -1.5rem; 
+  z-index: 1000;
+}
+
+.btn-circle:hover {
+  background-color: #c55662;
 }
 
 /* CSS main profile (Alice) */
@@ -372,14 +465,12 @@ div.scroll-container {
 
 /* CSS right-column (buttons) --> (Alice) */
 .right-profile {
-        height: 700px;   
-        grid-template-columns: 1fr;
-
-        
+  height: 700px;   
+  grid-template-columns: 1fr;
 }
 
 .b-grids-right {
-    grid-gap: 20px;
+  grid-gap: 20px;
 }
 
 /* CSS shopping page (Alice) */
@@ -462,7 +553,7 @@ div.scroll-container {
   
 }
 
-/* CSS vista meal planner */
+/* CSS vista meal planner (ALICE) */
 
 .planner-page {
   flex: 1;
@@ -818,5 +909,107 @@ div.scroll-container {
 
 .btn-save.saved:hover {
   background-color: #d48b1f;
+}
+
+/* Media based classes will only adapt to smal screens to make more easy to read */
+
+@media (max-width: 62rem) {
+
+  .popover_text {
+    font-size: 1.2rem;
+  }
+
+  .buttons_recipe{
+    font-size: 2.5rem !important;
+  }
+
+  .recipe_img{
+    object-fit: cover;
+    width: 100%;
+    height: 25rem;
+
+  }
+
+  .text_prep_type{
+    font-weight: 650;
+    font-size: 2.5rem;
+  }
+
+  .title_ing_steps{
+    font-weight: 600;
+    font-size: 3rem;
+  }
+
+  .text_ing1{
+    font-weight: 500;
+    font-size: 1.5rem;
+  }
+  .text_ing_steps{
+    font-size: 1.5rem;
+  }
+
+  .recipe_card_prep{
+    background-color: #C25C52;
+    width: 100%;
+  }
+
+  .icon_prep_type{
+    font-size: 2rem;
+
+  }
+
+  .prep_border {
+    border-bottom: 2px solid #ccc;
+    border-right: none
+  }
+
+}
+
+@media (min-width: 62.1rem), (max-width: 75rem){
+  .popover_text {
+    font-size: 1.2rem;
+  }
+
+  .recipe_img{
+    object-fit: cover;
+    width: 90%;
+    height: 24rem;
+
+  }
+
+  .buttons_recipe{
+    font-size: 1.7rem;
+  }
+
+  .recipe_card_prep{
+    background-color: #C25C52;
+    width: 100%;
+  }
+
+  .icon_prep_type{
+    font-size: 1.3rem;
+  }
+
+  .text_prep_type{
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .title_ing_steps{
+    font-weight: 600;
+    font-size: 2.5rem;
+  }
+
+  .text_ing1{
+    font-weight: 500;
+    font-size: 1rem;
+    margin: 0;
+  }
+
+  .text_ing_steps{
+    font-size: 1rem;
+  }
+
+
 }
 
