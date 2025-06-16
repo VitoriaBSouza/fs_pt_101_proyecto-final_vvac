@@ -35,7 +35,7 @@ export const RecipeDetails = () => {
     const portions = store.recipe?.portions;
 
     // Fetch of the recipe by recipe_id
-    const getOneRecipe = async () => recipeServices.getOneRecipe(id).then(data => {
+    const getRecipe = async () => recipeServices.getOneRecipe(id).then(data => {
         dispatch({ type: 'get_one_recipe', payload: data });
     })   
     
@@ -111,8 +111,8 @@ export const RecipeDetails = () => {
     const stepsArray = splitSteps(store.recipe?.steps); 
 
     useEffect(() => {
-        getOneRecipe();
-    }, [id]);
+        getRecipe();
+    }, [store.user?.id]);
 
     return (
         <div className="container-fluid recipe_card_bg1" ref={printRef}>
@@ -302,9 +302,9 @@ export const RecipeDetails = () => {
                 </div>
             </div>
             <div className="row">
-                <div className="col-12 col-md-6">{/* Nutricional table */}
+                <div className="col-12 col-md-6 mb-4">{/* Nutricional table */}
 
-                    {store.user?.user_id ? <NutricionalTable /> : ""}
+                    {store.user?.id ? <NutricionalTable /> : ""}
 
                 </div>
             </div>
