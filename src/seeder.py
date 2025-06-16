@@ -1,11 +1,10 @@
+from werkzeug.security import generate_password_hash
+from random import randint, choice, uniform
+from api.models import User, Recipe, Ingredient, RecipeIngredient, Comment, Media, Collection, RecipeScore, ShoppingListItem, UserStatus, DifficultyType, MediaType
+from app import app, db
 import os
 from dotenv import load_dotenv
 load_dotenv()
-
-from app import app, db
-from api.models import User, Recipe, Ingredient, RecipeIngredient, Comment, Media, Collection, RecipeScore, ShoppingListItem, UserStatus, DifficultyType, MediaType
-from random import randint, choice, uniform
-from werkzeug.security import generate_password_hash
 
 
 with app.app_context():
@@ -25,7 +24,8 @@ with app.app_context():
     ingredient_names = [
         "Harina", "Leche", "Huevo", "Azúcar", "Sal", "Aceite", "Tomate", "Queso", "Pollo", "Cebolla"
     ]
-    allergens_list = ["gluten", "lactosa", "", "", "", "", "", "lactosa", "", ""]
+    allergens_list = ["gluten", "lactosa",
+                      "", "", "", "", "", "lactosa", "", ""]
     ingredients = [
         Ingredient(name=ingredient_names[i], allergens=allergens_list[i])
         for i in range(10)

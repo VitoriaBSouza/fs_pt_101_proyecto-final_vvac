@@ -46,7 +46,7 @@ export const LogIn = () => {
                     dispatch({ type: "logIn", payload: { token: data.token, user: data.user } });
 
                     //Will keep on home page but for users
-                    navigate("/")
+                    navigate("/profile")
                 
                 } else{
                     //we can set another page here or change to a banner
