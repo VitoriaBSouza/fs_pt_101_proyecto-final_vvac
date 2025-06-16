@@ -9,6 +9,7 @@ import {
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
 import { LogInPage } from "./pages/LogInPage";
+import { RegisterPage } from "./pages/RegisterPage";
 import { RecipeDetails } from "./pages/RecipeDetails";
 import { Profile } from "./pages/Profile";
 import { ShoppingList } from "./pages/ShoppingList";
@@ -33,7 +34,7 @@ export const router = createBrowserRouter(
         <Route path= "/" element={<Home />} />
         <Route path="/recipes/:id" element={<RecipeDetails />} />
         <Route path="/login" element={<LogInPage />} />
-        <Route path="/register" element={<LogInPage />} />
+        <Route path="/signup" element={<RegisterPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/shopping-list" element={<ShoppingList />} />
         <Route path="/your-collection" element={<CollectionFav />} />
