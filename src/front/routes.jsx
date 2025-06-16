@@ -34,7 +34,7 @@ export const router = createBrowserRouter(
         <Route path= "/" element={<Home />} />
         <Route path="/recipes/:id" element={<RecipeDetails />} />
         <Route path="/login" element={<LogInPage />} />
-        <Route path="/signup" element={<RegisterPage />} />
+        <Route path="/register" element={<LogInPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/shopping-list" element={<ShoppingList />} />
         <Route path="/your-collection" element={<CollectionFav />} />
