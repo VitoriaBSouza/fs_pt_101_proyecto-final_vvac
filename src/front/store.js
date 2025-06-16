@@ -166,6 +166,12 @@ export default function storeReducer(store, action = {}) {
       }
     }
 
+    case 'add_user':
+      return {
+        ...store,
+        user: action.payload
+      };
+
     case 'set_hello':
       return {
         ...store,
