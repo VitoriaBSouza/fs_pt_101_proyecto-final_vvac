@@ -10,6 +10,9 @@ import { useState, useEffect } from "react"
 export const Profile = () => {
     const navigate = useNavigate();
 
+    const { dispatch, store } = useGlobalReducer();
+
+
     //     // Si no estas logueado, fuera de aqui
     // const user = localStorage.getItem('user')
     // user == null || user == 'undefined' ? navigate("/") : ''
@@ -31,6 +34,7 @@ export const Profile = () => {
 
     // Preparamos cambio de email
     const [NewMail, setNewMail] = useState([])
+    const [emailSuccess, setEmailSuccess] = useState("")
 
     // Preparamos el cambio de contraseña
     const [NewPasswd, setNewPasswd] = useState([])
@@ -84,23 +88,42 @@ export const Profile = () => {
     }
 
     // Cambio de correo
+
+    const changeEmail = async (userData) => userServices.editUser(userData).then(data => {
+        dispatch({ type: 'change_email', payload: data });
+    })
+
     const handleInputChangeMail = (e) => {
         e.preventDefault();
-        const target = e.target;
-        setNewMail(target.value)
+        setNewMail(e.target.value)
+        setEmailSuccess("")
     }
 
     const handleChangeEmail = async (e) => {
-        e.preventDefault();
+        e.preventDefault()
         try {
             const userData = { "email": NewMail }
             const resultado = await userServices.editUser(userData)
-            resultado?.created_at ? window.alert("Your new e-mail is: " + resultado.email) : window.alert("An ERROR has ocurred! Please try again later.")
 
+            // despachamos al store global
+            dispatch({ type: "change_email", payload: resultado })
+
+            // mostramos mensaje
+            setEmailSuccess(`Your new e-mail is: ${resultado.email}`)
+            // opcional: limpiar input
+            setNewMail("")
         } catch (error) {
-            window.alert("Something went wrong. Please try again: " + error)
+            setEmailSuccess(`Error updating e-mail: ${error.message || error}`)
         }
     }
+
+    useEffect(() => {
+        if (store.user) {
+            localStorage.setItem("user", JSON.stringify(store.user))
+        }
+    }, [store.user])
+
+
 
     // Borrar cuenta
     const handleDeleteAccount = async (e) => {
@@ -154,7 +177,7 @@ export const Profile = () => {
 
                                         <div className="mb-3 ">
                                             <label htmlFor="username" className="form label mt-3">Username </label>
-                                            <input type="text" className="form-control" id="username" onChange={handleInputChangeUsername} placeholder="teeest" />
+                                            <input type="text" className="form-control" id="username" onChange={handleInputChangeUsername} placeholder={store.user?.username} />
                                             <p className="change-email">
                                                 {/* Link no existe aun! o sera solo un modal?? */}
                                                 <Link to="/change-email" onClick={handleChangeUsername}>CHANGE USERNAME</Link>
@@ -167,6 +190,12 @@ export const Profile = () => {
                                                 {/* Link no existe aun! o sera solo un modal?? */}
                                                 <Link to="/change-email" onClick={handleChangeEmail}>CHANGE E-MAIL</Link>
                                             </p>
+                                            {/* Mensaje de OK o error */}
+                                            {emailSuccess && (
+                                                <div className="alert alert-info mt-2">
+                                                    {emailSuccess}
+                                                </div>
+                                            )}
 
                                         </div>
                                     </form>

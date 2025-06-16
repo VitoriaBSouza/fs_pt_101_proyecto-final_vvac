@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom"
 
 export const CollectionFav = () => {
   const navigate = useNavigate()
-  const { dispatch } = useGlobalReducer()
+  const { dispatch, store } = useGlobalReducer()
 
   const [activeTab, setActiveTab] = useState("all")
 
