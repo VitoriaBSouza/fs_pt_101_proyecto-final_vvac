@@ -4,7 +4,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 export const NutricionalTable = () =>{
 
     const {store, dispatch} = useGlobalReducer();
-    const portions = store.recipe?.portions;
+    const portions = store.recipe?.portions;    
 
     // Loops through the ingredients nutricional values and stores it to return the total of each
     //If value is null or none will be 0. Otherwise, will provide a sum of the values stored.

@@ -18,8 +18,8 @@ export function StoreProvider({ children }) {
 
     const loadRecipes = async () => {
         try {
-            const resp = await recipeServices.getAllRecipes();
-           dispatch({ type: 'get_all_recipes', payload: resp })
+            const data = await recipeServices.getAllRecipes();
+           dispatch({ type: 'get_all_recipes', payload: data })
 
         } catch (error) {
             console.log(error);
