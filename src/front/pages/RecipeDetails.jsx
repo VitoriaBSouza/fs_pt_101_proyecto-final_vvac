@@ -166,7 +166,9 @@ export const RecipeDetails = () => {
                         {/* User image profile */}
                         <div className="col-12 col-md-12 col-lg-3 col-xl-2
                         g-0 my-sm-1 d-flex justify-content-center justify-content-lg-end">
-                            <img src={store.recipe?.user_photo || placeHolderImage} className="float-start user_img" alt="user_img" />
+                            <img src={store.recipe?.user_photo || placeHolderImage} 
+                            className="float-start user_img border-0" 
+                            alt="user_img" />
                         </div>
 
                         {/* Username */}
@@ -216,7 +218,7 @@ export const RecipeDetails = () => {
                     <div className="border-bottom my-2 bg-secondary"></div>
 
                     <div className="row">
-                        {store.user?.user_id ? 
+                        {store.user?.id ? 
                         <div className="col-12 text-capitalize mt-1">
                             <h5 className="mb-2">Allergens: </h5>
                             <p className="fs-5">{store.recipe?.allergens.join(", ")}</p>

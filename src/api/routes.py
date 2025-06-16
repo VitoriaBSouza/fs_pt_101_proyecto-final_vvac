@@ -845,8 +845,6 @@ def get_comments(comment_id):
     return jsonify(comment.serialize()), 200
 
 # GET all comments by recipe ID
-
-
 @api.route('/recipes/<int:recipe_id>/comments', methods=['GET'])
 def get_comment(recipe_id):
 
@@ -855,9 +853,8 @@ def get_comment(recipe_id):
     
     return jsonify([comment.serialize() for comment in comments]), 200
 
+
 # POST new comment by recipe ID
-
-
 @api.route('/user/recipes/<int:recipe_id>/comments', methods=['POST'])
 @jwt_required()
 def create_comment(recipe_id):
