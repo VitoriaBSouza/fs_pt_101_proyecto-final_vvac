@@ -24,10 +24,6 @@ import { faCalendarDays } from '@fortawesome/free-solid-svg-icons'
 import { faClock } from '@fortawesome/free-regular-svg-icons'
 import { faUtensils } from '@fortawesome/free-solid-svg-icons'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
-import { LikeButton } from '../components/buttons/likeButton.jsx';
-import { LogOut } from "../components/LogOut.jsx";
-import { ShareButton } from "../components/buttons/shareButton.jsx";
-import { NutricionalTable } from "../components/NutricionalTable.jsx";
 import collectionServices from "../services/recetea_API/collectionServices.js"
 
 export const RecipeDetails = () => {
