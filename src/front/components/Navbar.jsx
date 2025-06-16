@@ -27,7 +27,7 @@ export const Navbar = () => {
         <div className="collapse navbar-collapse justify-content-end" id="navbarButtons">
           <div className="d-flex gap-2">
             <a href="/login" className="btn btn-primary">Login</a>
-            <a href="/Register" className="btn btn-primary">Register</a>
+            <a href="/signup" className="btn btn-primary">Register</a>
           </div>
         </div>
 
