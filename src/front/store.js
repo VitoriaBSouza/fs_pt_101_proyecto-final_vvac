@@ -1,7 +1,7 @@
 
 export const initialStore=()=>{
   return{
-    user: localStorage.getItem('user')? JSON.parse(localStorage.getItem('user')) : null,
+    user: localStorage.getItem('user') == null ? JSON.parse(localStorage.getItem('user')) : null,
     recipes: [],
     recipe: null,
     collections: null,

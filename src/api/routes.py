@@ -184,14 +184,12 @@ def update_user():
     if ('username' in data):
         user.username = data["username"]
     ## (Alice) he actualizado esta funcion para evitar errores cuando no se pasa algun dato (email o password o username)
+    ## Por otro lado, sí que se puede enviar el mismo correo... LOS CORREOS SON UNICOS Y LOS USERNAMES TB (por confirmar en backend!!)...
     ## El codigo que había:
     ### user.email = data["email"]
     ### user.password = generate_password_hash(data["password"])
     ### user.username = data["username"]
     user.updated_at = datetime.now(timezone.utc)
-
-
-    
 
     db.session.commit()
     return jsonify(user.serialize()), 200

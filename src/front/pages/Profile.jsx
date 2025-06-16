@@ -10,15 +10,53 @@ import { useState, useEffect } from "react"
 export const Profile = () => {
     const navigate = useNavigate();
 
+    //     // Si no estas logueado, fuera de aqui
+    // const user = localStorage.getItem('user')
+    // user == null || user == 'undefined' ? navigate("/") : ''
+    // console.log("user al inicio es: " + JSON.stringify(user))
+
+    // // const test = JSON.parse(localStorage.getItem('user')).username
+
+    // try {
+    //     const user = await userServices.getUser()
+    //     console.log("------zzzzzz " + user)
+    // }
+    // catch {
+    //     console.log("error")
+    // }
+
+
+    // Preparamos cambio de username
+    const [NewUsername, setNewUsername] = useState([])
+
     // Preparamos cambio de email
     const [NewMail, setNewMail] = useState([])
 
     // Preparamos el cambio de contraseña
-    // valores de los inputs
     const [NewPasswd, setNewPasswd] = useState([])
     const [RepeatPasswd, setRepeatPasswd] = useState([])
 
+    // Cambio de username
+    const handleInputChangeUsername = (e) => {
+        e.preventDefault();
+        const target = e.target;
+        setNewUsername(target.value)
+    }
 
+    const handleChangeUsername = async (e) => {
+        e.preventDefault();
+        try {
+            const userData = { "username": NewUsername }
+            const resultado = await userServices.editUser(userData)
+            resultado?.created_at ? window.alert("Your new username is: " + resultado.username) : window.alert("An ERROR has ocurred! Please try again later.")
+
+        } catch (error) {
+            window.alert("Something went wrong. Please try again: " + error)
+        }
+    }
+
+
+    //Cambio de contraseña:
     const handleInputChangePass = (e) => {
         e.preventDefault();
         const target = e.target;
@@ -28,21 +66,18 @@ export const Profile = () => {
     const handleSubmitUpdatePasswd = async (e) => {
         e.preventDefault();
         try {
-            //ToDo-- ver que tiene el userData para poder cambiar SOLO el correo.
-
-            //Comprobar si la contraseña anterior es correcta <-- ToDo por falta de método de comprobacion de contraseña al usuario actual.
+            //Comprobar si la contraseña anterior es correcta <-- ToDo por falta de método de comprobacion de contraseña al usuario actual en la API.
             //Comprobar si las contraseñas son iguales --> ok
-            //Actualizar la contraseña del usuario en la bdd. --> 
+            //Actualizar la contraseña del usuario en la bdd. --> ok
 
-            // new-password.value == repeat-password.value ? console.log("cambiamos") : console.log("NOOOOO Cambiamos"
             if (NewPasswd !== RepeatPasswd) {
                 window.alert("Las contraseñas no coinciden. ")
             }
-            console.log("vamos a cambiar de esta contraseña!" + NewPasswd)
-            // const resultado = await userServices.editUser("userData")
-            const userData = { "password": "nuevoCorreo@mail.com" }
-
-
+            else {
+                const userData = { "password": NewPasswd.toString() }
+                const resultado = await userServices.editUser(userData)
+                resultado?.created_at ? window.alert("Your password has been changed.") : window.alert("An ERROR has ocurred! Please try again later.")
+            }
         } catch (error) {
             window.alert("Something went wrong. Please try again: " + error)
         }
@@ -58,19 +93,9 @@ export const Profile = () => {
     const handleChangeEmail = async (e) => {
         e.preventDefault();
         try {
-            //ToDo-- ver que tiene el userData para poder cambiar SOLO el correo.
-            // extraido de routes.py
-            //    # The update does not requiere to add all fields on the body, just what you need to change
-            //    # Sistem will not allow same email or username
-            // segun postman
-            // {   "username": "example1a",
-            //     "email": "example1@gmail.com",
-            //     "password": "123456789"
-            // }
-            const userData = {"email" : NewMail}
-            console.log("Enviaremos este nuevo correo; " + JSON.stringify(userData))
+            const userData = { "email": NewMail }
             const resultado = await userServices.editUser(userData)
-            console.log("LA respuesta del changeEmail: " + JSON.stringify(resultado))
+            resultado?.created_at ? window.alert("Your new e-mail is: " + resultado.email) : window.alert("An ERROR has ocurred! Please try again later.")
 
         } catch (error) {
             window.alert("Something went wrong. Please try again: " + error)
@@ -129,7 +154,12 @@ export const Profile = () => {
 
                                         <div className="mb-3 ">
                                             <label htmlFor="username" className="form label mt-3">Username </label>
-                                            <input type="text" className="form-control" id="username" placeholder="@the_bestcooker" />
+                                            <input type="text" className="form-control" id="username" onChange={handleInputChangeUsername} placeholder="teeest" />
+                                            <p className="change-email">
+                                                {/* Link no existe aun! o sera solo un modal?? */}
+                                                <Link to="/change-email" onClick={handleChangeUsername}>CHANGE USERNAME</Link>
+                                            </p>
+
                                             <label htmlFor="Email1" className="form-label">Email address</label>
                                             <input type="email" className="form-control" id="Email1" onChange={handleInputChangeMail} placeholder="the_bestcooker@mail.com" />
 

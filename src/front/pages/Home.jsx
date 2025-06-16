@@ -53,7 +53,7 @@ export const Home = () => {
 							key={el.id}
 							id={el.id}
 							name={el.title}
-							imageUrl={el.media[0]?.url}
+							imageUrl={el.media?.[0]?.url}
 
 						/>)
 					}
