@@ -20,7 +20,32 @@ mealPlanServices.getAllEntries = async () => {
     return data;
   } catch (error) {
     console.error("Error fetching meal plan entries:", error);
-    return error;
+    return [];
+  }
+};
+
+// ✅ NEW: Get entries structured by date and meal_type
+mealPlanServices.getStructuredEntries = async () => {
+  try {
+    const flatEntries = await mealPlanServices.getAllEntries();
+
+    const structured = {};
+
+    for (const entry of flatEntries) {
+      const { date, meal_type } = entry;
+
+      if (!structured[date]) {
+        structured[date] = {};
+      }
+
+      // Only one recipe per meal_type per date (latest one wins)
+      structured[date][meal_type] = entry;
+    }
+
+    return structured; // Example: { "2025-06-17": { breakfast: {…}, lunch: {…} } }
+  } catch (error) {
+    console.error("Error structuring meal plan entries:", error);
+    return {};
   }
 };
 
@@ -36,7 +61,7 @@ mealPlanServices.getEntriesByDate = async (date) => {
     return data;
   } catch (error) {
     console.error("Error fetching entries by date:", error);
-    return error;
+    return [];
   }
 };
 
