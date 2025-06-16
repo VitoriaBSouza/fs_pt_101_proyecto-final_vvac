@@ -6,9 +6,10 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
 //services
 import recipeServices from "../services/recetea_API/recipeServices.js"
+import collectionServices from "../services/recetea_API/collectionServices.js"
+
 
 //components
-import { LogOut } from "../components/LogOut.jsx";
 import { Comments } from "../components/Comments.jsx";
 import { NutricionalTable } from "../components/NutricionalTable.jsx";
 
@@ -24,7 +25,6 @@ import { faCalendarDays } from '@fortawesome/free-solid-svg-icons'
 import { faClock } from '@fortawesome/free-regular-svg-icons'
 import { faUtensils } from '@fortawesome/free-solid-svg-icons'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
-import collectionServices from "../services/recetea_API/collectionServices.js"
 
 export const RecipeDetails = () => {
 
@@ -116,7 +116,6 @@ export const RecipeDetails = () => {
 
     return (
         <div className="container-fluid recipe_card_bg1" ref={printRef}>
-            <LogOut />
             <div className="row recipe_card_bg2 my-4 -2 p-4 mt-4">
 
                 <div className="col-12 col-md-12 col-lg-7 col-xl-7 d-flex mt-2 my-4 justify-content-center">

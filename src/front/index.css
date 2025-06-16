@@ -1019,3 +1019,18 @@ div.scroll-container {
   height: 5rem;
 }
 
+/* From here is search button CSS  */
+
+.search_box_bg{
+  background-color: rgba(181, 181, 181, 0.836);
+}
+
+.search_input_bg{
+  background-color: rgba(193, 193, 193, 0.836);
+}
+
+.search_input_bg:focus {
+  outline: none;
+  box-shadow: none;
+  background-color: inherit;
+}
