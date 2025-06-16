@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 
 //hooks
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
@@ -52,11 +52,14 @@ export const RecipeDetails = () => {
         return (299 * r + 587 * g + 114 * b) / 1000;
     }
 
+    //will only change if we change users, otherwise will not render
+    const userBackground = useMemo(() => getRandomColor(), []);
+
     //Takes first letter from username
     const firstLetter = store.recipe?.username?.charAt(0).toUpperCase() || "R"
 
     //check bringhtness to stablish the letter color
-    const textColor = getBrightness(getRandomColor()) < 125 ? 'fff' : '000';
+    const textColor = getBrightness(userBackground) < 125 ? 'fff' : '000';
 
     //creates place holder image with random background and letter
     const placeHolderImage = `https://ui-avatars.com/api/?name=${firstLetter}&background=random&color=${textColor}`
@@ -94,25 +97,11 @@ export const RecipeDetails = () => {
             .filter(step => step.length > 0);
     };
 
-    //desde aqui (alice)
-    const handleToggleCollection = async (e) => {
-        e.preventDefault();
-        try {
-            // const data = await ;
-            const resultado = await collectionServices.ToggleCollection(id)
-            
-        } catch (error) {
-            window.alert("Something went wrong. Please try again: " + error)
-        }
-    }
-    // hasta aqui
-
-
     const stepsArray = splitSteps(store.recipe?.steps); 
 
     useEffect(() => {
         getRecipe();
-    }, [store.user?.id]);
+    }, [store.user?.id, store.recipe?.id]);
 
     return (
         <div className="container-fluid recipe_card_bg1" ref={printRef}>
