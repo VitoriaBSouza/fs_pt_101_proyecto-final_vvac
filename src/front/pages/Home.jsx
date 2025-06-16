@@ -9,6 +9,9 @@ import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 //components
 import { RecipeCard } from "../components/RecipeCard.jsx";
 import { LogIn } from "../components/LogIn.jsx";
+import { TopSection } from '../components/landingPage/TopSection.jsx';
+import { HorizontalScroll } from '../components/landingPage/HorizontalScroll.jsx';
+import { BottomSection } from '../components/landingPage/BottomSection.jsx';
 
 export const Home = () => {
 
@@ -58,6 +61,11 @@ export const Home = () => {
 					}
 				</div>
 				<LogIn />
+				<div className="font-sans">
+					<TopSection />
+					<HorizontalScroll />
+					<BottomSection />
+				</div>
 			</div>
 		</div>
 	);
