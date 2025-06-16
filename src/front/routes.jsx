@@ -8,9 +8,16 @@ import {
 } from "react-router-dom";
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
+import { LogInPage } from "./pages/LogInPage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { RecipeDetails } from "./pages/RecipeDetails";
+import { Profile } from "./pages/Profile";
+import { ShoppingList } from "./pages/ShoppingList";
+import { CollectionFav } from "./pages/CollectionFav";
+import { MealPlanner } from "./pages/MealPlanner";
 import { Single } from "./pages/Single";
 import { Demo } from "./pages/Demo";
-import { RecipeDetails } from "./pages/RecipeDetails";
+
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -26,8 +33,15 @@ export const router = createBrowserRouter(
         {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
         <Route path= "/" element={<Home />} />
         <Route path="/recipes/:id" element={<RecipeDetails />} />
+        <Route path="/login" element={<LogInPage />} />
+        <Route path="/signup" element={<RegisterPage />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/shopping-list" element={<ShoppingList />} />
+        <Route path="/your-collection" element={<CollectionFav />} />
+        <Route path="/meal-planner" element={<MealPlanner />} />
         <Route path="/single/:theId" element={ <Single />} />  {/* Dynamic route for single items */}
         <Route path="/demo" element={<Demo />} />
+        
       </Route>
     ),
     {
