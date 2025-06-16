@@ -46,7 +46,33 @@ table {
 	border-collapse: collapse;
 	border-spacing: 0;
 }
+/* From here is LogIn CSS classes */
 
+.logIn_title{
+  color: #b8212e;
+  font-size: 3.5rem;
+  text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.516);
+}
+
+.logIn_background {
+  background-color: #f3e8d98b;
+  background-image: radial-gradient(#e6394764 5px, transparent 6px);
+  background-size: 50px 50px;
+}
+
+/* From here is SignUp CSS classes */
+
+.sigUp_title{
+  color: #b8212e;
+  font-size: 3.5rem;
+  text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.516);
+}
+
+.sigUp_background {
+  background-color: #b30c1a18;
+  background-image: radial-gradient(#e0c19689 5px, transparent 6px);
+  background-size: 50px 50px;
+}
 
 /* From here is recipe details CSS classes */
 .recipe_card_bg1 {
@@ -258,8 +284,9 @@ div.scroll-container {
 
 /* CSS left sidebar profile (Alice) */
 
+
 .sidebar-left-profile {
-    flex: 0 0 240px;
+  flex: 0 0 240px;
 }
 
 .links-menu {
@@ -300,6 +327,32 @@ div.scroll-container {
 
 .links-menu .menu-link.active {
   background-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 20%;
+  background-color: #d4cbcb;
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: background-color 0.3s;
+}
+
+
+
+.back-button-container {
+ 
+  left: -1.5rem; 
+  z-index: 1000;
+}
+
+.btn-circle:hover {
+  background-color: #c55662;
 }
 
 /* CSS main profile (Alice) */
@@ -412,14 +465,12 @@ div.scroll-container {
 
 /* CSS right-column (buttons) --> (Alice) */
 .right-profile {
-        height: 700px;   
-        grid-template-columns: 1fr;
-
-        
+  height: 700px;   
+  grid-template-columns: 1fr;
 }
 
 .b-grids-right {
-    grid-gap: 20px;
+  grid-gap: 20px;
 }
 
 /* CSS shopping page (Alice) */
@@ -502,7 +553,7 @@ div.scroll-container {
   
 }
 
-/* CSS vista meal planner */
+/* CSS vista meal planner (ALICE) */
 
 .planner-page {
   flex: 1;

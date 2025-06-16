@@ -24,6 +24,7 @@ import { faCalendarDays } from '@fortawesome/free-solid-svg-icons'
 import { faClock } from '@fortawesome/free-regular-svg-icons'
 import { faUtensils } from '@fortawesome/free-solid-svg-icons'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
+import collectionServices from "../services/recetea_API/collectionServices.js"
 
 export const RecipeDetails = () => {
 
@@ -92,6 +93,20 @@ export const RecipeDetails = () => {
             .map(step => step.trim())
             .filter(step => step.length > 0);
     };
+
+    //desde aqui (alice)
+    const handleToggleCollection = async (e) => {
+        e.preventDefault();
+        try {
+            // const data = await ;
+            const resultado = await collectionServices.ToggleCollection(id)
+            
+        } catch (error) {
+            window.alert("Something went wrong. Please try again: " + error)
+        }
+    }
+    // hasta aqui
+
 
     const stepsArray = splitSteps(store.recipe?.steps); 
 

@@ -13,12 +13,12 @@ export const RecipeCard = (props) => {
     const navigate = useNavigate()
     const {store, dispatch} = useGlobalReducer();
 
-    const getOneRecipe = async () => recipeServices.getOneRecipe(props.recipe_id).then(data=>{
+    const getOneRecipe = async () => recipeServices.getOneRecipe(props.id).then(data=>{
         dispatch({type: 'get_one_recipe', payload:data});
     })
 
     const handleClick = (e) => {
-        navigate("/recipes/" + props.recipe_id)
+        navigate("/recipes/" + props.id)
         getOneRecipe()
     } 
 
@@ -29,7 +29,7 @@ export const RecipeCard = (props) => {
             onClick={handleClick}>
                 <img src={props.url} className="img-fluid w-100 card-img recipe_img" alt="recipe_img"/>
                 <div className="card-img-overlay img_bg_overlay">
-                    <h2 className="card-title">{props.title}</h2>
+                    <h2 className="card-title">{props.name}</h2>
                 </div>
             </div>
         </div>
