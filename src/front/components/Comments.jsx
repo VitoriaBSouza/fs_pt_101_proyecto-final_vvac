@@ -83,7 +83,7 @@ export const Comments = (props) => {
            {Array.isArray(store.comments) && store.comments.length > 0
             ? store.comments.map(loadComments)
             : 
-            null
+            <h5 className="m-4">Be the first to comment on this recipe!</h5>
             }
         </div>
     );
