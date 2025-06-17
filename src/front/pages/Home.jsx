@@ -9,8 +9,6 @@ import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 
 //components
 import { RecipeCard } from "../components/RecipeCard.jsx";
-import { LogIn } from "../components/LogIn.jsx";
-import { TopSection } from '../components/landingPage/TopSection.jsx';
 import { HorizontalScroll } from '../components/landingPage/HorizontalScroll.jsx';
 import { BottomSection } from '../components/landingPage/BottomSection.jsx';
 
@@ -46,11 +44,8 @@ export const Home = () => {
 
 	return (
 		<div className="container-fluid">
-			<div className="row">
-				
-				
-				<div className="font-sans">
-					<TopSection />
+			<div className="row">			
+				<div className="container-fluid">
 					<HorizontalScroll />
 					<BottomSection />
 				</div>
