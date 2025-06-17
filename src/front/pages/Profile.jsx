@@ -11,8 +11,17 @@ export const Profile = () => {
     const navigate = useNavigate();
 
     const { dispatch, store } = useGlobalReducer();
-    const [formData, setFormData] = useState(null);
-    const [repeatPasswd, setRepeatPasswd] = useState("")
+
+    // Preparamos cambio de username
+    const [NewUsername, setNewUsername] = useState("")
+
+    // Preparamos cambio de email
+    const [NewMail, setNewMail] = useState("")
+    const [emailSuccess, setEmailSuccess] = useState("")
+
+    // Preparamos el cambio de contraseña
+    const [NewPasswd, setNewPasswd] = useState("")
+    const [RepeatPasswd, setRepeatPasswd] = useState("")
 
     const handleChange = e => {
         setFormData({
@@ -24,30 +33,49 @@ export const Profile = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (formData.password !== repeatPasswd) {
-            window.alert("The password does not match")
-            //this will stop submission if does not match
-            return;
-        }
-
         try {
-            const data = await userServices.editUser(formData)
+            const userData = { "username": NewUsername }
+            const resultado = await userServices.editUser(userData)
 
-            if (data.success) {
-                dispatch({ type: "updateUser", payload: data.user, token: data.token });
-                window.alert("Your profile has been updated");
-                console.log(data);
-                
-                setFormData({
-                    username: data.user.username || "",
-                    email: data.user.email || "",
-                    password: "",
-                    photo_url: data.user.photo_url || ""
-                });
-                setRepeatPasswd("");
+            if (resultado.success) {
+
+                dispatch({ type: "updateUser", payload: { username: resultado.user.username }, token: resultado.token });
+                window.alert("Your new username is: " + resultado.user.username);
+                setNewUsername("");
 
             } else {
-                window.alert(data.error || "Something went wrong, please try again.")
+                window.alert("An ERROR has ocurred! Please try again later.");
+            }
+
+        } catch (error) {
+            window.alert("Something went wrong. Please try again: " + error)
+        }
+    }
+
+
+    //Cambio de contraseña:
+    const handleInputChangePass = (e) => {
+        const target = e.target;
+        target.name == 'NewPasswd' ? setNewPasswd(target.value) : setRepeatPasswd(target.value)
+    }
+
+    const handleSubmitUpdatePasswd = async (e) => {
+        e.preventDefault();
+        try {
+            //Comprobar si la contraseña anterior es correcta <-- ToDo por falta de método de comprobacion de contraseña al usuario actual en la API.
+            //Comprobar si las contraseñas son iguales --> ok
+            //Actualizar la contraseña del usuario en la bdd. --> ok
+
+            if (NewPasswd !== RepeatPasswd) {
+                window.alert("Las contraseñas no coinciden. ")
+            }
+            else {
+                const userData = { "password": NewPasswd.toString() }
+                const resultado = await userServices.editUser(userData)
+                resultado.success ? window.alert("Your password has been changed.") : window.alert("An ERROR has ocurred! Please try again later.")
+                
+                setNewPasswd("");
+                setRepeatPasswd("");
             }
 
         } catch (error) {
@@ -55,20 +83,29 @@ export const Profile = () => {
         }
     }
 
-    // Borrar cuenta
-    const handleDeleteAccount = async (e) => {
+    // Cambio de correo
+
+    const handleInputChangeMail = (e) => {
         e.preventDefault();
+        setNewMail(e.target.value)
+        setEmailSuccess("")
+    }
+
+    const handleChangeEmail = async (e) => {
+
+        e.preventDefault();
+
         try {
-            const resultado = await userServices.deleteUser()
-            if(resultado.success){
-                //delete from store the user and token saved
-                dispatch({ type: "logout" });
-                window.alert("You account has been deleted")
-                navigate("/")
-            }else {
-                window.alert("Failed to delete account: " + (resultado.error || "Unknown error"));
-            }
-            
+            const userData = { "email": NewMail }
+            const resultado = await userServices.editUser(userData)
+
+            // despachamos al store global
+            dispatch({ type: "updateUser", payload: { email: resultado.user.email } });
+
+            // mostramos mensaje
+            setEmailSuccess(`Your new e-mail is: ${resultado.user.email}`)
+            // opcional: limpiar input
+            setNewMail("")
         } catch (error) {
             window.alert(error || "Something went wrong. Please try again.")
         }
@@ -80,15 +117,28 @@ export const Profile = () => {
 
     useEffect(() => {
         if (store.user) {
-            setFormData({
-                username: store.user.username || "",
-                email: store.user.email || "",
-                password: "",
-                photo_url: store.user.photo_url || ""
-            });
-
+            localStorage.setItem("user", JSON.stringify(store.user))
+            localStorage.setItem("token", store.token);
         }
     }, [store.user])
+
+
+
+    // Borrar cuenta
+    const handleDeleteAccount = async (e) => {
+        e.preventDefault();
+        try {
+            const resultado = await userServices.deleteUser(store.user?.id)
+            window.alert("Resultado de la eliminación de la cuenta: " + resultado)
+            navigate("/")
+            
+        } catch (error) {
+            window.alert("Something went wrong. Please try again: " + error)
+        }
+    }
+    // hasta aqui
+
+
 
     return (
         <>

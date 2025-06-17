@@ -10,6 +10,7 @@ import logo from "../assets/img/recetea-logo.png";
 import { LogOut } from "../components/LogOut.jsx";
 import { CollectionList } from "../components/CollectionList.jsx";
 import { Search } from '../components/Search.jsx';
+import { Search } from '../components/Search.jsx';
 
 export const Navbar = () => {
 
@@ -25,52 +26,37 @@ export const Navbar = () => {
           <img src={logo} alt="Logo" className="logo-navbar" />
         </Link>
 
-        <form className="d-flex" role="search">
-          <input className="form-control me-2 r-10" type="search" placeholder="Search recipes, diets and more" aria-label="Search" />
-          <button className="btn btn-outline-primary" type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
-        </form>
+        <Search />
 
-        {/* Botón hamburguesa para colapsar en móvil */}
-        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarButtons">
-          <span className="navbar-toggler-icon"></span>
-        </button>
+        {store.token ? 
 
-        {/* Contenido colapsable */}
-        <div className="collapse navbar-collapse justify-content-end" id="navbarButtons">
-          <div className="d-flex gap-2">
-            <a href="/login" className="btn btn-primary">Login</a>
-            <a href="/signup" className="btn btn-primary">Register</a>
+          <div className="collapse navbar-collapse" id="navbarSupportedContent">
+            
+            <CollectionList />
+
+            <ul className="navbar-nav mb-lg-0">
+            
+              <li className="nav-item dropdown">
+                <img className="nav-link dropdown-toggle user_img m-2" 
+                src={store.user?.photo_url}
+                href="#" id="navbarDropdown" 
+                role="button" 
+                data-bs-toggle="dropdown" 
+                aria-expanded="false"/>
+
+                <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                  <li className="m-2"><a className="dropdown-item" href="/profile">Profile</a></li>
+                  <li className="m-2"><a className="dropdown-item" href="/your-collection">My Recipes</a></li>
+                  <li className="m-2"><a className="dropdown-item" href="/meal-planner">Meal Planner</a></li>
+                  <li className="mb-2"><hr className="dropdown-divider"/></li>
+                  <li className="mb-2"><LogOut /></li>
+                </ul>
+              </li>
+            </ul>
+
           </div>
         
-        : 
-          <div>
-            {location.pathname == "/" ? 
-            
-            <div className="d-flex">
-              <Link to="/login" className="border-end border-2">
-                <button className="btn border-0 m-2 fs-5 fw-bold">Log In</button>
-              </Link>
-              <Link to="/signup">
-                <button className="btn border-0 m-2 fs-5 fw-bold text-danger">Sign Up</button>
-              </Link>
-            </div>
-
-            : 
-              <div className="ms-auto">
-                {location.pathname == "/login" ? 
-                  <Link to="/signup">
-                    <button className="btn border-0 m-2 fs-5 fw-bold text-danger">Sign Up</button>
-                  </Link>
-                  :
-                  <Link to="/login">
-                    <button className="btn border-0 m-2 fs-5 fw-bold">Log In</button>
-                  </Link>
-                }
-                
-              </div>
-            }
-          </div>
-        }
+        : null}
 
       </div>
     </nav>

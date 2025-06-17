@@ -206,13 +206,11 @@ def update_user():
         user.password = generate_password_hash(data["password"])
     if 'username' in data:
         user.username = data["username"]
-    if 'photo_url' in data:
-        user.photo_url = data["photo_url"] or placeholder_url
     user.updated_at = datetime.now(timezone.utc)
 
     db.session.commit()
 
-    # Generate a new token so the store is updated properly and we have no errors to match token
+    # Generate str token as it's not possible to be a number
     token = create_access_token(identity=str(user.id))
 
     return jsonify({"success": True, "token": token, "user": user.serialize()}), 200
@@ -1149,6 +1147,7 @@ def get_all_collections():
 
     return jsonify([c.serialize() for c in collections]), 200
 
+# GET collection of recipes of a specific user
 # GET collection of recipes of a specific user
 @api.route('/user/collection', methods=['GET'])
 @jwt_required()
