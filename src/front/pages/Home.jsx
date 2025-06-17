@@ -6,6 +6,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 //assets
 import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 
+
 //components
 import { RecipeCard } from "../components/RecipeCard.jsx";
 import { LogIn } from "../components/LogIn.jsx";
@@ -46,22 +47,8 @@ export const Home = () => {
 	return (
 		<div className="container-fluid">
 			<div className="row">
-				<h3>This is for test as we have pending the Home page</h3>
-				<div className="scroll-container d-flex p-3">
-
-					{/* maping over RecipeCards to create cards based on the data */}
-					{
-
-						store.recipes?.map((el) => <RecipeCard
-							key={el.id}
-							id={el.id}
-							name={el.title}
-							url={el.media?.[0]?.url}
-
-						/>)
-					}
-				</div>
-				<LogIn />
+				
+				
 				<div className="font-sans">
 					<TopSection />
 					<HorizontalScroll />
