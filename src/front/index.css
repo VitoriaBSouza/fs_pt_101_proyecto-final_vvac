@@ -49,7 +49,7 @@ table {
 /* From here is LogIn CSS classes */
 
 .logIn_title{
-  color: #b8212e;
+  color: #C1454B;
   font-size: 3.5rem;
   text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.516);
 }
@@ -63,7 +63,7 @@ table {
 /* From here is SignUp CSS classes */
 
 .sigUp_title{
-  color: #b8212e;
+  color: #C1454B;
   font-size: 3.5rem;
   text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.516);
 }
@@ -110,7 +110,7 @@ table {
 
 
 .steps_bg{
-  background-color: #C25C52;
+  background-color: #C1454B;
 }
 
 .border_steps{
@@ -146,7 +146,7 @@ table {
 }
 
 .recipe_card_prep{
-  background-color: #C25C52;
+  background-color: #C1454B;
   width: 45%;
 }
 
@@ -155,7 +155,7 @@ table {
 }
 
 .color_icons{
-	color: #C25C52;
+	color: #C1454B;
 
 }
 
@@ -169,8 +169,31 @@ div.scroll-container {
 /* Here starts the recipe card css */
 /* We also used recipe_img class on the scroll galery for home page */
 
-.img_bg_overlay{
-	background-color: rgba(0, 0, 0, 0.386);
+.recipes_card_img{
+	object-fit: cover;
+  width: 700px;
+  height: 250px;
+  background-color: #C1454B;
+}
+
+.row_bg_suggestions{
+  background-color: #C1454B;
+}
+
+.recipes_cards_bg {
+  min-width: 25rem;
+  border-radius: 0.8rem;
+  border: 1px solid white;
+  overflow: hidden;
+  background-color: white;
+  padding: 0.2rem;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+}
+
+.title_suggestion_card{
+  background-color: #4a5a79a1;
+  height: 5rem;
+  border-radius: 0.4rem;
 }
 
 /* End of recipe details CSS classes */
@@ -189,7 +212,7 @@ div.scroll-container {
   position: absolute;
   bottom: -0.3125rem;     
   right: -0.3125rem;    
-  background-color: #b71c1c;
+  background-color: #C1454B;
   color: white;
   font-size: 0.75rem;    
   font-weight: bold;
@@ -263,6 +286,21 @@ div.scroll-container {
   border-color: rgba(128, 128, 128, 0.767);
 }
 
+.comment_overflow{
+  min-height: 10rem;
+  max-height: 25rem;
+}
+
+.text_box{
+  width: 100%;
+  min-height: 1rem;
+  max-height: 9rem;
+}
+
+.send_btn{
+  color: #C1454B;
+}
+
 
 /* End of share button CSS */
 
@@ -292,7 +330,7 @@ div.scroll-container {
 }
 
 .links-menu {
-  background-color: #ca3e49 ;
+  background-color: #C1454B ;
   border-radius: 8px;
   padding: 1.5rem 1rem;
   height: 100%;
@@ -354,7 +392,7 @@ div.scroll-container {
 }
 
 .btn-circle:hover {
-  background-color: #c55662;
+  background-color: #C1454B;
 }
 
 /* CSS main profile (Alice) */
@@ -456,7 +494,7 @@ div.scroll-container {
 
 .change-email a {
   font-size: 0.85rem;
-  color: #ca3e49;
+  color: #C1454B;
   text-decoration: none;
   font-weight: 500;
 }
@@ -951,7 +989,7 @@ div.scroll-container {
   }
 
   .recipe_card_prep{
-    background-color: #C25C52;
+    background-color: #C1454B;
     width: 100%;
   }
 
@@ -984,7 +1022,7 @@ div.scroll-container {
   }
 
   .recipe_card_prep{
-    background-color: #C25C52;
+    background-color: #C1454B;
     width: 100%;
   }
 
@@ -1022,6 +1060,7 @@ div.scroll-container {
 }
 
 .nav_collection_btn{
+  color: #C1454B;
   border-radius: 50%;
 	min-width: 4rem;
 	max-width: 7rem;
@@ -1046,4 +1085,3 @@ div.scroll-container {
   box-shadow: none;
   background-color: inherit;
 }
-
