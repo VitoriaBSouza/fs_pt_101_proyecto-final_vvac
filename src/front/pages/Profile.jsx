@@ -11,12 +11,7 @@ export const Profile = () => {
     const navigate = useNavigate();
 
     const { dispatch, store } = useGlobalReducer();
-    const [formData, setFormData] = useState({
-        username:"",
-        email: "",
-        password: "",
-        photo_url: ""
-    })
+    const [formData, setFormData] = useState(null);
     const [repeatPasswd, setRepeatPasswd] = useState("")
 
     const handleChange = e => {
@@ -26,11 +21,13 @@ export const Profile = () => {
         })
     }
 
-    handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (formData.password !== repeatPasswd) {
             window.alert("The password does not match")
+            //this will stop submission if does not match
+            return;
         }
 
         try {
@@ -39,7 +36,15 @@ export const Profile = () => {
             if (data.success) {
                 dispatch({ type: "updateUser", payload: data.user, token: data.token });
                 window.alert("Your profile has been updated");
-                setFormData("");
+                console.log(data);
+                
+                setFormData({
+                    username: data.user.username || "",
+                    email: data.user.email || "",
+                    password: "",
+                    photo_url: data.user.photo_url || ""
+                });
+                setRepeatPasswd("");
 
             } else {
                 window.alert(data.error || "Something went wrong, please try again.")
@@ -49,15 +54,6 @@ export const Profile = () => {
             window.alert(error)
         }
     }
-
-    useEffect(() => {
-        if (store.user) {
-            localStorage.setItem("user", JSON.stringify(store.user))
-            localStorage.setItem("token", store.token);
-        }
-    }, [store.user, store.token])
-
-
 
     // Borrar cuenta
     const handleDeleteAccount = async (e) => {
@@ -77,7 +73,22 @@ export const Profile = () => {
             window.alert(error || "Something went wrong. Please try again.")
         }
     }
+
+    console.log(store.user);
+    
     // hasta aqui
+
+    useEffect(() => {
+        if (store.user) {
+            setFormData({
+                username: store.user.username || "",
+                email: store.user.email || "",
+                password: "",
+                photo_url: store.user.photo_url || ""
+            });
+
+        }
+    }, [store.user])
 
     return (
         <>
@@ -112,44 +123,61 @@ export const Profile = () => {
 
                                         </div>
                                     </div>
-                                    <form className="text-start form-perfil w-75 mx-auto">
+                                    <form className="text-start form-perfil w-75 mx-auto" onSubmit={handleSubmit}>
 
                                         <div className="mb-3">
                                             <label htmlFor="username" className="form label my-3 fw-bold">Username</label>
-                                            <input type="text" className="form-control" id="username" onChange={handleInputChangeUsername} placeholder={store.user?.username} />
-                                            <p className="change-email text-danger fw-bold" onClick={handleChangeUsername}>
+                                            <input type="text" 
+                                            className="form-control"
+                                            name="username" 
+                                            id="username" 
+                                            onChange={handleChange}
+                                            placeholder={formData?.username || ""} />
+                                            <p className="change-email text-danger fw-bold" onClick={handleSubmit}>
                                                 CHANGE USERNAME
                                             </p>
                                         </div>
                                         <div className="mb-3">
                                             <label htmlFor="Email1" className="form-label my-3 fw-bold">Email address</label>
-                                            <input type="email" className="form-control" id="Email1" onChange={handleInputChangeMail} placeholder="the_bestcooker@mail.com" />
+                                            <input type="email" 
+                                            className="form-control"
+                                            name="email" 
+                                            id="Email1" 
+                                            onChange={handleChange}
+                                            placeholder={store.user?.email || ""} />
 
-                                            <p className="change-email text-danger fw-bold" onClick={handleChangeEmail}>
+                                            <p className="change-email text-danger fw-bold" onClick={handleSubmit}>
                                                 CHANGE E-MAIL
                                             </p>
                                             {/* Mensaje de OK o error */}
-                                            {emailSuccess && (
+                                            {store.user?.success && (
                                                 <div className="alert alert-info mt-2">
-                                                    {emailSuccess}
+                                                    "Your email has been updated."
                                                 </div>
                                             )}
                                         </div>
-                                    </form>
-                                    <form className="text-start form-perfil w-75 mx-auto" id="passwdchange">
                                         <div className="form-group mb-4">
                                             <label className="form-label my-3 fw-bold">Change password</label>
                                             {/* FALTARIA UN METODO EN LA API PARA COMPROBAR SI LA PASSW ANTIGUA COINCIDE CON LA INTRODUCIDA AQUI.... <input type="password" className="form-control" id="current-password" placeholder="*Current password" /> */}
-                                            <input type="password" name="NewPasswd" onChange={handleInputChangePass} className="form-control" id="NewPasswd" placeholder="*Type new password" />
-                                            <input type="password" name="RepeatPasswd" onChange={handleInputChangePass} className="form-control" id="RepeatPasswd" placeholder="*Repeat new password" />
+                                            <input type="password" 
+                                            name="password" 
+                                            onChange={handleChange} 
+                                            className="form-control" 
+                                            id="password" 
+                                            placeholder="*Type new password" />
+                                            <input type="password" 
+                                            name="repeatPasswd" 
+                                            onChange={e => setRepeatPasswd(e.target.value)} 
+                                            className="form-control" 
+                                            id="repeatPasswd" 
+                                            placeholder="*Repeat new password" />
                                         </div>
                                         <div className="actions-profile">
 
-                                            <button type="submit" className="btn btn-secondary" onClick={handleSubmitUpdatePasswd}>Update</button>
+                                            <button type="submit" className="btn btn-secondary">Update</button>
                                             <button type="reset" className="btn btn-danger ms-2">Cancel</button>
                                         </div>
                                     </form>
-
                                 </div>
                             </div>
 
