@@ -32,6 +32,7 @@ export function StoreProvider({ children }) {
         const user = localStorage.getItem("user");
 
         if (token && user) {
+                        
         dispatch({
             type: "logIn",
             payload: { token, user: JSON.parse(user) },

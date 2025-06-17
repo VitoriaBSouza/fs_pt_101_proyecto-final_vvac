@@ -12,33 +12,16 @@ export const Profile = () => {
 
     const { dispatch, store } = useGlobalReducer();
 
-
-    //     // Si no estas logueado, fuera de aqui
-    // const user = localStorage.getItem('user')
-    // user == null || user == 'undefined' ? navigate("/") : ''
-    // console.log("user al inicio es: " + JSON.stringify(user))
-
-    // // const test = JSON.parse(localStorage.getItem('user')).username
-
-    // try {
-    //     const user = await userServices.getUser()
-    //     console.log("------zzzzzz " + user)
-    // }
-    // catch {
-    //     console.log("error")
-    // }
-
-
     // Preparamos cambio de username
-    const [NewUsername, setNewUsername] = useState([])
+    const [NewUsername, setNewUsername] = useState("")
 
     // Preparamos cambio de email
-    const [NewMail, setNewMail] = useState([])
+    const [NewMail, setNewMail] = useState("")
     const [emailSuccess, setEmailSuccess] = useState("")
 
     // Preparamos el cambio de contraseña
-    const [NewPasswd, setNewPasswd] = useState([])
-    const [RepeatPasswd, setRepeatPasswd] = useState([])
+    const [NewPasswd, setNewPasswd] = useState("")
+    const [RepeatPasswd, setRepeatPasswd] = useState("")
 
     // Cambio de username
     const handleInputChangeUsername = (e) => {
@@ -49,10 +32,20 @@ export const Profile = () => {
 
     const handleChangeUsername = async (e) => {
         e.preventDefault();
+
         try {
             const userData = { "username": NewUsername }
             const resultado = await userServices.editUser(userData)
-            resultado?.created_at ? window.alert("Your new username is: " + resultado.username) : window.alert("An ERROR has ocurred! Please try again later.")
+
+            if (resultado.success) {
+
+                dispatch({ type: "updateUser", payload: { username: resultado.user.username }, token: resultado.token });
+                window.alert("Your new username is: " + resultado.user.username);
+                setNewUsername("");
+
+            } else {
+                window.alert("An ERROR has ocurred! Please try again later.");
+            }
 
         } catch (error) {
             window.alert("Something went wrong. Please try again: " + error)
@@ -62,7 +55,6 @@ export const Profile = () => {
 
     //Cambio de contraseña:
     const handleInputChangePass = (e) => {
-        e.preventDefault();
         const target = e.target;
         target.name == 'NewPasswd' ? setNewPasswd(target.value) : setRepeatPasswd(target.value)
     }
@@ -80,7 +72,10 @@ export const Profile = () => {
             else {
                 const userData = { "password": NewPasswd.toString() }
                 const resultado = await userServices.editUser(userData)
-                resultado?.created_at ? window.alert("Your password has been changed.") : window.alert("An ERROR has ocurred! Please try again later.")
+                resultado.success ? window.alert("Your password has been changed.") : window.alert("An ERROR has ocurred! Please try again later.")
+                
+                setNewPasswd("");
+                setRepeatPasswd("");
             }
         } catch (error) {
             window.alert("Something went wrong. Please try again: " + error)
@@ -89,10 +84,6 @@ export const Profile = () => {
 
     // Cambio de correo
 
-    const changeEmail = async (userData) => userServices.editUser(userData).then(data => {
-        dispatch({ type: 'change_email', payload: data });
-    })
-
     const handleInputChangeMail = (e) => {
         e.preventDefault();
         setNewMail(e.target.value)
@@ -100,16 +91,18 @@ export const Profile = () => {
     }
 
     const handleChangeEmail = async (e) => {
-        e.preventDefault()
+
+        e.preventDefault();
+
         try {
             const userData = { "email": NewMail }
             const resultado = await userServices.editUser(userData)
 
             // despachamos al store global
-            dispatch({ type: "change_email", payload: resultado })
+            dispatch({ type: "updateUser", payload: { email: resultado.user.email } });
 
             // mostramos mensaje
-            setEmailSuccess(`Your new e-mail is: ${resultado.email}`)
+            setEmailSuccess(`Your new e-mail is: ${resultado.user.email}`)
             // opcional: limpiar input
             setNewMail("")
         } catch (error) {
@@ -120,6 +113,7 @@ export const Profile = () => {
     useEffect(() => {
         if (store.user) {
             localStorage.setItem("user", JSON.stringify(store.user))
+            localStorage.setItem("token", store.token);
         }
     }, [store.user])
 
@@ -129,9 +123,10 @@ export const Profile = () => {
     const handleDeleteAccount = async (e) => {
         e.preventDefault();
         try {
-            const resultado = await userServices.deleteUser(test)
+            const resultado = await userServices.deleteUser(store.user?.id)
             window.alert("Resultado de la eliminación de la cuenta: " + resultado)
             navigate("/")
+            
         } catch (error) {
             window.alert("Something went wrong. Please try again: " + error)
         }
