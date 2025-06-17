@@ -152,17 +152,11 @@ export default function storeReducer(store, action = {}) {
       };
     }
 
-    case 'add_recipe': {
+    case 'update_collections': {
       return {
-      ...store,
-        collections: action.payload
+        ...store,
+        collections: action.payload || []
       };
-    }
-
-    case 'remove_recipe': {
-      return {
-        ...store, collections: action.payload
-      }
     }
 
     case 'get_all_comments': {

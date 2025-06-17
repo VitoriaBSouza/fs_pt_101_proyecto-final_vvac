@@ -53,9 +53,9 @@ export const CollectionList = () =>{
                 {/* we will only map if there is items on the list */}
             {store.collections && store.collections.length > 0 ? (
                     store.collections.map((el, i) => (
-                        <li key={el.id} className="d-flex">
+                        <li key={el.recipe_id} className="d-flex">
                             <button className="dropdown-item m-1" type="button" style={{ textTransform: 'capitalize' }}>
-                                {el}
+                                {el.recipe_title}
                             </button>
                             <button 
                                 type="button" 
