@@ -5,7 +5,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
 //icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBookOpen } from '@fortawesome/free-solid-svg-icons'
+import { faBookBookmark } from '@fortawesome/free-solid-svg-icons'
 
 export const CollectionList = () =>{
 
@@ -43,10 +43,10 @@ export const CollectionList = () =>{
     return(
         <div className="btn-group border-0 ms-3">
             <button type="button" 
-            className="btn bg-danger rounded-circle nav_collection_btn border-0" 
+            className="btn rounded-circle nav_collection_btn border-0" 
             aria-expanded="false"
             data-bs-toggle="dropdown">
-                <FontAwesomeIcon icon={faBookOpen} className="fs-4"/>
+                <FontAwesomeIcon icon={faBookBookmark} className="fs-1"/>
             </button>
             <ul className="dropdown-menu dropdown-menu-end">
                 {/* important to use condition to either show list or a span/comment with no items added */}

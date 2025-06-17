@@ -12,6 +12,7 @@ import collectionServices from "../services/recetea_API/collectionServices.js"
 //components
 import { Comments } from "../components/Comments.jsx";
 import { NutricionalTable } from "../components/NutricionalTable.jsx";
+import { RecipeCard } from "../components/RecipeCard.jsx";
 
 //buttons
 import { LikeButton } from '../components/buttons/likeButton.jsx';
@@ -100,6 +101,7 @@ export const RecipeDetails = () => {
     const stepsArray = splitSteps(store.recipe?.steps); 
 
     useEffect(() => {
+        window.scrollTo(0, 0);
         getRecipe();
     }, [store.user?.id, store.recipe?.id]);
 
@@ -301,8 +303,25 @@ export const RecipeDetails = () => {
 
             <Comments recipe_id={id} />
 
-            <div>
-                Sugerencias
+            <div className="row row_bg_suggestions">
+                <h2 className="m-4 text-light">Latest Recipes</h2>
+                <div className="col-12">
+                    <div className="scroll-container d-flex p-3">
+
+                        {/* maping over RecipeCards to create cards based on the data */}
+                        {
+
+                            store.recipes?.map((el) => <RecipeCard
+                                key={el.id}
+                                id={el.id}
+                                name={el.title}
+                                url={el.media?.[0]?.url}
+
+                            />)
+                        }
+                    </div>
+            
+                </div>
             </div>
 
         </div>
