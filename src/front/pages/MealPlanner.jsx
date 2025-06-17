@@ -7,8 +7,7 @@ import { MealPlannerCalendar } from "../components/MealPlannerCalendar";
 
 export const MealPlanner = () => {
   return (
-    <div className="main-row-all vh-100">
-      <div className="profile-container">
+ 
         <div className="container text-center sidebar-left-profile">
           <div className="row align-items-start">
             {/* Left Sidebar */}
@@ -20,7 +19,7 @@ export const MealPlanner = () => {
             </div>
 
             {/* Main Content */}
-            <div className="col-12 col-md-6 planner-page">
+            <div className="col-12 planner-page">
               <MealPlannerCalendar />
             </div>
 
@@ -30,7 +29,6 @@ export const MealPlanner = () => {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+
   );
 };

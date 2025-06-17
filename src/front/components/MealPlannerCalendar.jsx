@@ -9,8 +9,8 @@ import startOfWeek from "date-fns/startOfWeek";
 import getDay from "date-fns/getDay";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import mealPlanServices from "../services/recetea_API/mealplan";
+import "../index.css";
 
-// Configure the date-fns localizer
 const localizer = dateFnsLocalizer({
   format,
   parse,
@@ -19,10 +19,8 @@ const localizer = dateFnsLocalizer({
   locales: {},
 });
 
-// Define allowed calendar views
 const calendarViews = [Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA];
 
-// Utility function to transform meal plan entries to calendar events
 const mapEntriesToEvents = (entries) => {
   return entries.map((entry) => ({
     title: `${entry.recipe_title} (${entry.meal_type})`,
@@ -44,6 +42,8 @@ export const MealPlannerCalendar = () => {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [formData, setFormData] = useState({ recipe_id: "", meal_type: "" });
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentView, setCurrentView] = useState(Views.MONTH);
   const navigate = useNavigate();
 
   const loadMealPlanEntries = useCallback(async () => {
@@ -93,14 +93,79 @@ export const MealPlannerCalendar = () => {
     }
   };
 
+  const handleMonthChange = (e) => {
+    const newMonth = parseInt(e.target.value);
+    const updatedDate = new Date(currentDate);
+    updatedDate.setMonth(newMonth);
+    setCurrentDate(updatedDate);
+  };
+
+  const handleYearChange = (e) => {
+    const newYear = parseInt(e.target.value);
+    const updatedDate = new Date(currentDate);
+    updatedDate.setFullYear(newYear);
+    setCurrentDate(updatedDate);
+  };
+
+  const monthOptions = Array.from({ length: 12 }, (_, i) =>
+    new Date(0, i).toLocaleString("default", { month: "long" })
+  );
+
+  const yearOptions = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i);
+
   return (
-    <div className="container mt-5">
-      <div className="card shadow-sm border-0">
-        <div className="card-body">
-          <h2 className="card-title mb-4 text-center">Your Meal Plan Calendar</h2>
+    <div className="container-fluid">
+      
+        
+          <h2 className="text-center text-danger-emphasis fw-bold mb-3 display-6">Meal Plan</h2>
+
+          <div className="d-flex justify-content-center flex-wrap gap-3 mb-4">
+            <div className="dropdown">
+              <button className="btn btn-outline-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {monthOptions[currentDate.getMonth()]}
+              </button>
+              <ul className="dropdown-menu">
+                {monthOptions.map((month, index) => (
+                  <li key={index}>
+                    <button className="dropdown-item" onClick={() => handleMonthChange({ target: { value: index } })}>
+                      {month}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="dropdown">
+              <button className="btn btn-outline-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {currentDate.getFullYear()}
+              </button>
+              <ul className="dropdown-menu">
+                {yearOptions.map((year) => (
+                  <li key={year}>
+                    <button className="dropdown-item" onClick={() => handleYearChange({ target: { value: year } })}>
+                      {year}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="btn-group">
+              {calendarViews.map((view) => (
+                <button
+                  key={view}
+                  className={`btn btn-outline-danger ${currentView === view ? "active" : ""}`}
+                  onClick={() => setCurrentView(view)}
+                >
+                  {view.charAt(0).toUpperCase() + view.slice(1).toLowerCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {loading ? (
             <div className="text-center py-5">
-              <div className="spinner-border text-primary" role="status">
+              <div className="spinner-border text-danger" role="status">
                 <span className="visually-hidden">Loading...</span>
               </div>
             </div>
@@ -109,74 +174,76 @@ export const MealPlannerCalendar = () => {
               {error}
             </div>
           ) : (
-            <div className="calendar-wrapper">
+            <div className="calendar-wrapper calendar-theme">
               <Calendar
                 localizer={localizer}
                 events={events}
                 startAccessor="start"
                 endAccessor="end"
                 views={calendarViews}
+                view={currentView}
+                onView={setCurrentView}
                 defaultView={Views.MONTH}
+                date={currentDate}
+                onNavigate={setCurrentDate}
                 style={{ height: 700 }}
                 onSelectEvent={handleSelectEvent}
                 onSelectSlot={handleSelectSlot}
                 selectable
                 popup
+                toolbar={false}
               />
             </div>
           )}
-        </div>
-      </div>
+        
+      
 
-      {/* Modal for adding new entry */}
       {modalVisible && (
         <div className="modal d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Add Meal Plan Entry</h5>
+          <div className="modal-dialog modal-dialog-centered" role="document">
+            <div className="modal-content border-0 shadow-lg rounded-4">
+              <div className="modal-header bg-danger text-white">
+                <h5 className="modal-title fw-semibold">Add Meal Plan Entry</h5>
                 <button
                   type="button"
-                  className="btn-close"
+                  className="btn-close btn-close-white"
                   onClick={() => setModalVisible(false)}
                 ></button>
               </div>
-              <form onSubmit={handleModalSubmit}>
-                <div className="modal-body">
-                  <div className="mb-3">
-                    <label className="form-label">Recipe ID</label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      name="recipe_id"
-                      value={formData.recipe_id}
-                      onChange={handleModalChange}
-                      required
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Meal Type</label>
-                    <select
-                      className="form-select"
-                      name="meal_type"
-                      value={formData.meal_type}
-                      onChange={handleModalChange}
-                      required
-                    >
-                      <option value="">Select one</option>
-                      <option value="breakfast">Breakfast</option>
-                      <option value="lunch">Lunch</option>
-                      <option value="dinner">Dinner</option>
-                    </select>
-                  </div>
+              <form onSubmit={handleModalSubmit} className="needs-validation p-3">
+                <div className="mb-3">
+                  <label className="form-label fw-semibold">Recipe ID</label>
+                  <input
+                    type="number"
+                    className="form-control border-1 border-secondary shadow-sm"
+                    name="recipe_id"
+                    value={formData.recipe_id}
+                    onChange={handleModalChange}
+                    required
+                  />
                 </div>
-                <div className="modal-footer">
-                  <button type="submit" className="btn btn-primary">
+                <div className="mb-3">
+                  <label className="form-label fw-semibold">Meal Type</label>
+                  <select
+                    className="form-select border-1 border-secondary shadow-sm"
+                    name="meal_type"
+                    value={formData.meal_type}
+                    onChange={handleModalChange}
+                    required
+                  >
+                    <option value="">Select one</option>
+                    <option value="breakfast">Breakfast</option>
+                    <option value="lunch">Lunch</option>
+                    <option value="dinner">Dinner</option>
+                  </select>
+                </div>
+                <div className="modal-footer border-0 pt-3">
+                  <button type="submit" className="btn btn-danger px-4">
                     Save
                   </button>
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className="btn btn-outline-secondary px-4"
                     onClick={() => setModalVisible(false)}
                   >
                     Cancel
