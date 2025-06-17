@@ -28,7 +28,7 @@ export const Navbar = () => {
 
         <Search />
 
-        {store.token ? 
+        {store.user?.id ? 
 
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             
@@ -56,7 +56,35 @@ export const Navbar = () => {
 
           </div>
         
-        : null}
+        : 
+          <div>
+            {location.pathname == "/" ? 
+            
+            <div className="d-flex">
+              <Link to="/login" className="border-end border-2">
+                <button className="btn border-0 m-2 fs-5 fw-bold">Log In</button>
+              </Link>
+              <Link to="/signup">
+                <button className="btn border-0 m-2 fs-5 fw-bold text-danger">Sign Up</button>
+              </Link>
+            </div>
+
+            : 
+              <div className="ms-auto">
+                {location.pathname == "/login" ? 
+                  <Link to="/signup">
+                    <button className="btn border-0 m-2 fs-5 fw-bold text-danger">Sign Up</button>
+                  </Link>
+                  :
+                  <Link to="/login">
+                    <button className="btn border-0 m-2 fs-5 fw-bold">Log In</button>
+                  </Link>
+                }
+                
+              </div>
+            }
+          </div>
+        }
 
       </div>
     </nav>
