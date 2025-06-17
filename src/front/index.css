@@ -89,6 +89,8 @@ table {
 	width: 100%;
   min-height: 24rem;
 	max-height: 24rem;
+  border: none !important;
+  box-shadow: none !important;
 
 }
 

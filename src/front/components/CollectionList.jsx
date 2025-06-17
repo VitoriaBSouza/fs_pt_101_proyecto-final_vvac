@@ -3,19 +3,35 @@ import React, {useState, useEffect} from "react";
 //hooks
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
+//services
+import collectionServices from "../services/recetea_API/collectionServices.js"
+
 //icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBookOpen } from '@fortawesome/free-solid-svg-icons'
+
 
 export const CollectionList = () =>{
 
     const { store, dispatch } = useGlobalReducer();
     const [collection, setCollection] = useState([]);
 
+    const getUserCollection = async () => collectionServices.getUserCollections().then(data => {
+
+        if (!store.user?.id) return alert("Log in to save or remove recipes");
+
+        //We update the store to match the backend DB
+        dispatch({ type: 'get_user_collection', payload: data.data });
+
+        return data.data;
+        
+    })
+
     useEffect(() => {
-        // Initialize collection from the store with the new items on list or empty if none is saved
-        setCollection(store.collections || []);
-    }, [store.collections]);
+        if (store.user?.id) {
+            getUserCollection()
+        }
+    }, [store.user?.id]);
 
     const handleDelete = async (recipe_id) => {
 
@@ -31,7 +47,8 @@ export const CollectionList = () =>{
             setCollection(collectionList);
 
             //update store.collections
-            dispatch({ type: 'remove_recipe', payload: newList });
+            dispatch({ type: 'update_collections', payload: newList });
+
             console.log("Recipe was removed from collection: ", data);
             
         } else {
@@ -39,6 +56,9 @@ export const CollectionList = () =>{
         }
         
     }
+
+    console.log(store.collections);
+    
 
     return(
         <div className="btn-group border-0 ms-3">
