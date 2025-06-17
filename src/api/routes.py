@@ -56,24 +56,22 @@ def signup():
 
         # Check if user is registered
         stm = select(User).where(User.email == data["email"], User.username == data["username"])
+        stm = select(User).where(User.email == data["email"], User.username == data["username"])
         user = db.session.execute(stm).scalar_one_or_none()
 
-        if user:
-            if user.email:
-                return jsonify({"error": "This email is already registered, please log in"}), 409
+        if user.email:
+            return jsonify({"error": "This email is already registered, please log in"}), 409
 
-            if user.username:
-                return jsonify({"error": "This username is already been used, try another one."}), 409
-
-        placeholder_url = generate_placeholder(data["username"])
+        if user.username:
+            return jsonify({"error": "This username is already been used, try another one."}), 409
 
         # hash password to not show to others
         hashed_password = generate_password_hash(data["password"])
 
         new_user = User(
             username=data["username"],
-            photo_url = data.get("photo_url", placeholder_url),
-            email=data["email"].strip().lower(),
+            photo_url = data["photo_url"] or None,
+            email=data["email"],
             password=hashed_password,
             status=UserStatus.active,  # Default status
             created_at=datetime.now(timezone.utc),
@@ -154,6 +152,7 @@ def delete_user():
     user.password = generate_password_hash(f"User{user_id}NoLongerExists")
     user.status = UserStatus.deleted  # Mark as deleted status
     user.photo_url = None
+    user.photo_url = None
     user.updated_at = datetime.now(timezone.utc)
 
     # We also delete the comments and fav list.
@@ -175,10 +174,7 @@ def update_user():
     data = request.json
 
     # Check if new details are already registered
-    check_stm = select(User).where(
-        (User.id != user_id) &
-        ((User.email == data["email"]) | (User.username == data["username"]))
-    )
+    check_stm = select(User).where((User.email == data["email"]) | (User.username == data["username"])) & (User.id != user_id)
     check_user = db.session.execute(check_stm).scalar_one_or_none()
 
     # Check if user exists on DB and if there is another user with same username or email
@@ -201,16 +197,19 @@ def update_user():
    # The update does not requiere to add all fields on the body, just what you need to change
    # Sistem will not allow same email or username
     if 'email' in data:
-        user.email = data["email"].strip().lower()
+        user.email = data["email"]
     if 'password' in data:
         user.password = generate_password_hash(data["password"])
     if 'username' in data:
+    if 'username' in data:
         user.username = data["username"]
+    if 'photo_url' in data:
+        user.photo_url = data["photo_url"] or None
     user.updated_at = datetime.now(timezone.utc)
 
     db.session.commit()
 
-    # Generate str token as it's not possible to be a number
+    # Generate a new token so the store is updated properly and we have no errors to match token
     token = create_access_token(identity=str(user.id))
 
     return jsonify({"success": True, "token": token, "user": user.serialize()}), 200
