@@ -177,6 +177,11 @@ class Collection(db.Model):
         return {
             "recipe_id": self.recipe_id,
             "user_id": self.user_id,
+            "username": self.user.username,
+            "recipe_media": [media.serialize() for media in self.recipe.media],
+            "recipe_title": self.recipe.title,
+            "recipe_difficultty": self.recipe.difficulty_type.value,
+            "prep_time": self.recipe.prep_time,
         }
 
 class Ingredient(db.Model):

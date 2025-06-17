@@ -18,8 +18,8 @@ export function StoreProvider({ children }) {
 
     const loadRecipes = async () => {
         try {
-            const resp = await recipeServices.getAllRecipes();
-           dispatch({ type: 'get_all_recipes', payload: resp })
+            const data = await recipeServices.getAllRecipes();
+           dispatch({ type: 'get_all_recipes', payload: data })
 
         } catch (error) {
             console.log(error);
@@ -32,6 +32,7 @@ export function StoreProvider({ children }) {
         const user = localStorage.getItem("user");
 
         if (token && user) {
+                        
         dispatch({
             type: "logIn",
             payload: { token, user: JSON.parse(user) },
