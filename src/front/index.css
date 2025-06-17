@@ -1074,6 +1074,7 @@ div.scroll-container {
 
 .search_box_bg{
   background-color: rgba(181, 181, 181, 0.39);
+  width: 65%;
 }
 
 .search_input_bg{

@@ -34,7 +34,7 @@ export const SignUp = () => {
                 console.log(data);
                 navigate("/login")
             } else{
-                window.alert(data.message)
+                window.alert(data.error || "Could not sign up, try again.")
             }
         } catch(error){
             window.alert("An unexpected error occurred. Please try again later.")
