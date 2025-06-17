@@ -1,26 +1,76 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 
 //hooks
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
+//icons
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBookOpen } from '@fortawesome/free-solid-svg-icons'
+
 export const CollectionList = () =>{
 
     const { store, dispatch } = useGlobalReducer();
+    const [collection, setCollection] = useState([]);
+
+    useEffect(() => {
+        // Initialize collection from the store with the new items on list or empty if none is saved
+        setCollection(store.collections || []);
+    }, [store.collections]);
+
+    const handleDelete = async (recipe_id) => {
+
+        const data = await collectionServices.removeFromCollection(recipe_id);
+
+        if (data.success) {
+
+            //Fetch again updated list
+            const collectionList = await collectionServices.getUserCollections();
+
+            console.log(collectionList);
+            
+            setCollection(collectionList);
+
+            //update store.collections
+            dispatch({ type: 'remove_recipe', payload: newList });
+            console.log("Recipe was removed from collection: ", data);
+            
+        } else {
+            console.error("Error from service:", data.error);
+        }
+        
+    }
 
     return(
-        <div className="btn-group border-0">
+        <div className="btn-group border-0 ms-3">
             <button type="button" 
-            className="btn btn-secondary dropdown-toggle" 
-            data-bs-toggle="dropdown" 
-            aria-expanded="false">
-                Add icon here
+            className="btn bg-danger rounded-circle nav_collection_btn border-0" 
+            aria-expanded="false"
+            data-bs-toggle="dropdown">
+                <FontAwesomeIcon icon={faBookOpen} className="fs-4"/>
             </button>
             <ul className="dropdown-menu dropdown-menu-end">
-                {store.collections.map((collection, i) => (
-                    <li key={i} className="dropdown-item m-0 p-0 d-flex justify-content-center justify-content-lg-start">
-                        <p className="text_ing1 me-2" >{collection.recipe_id}</p>
+                {/* important to use condition to either show list or a span/comment with no items added */}
+                {/* we will only map if there is items on the list */}
+            {store.collections && store.collections.length > 0 ? (
+                    store.collections.map((el, i) => (
+                        <li key={el.id} className="d-flex">
+                            <button className="dropdown-item m-1" type="button" style={{ textTransform: 'capitalize' }}>
+                                {el}
+                            </button>
+                            <button 
+                                type="button" 
+                                className="btn-close m-2" 
+                                aria-label="Close"
+                                onClick={() => handleDelete(el)}
+                            ></button>
+                        </li>
+                    ))
+                ) : (
+                    <li>
+                        <button className="dropdown-item m-1" type="button" disabled>Your collection list is empty</button>
                     </li>
-                ))}
+                )}
+                
             </ul>
         </div>
         

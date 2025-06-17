@@ -66,11 +66,15 @@ export default function storeReducer(store, action = {}) {
         user: action.payload
       };
       
-      case 'change_email':
+      case "updateUser":
         return {
           ...store,
-          user: action.payload 
-        };
+          user: {
+            ...store.user,
+            ...action.payload.user, // Merge only the updated fields
+          },
+          token: action.payload.token || store.token
+      };
 
     case 'get_all_recipes':
       return {
@@ -167,12 +171,6 @@ export default function storeReducer(store, action = {}) {
         comments: action.payload || []
       }
     }
-
-    case 'add_user':
-      return {
-        ...store,
-        user: action.payload
-      };
 
     case 'set_hello':
       return {

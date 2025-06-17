@@ -182,16 +182,14 @@ def update_user():
         user.password = generate_password_hash(data["password"])
     if ('username' in data):
         user.username = data["username"]
-    ## (Alice) he actualizado esta funcion para evitar errores cuando no se pasa algun dato (email o password o username)
-    ## Por otro lado, sí que se puede enviar el mismo correo... LOS CORREOS SON UNICOS Y LOS USERNAMES TB (por confirmar en backend!!)...
-    ## El codigo que había:
-    ### user.email = data["email"]
-    ### user.password = generate_password_hash(data["password"])
-    ### user.username = data["username"]
     user.updated_at = datetime.now(timezone.utc)
 
     db.session.commit()
-    return jsonify(user.serialize()), 200
+
+    # Generate str token as it's not possible to be a number
+    token = create_access_token(identity=str(user.id))
+
+    return jsonify({"success": True, "token": token, "user": user.serialize()}), 200
 
 
 @api.route('/forgot-password', methods=['POST'])
@@ -1121,8 +1119,6 @@ def get_recipe_ingredients(recipe_id):
 # ========================================
 
 # GET all saved collections for all users(for test)
-
-
 @api.route('/collections', methods=['GET'])
 def get_all_collections():
 
@@ -1130,9 +1126,7 @@ def get_all_collections():
 
     return jsonify([c.serialize() for c in collections]), 200
 
-# GET collection of recipe of a specific user
-
-
+# GET collection of recipes of a specific user
 @api.route('/user/collection', methods=['GET'])
 @jwt_required()
 def get_user_collections():

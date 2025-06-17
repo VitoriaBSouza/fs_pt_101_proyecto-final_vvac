@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFilter } from '@fortawesome/free-solid-svg-icons'
 
-export const SearchButton = () =>{
+export const Search = () =>{
 
     const [searchQuery, setSearchQuery] = useState('');
     const [filter, setFilter] = useState('title'); // default filter
@@ -40,15 +40,15 @@ export const SearchButton = () =>{
                 </button>
 
                 <ul className="dropdown-menu" aria-labelledby="filterDropdown">
-                <li>
-                    <button className="dropdown-item" onClick={() => setFilter('title')}>Title</button>
-                </li>
-                <li>
-                    <button className="dropdown-item" onClick={() => setFilter('ingredients')}>Allergens</button>
-                </li>
-                <li>
-                    <button className="dropdown-item" onClick={() => setFilter('category')}>Diets</button>
-                </li>
+                    <li className="m-2">
+                        <button className="dropdown-item" onClick={() => setFilter('title')}>Title</button>
+                    </li>
+                    <li className="m-2">
+                        <button className="dropdown-item" onClick={() => setFilter('ingredients')}>Allergens</button>
+                    </li>
+                    <li className="m-2">
+                        <button className="dropdown-item" onClick={() => setFilter('category')}>Diets</button>
+                    </li>
                 </ul>
             </div>
         </form>

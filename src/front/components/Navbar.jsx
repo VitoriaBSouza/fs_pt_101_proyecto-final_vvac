@@ -9,7 +9,7 @@ import logo from "../assets/img/recetea-logo.png";
 //components
 import { LogOut } from "../components/LogOut.jsx";
 import { CollectionList } from "../components/CollectionList.jsx";
-import { SearchButton } from '../components/buttons/searchButton.jsx';
+import { Search } from '../components/Search.jsx';
 
 export const Navbar = () => {
 
@@ -24,33 +24,38 @@ export const Navbar = () => {
           <img src={logo} alt="Logo" className="logo-navbar" />
         </Link>
 
-        <div className="collapse navbar-collapse" id="navbarSupportedContent">
+        <Search />
 
-          <SearchButton />
+        {store.token ? 
 
-          <CollectionList />
+          <div className="collapse navbar-collapse" id="navbarSupportedContent">
+            
+            <CollectionList />
 
-          <ul className="navbar-nav ms-auto mb-2 mb-lg-0">
-          
-            <li className="nav-item dropdown">
-              <img className="nav-link dropdown-toggle user_img" 
-              src={store.user?.photo_url}
-              href="#" id="navbarDropdown" 
-              role="button" 
-              data-bs-toggle="dropdown" 
-              aria-expanded="false"/>
+            <ul className="navbar-nav mb-lg-0">
+            
+              <li className="nav-item dropdown">
+                <img className="nav-link dropdown-toggle user_img m-2" 
+                src={store.user?.photo_url}
+                href="#" id="navbarDropdown" 
+                role="button" 
+                data-bs-toggle="dropdown" 
+                aria-expanded="false"/>
 
-              <ul className="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li className="m-2"><a className="dropdown-item" href="/profile">Profile</a></li>
-                <li className="m-2"><a className="dropdown-item" href="/your-collection">My Recipes</a></li>
-                <li className="m-2"><a className="dropdown-item" href="/meal-planner">Meal Planner</a></li>
-                <li className="mb-2"><hr className="dropdown-divider"/></li>
-                <li className="mb-2"><LogOut /></li>
-              </ul>
-            </li>
-          </ul>
+                <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                  <li className="m-2"><a className="dropdown-item" href="/profile">Profile</a></li>
+                  <li className="m-2"><a className="dropdown-item" href="/your-collection">My Recipes</a></li>
+                  <li className="m-2"><a className="dropdown-item" href="/meal-planner">Meal Planner</a></li>
+                  <li className="mb-2"><hr className="dropdown-divider"/></li>
+                  <li className="mb-2"><LogOut /></li>
+                </ul>
+              </li>
+            </ul>
 
-        </div>
+          </div>
+        
+        : null}
+
       </div>
     </nav>
   );
