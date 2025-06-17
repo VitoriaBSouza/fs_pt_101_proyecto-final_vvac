@@ -22,13 +22,10 @@ export const CollectionButton = (props) =>{
 
         if (!store.user?.id) return alert("Log in to save or remove recipes");
 
-        //Need to map on the data list to find only the recipe_id to make easier to display later and filter
-        const addedList = data.data.map(item => item.recipe_id);
-
         //We update the store to match the backend DB
-        dispatch({ type: 'get_user_collection', payload: addedList });
+        dispatch({ type: 'get_user_collection', payload: data.data });
 
-        return addedList;
+        return data.data;
         
     })
     
@@ -36,9 +33,10 @@ export const CollectionButton = (props) =>{
 
         //update store to latest list
         const updatedCollection = await getUserCollection();
+        const exists = updatedCollection.some(item => item.recipe_id === Number(props.recipe_id));
 
         //if recpe_id is not found we will add it
-        if(!updatedCollection.includes(Number(props.recipe_id))){
+        if(!exists){
 
             //fetch POST method to add to collection table
             const data = await collectionServices.addToCollection(props.recipe_id);
@@ -49,7 +47,7 @@ export const CollectionButton = (props) =>{
                 const newList = await getUserCollection();
 
                 //update store.collections
-                dispatch({ type: 'add_recipe', payload: newList });
+                dispatch({ type: 'update_collections', payload: newList });
 
                 console.log("Recipe was added to collection");
 
@@ -63,7 +61,9 @@ export const CollectionButton = (props) =>{
 
         const updatedCollection = await getUserCollection();
 
-        if(updatedCollection.includes(Number(props.recipe_id))){
+        const exists = updatedCollection.some(item => item.recipe_id === Number(props.recipe_id));
+
+        if(exists){
             
             const data = await collectionServices.removeFromCollection(props.recipe_id);
 
@@ -73,7 +73,7 @@ export const CollectionButton = (props) =>{
                 const newList = await getUserCollection();
 
                 //update store.collections
-                dispatch({ type: 'remove_recipe', payload: newList });
+                dispatch({ type: 'update_collections', payload: newList });
 
                 console.log("Recipe was removed from collection: ", data);
                 
@@ -83,7 +83,8 @@ export const CollectionButton = (props) =>{
         }
     };
 
-    const isAdded = store.collections?.includes(Number(props.recipe_id));
+    const isAdded = store.collections?.some(item => item.recipe_id === Number(props.recipe_id));
+    console.log(isAdded);
     
     //will reload only if user logs in or out from account
     useEffect(() => {

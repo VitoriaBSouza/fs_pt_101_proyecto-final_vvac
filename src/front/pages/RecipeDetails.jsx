@@ -1,14 +1,15 @@
 import { useNavigate, useParams } from "react-router-dom";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 
 //hooks
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
 //services
 import recipeServices from "../services/recetea_API/recipeServices.js"
+import collectionServices from "../services/recetea_API/collectionServices.js"
+
 
 //components
-import { LogOut } from "../components/LogOut.jsx";
 import { Comments } from "../components/Comments.jsx";
 import { NutricionalTable } from "../components/NutricionalTable.jsx";
 
@@ -24,7 +25,6 @@ import { faCalendarDays } from '@fortawesome/free-solid-svg-icons'
 import { faClock } from '@fortawesome/free-regular-svg-icons'
 import { faUtensils } from '@fortawesome/free-solid-svg-icons'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
-import collectionServices from "../services/recetea_API/collectionServices.js"
 
 export const RecipeDetails = () => {
 
@@ -35,7 +35,7 @@ export const RecipeDetails = () => {
     const portions = store.recipe?.portions;
 
     // Fetch of the recipe by recipe_id
-    const getOneRecipe = async () => recipeServices.getOneRecipe(id).then(data => {
+    const getRecipe = async () => recipeServices.getOneRecipe(id).then(data => {
         dispatch({ type: 'get_one_recipe', payload: data });
     })   
     
@@ -52,11 +52,14 @@ export const RecipeDetails = () => {
         return (299 * r + 587 * g + 114 * b) / 1000;
     }
 
+    //will only change if we change users, otherwise will not render
+    const userBackground = useMemo(() => getRandomColor(), []);
+
     //Takes first letter from username
     const firstLetter = store.recipe?.username?.charAt(0).toUpperCase() || "R"
 
     //check bringhtness to stablish the letter color
-    const textColor = getBrightness(getRandomColor()) < 125 ? 'fff' : '000';
+    const textColor = getBrightness(userBackground) < 125 ? 'fff' : '000';
 
     //creates place holder image with random background and letter
     const placeHolderImage = `https://ui-avatars.com/api/?name=${firstLetter}&background=random&color=${textColor}`
@@ -94,29 +97,14 @@ export const RecipeDetails = () => {
             .filter(step => step.length > 0);
     };
 
-    //desde aqui (alice)
-    const handleToggleCollection = async (e) => {
-        e.preventDefault();
-        try {
-            // const data = await ;
-            const resultado = await collectionServices.ToggleCollection(id)
-            
-        } catch (error) {
-            window.alert("Something went wrong. Please try again: " + error)
-        }
-    }
-    // hasta aqui
-
-
     const stepsArray = splitSteps(store.recipe?.steps); 
 
     useEffect(() => {
-        getOneRecipe();
-    }, [id]);
+        getRecipe();
+    }, [store.user?.id, store.recipe?.id]);
 
     return (
         <div className="container-fluid recipe_card_bg1" ref={printRef}>
-            <LogOut />
             <div className="row recipe_card_bg2 my-4 -2 p-4 mt-4">
 
                 <div className="col-12 col-md-12 col-lg-7 col-xl-7 d-flex mt-2 my-4 justify-content-center">
@@ -177,7 +165,9 @@ export const RecipeDetails = () => {
                         {/* User image profile */}
                         <div className="col-12 col-md-12 col-lg-3 col-xl-2
                         g-0 my-sm-1 d-flex justify-content-center justify-content-lg-end">
-                            <img src={store.recipe?.user_photo || placeHolderImage} className="float-start user_img" alt="user_img" />
+                            <img src={store.recipe?.user_photo || placeHolderImage} 
+                            className="float-start user_img border-0" 
+                            alt="user_img" />
                         </div>
 
                         {/* Username */}
@@ -227,7 +217,7 @@ export const RecipeDetails = () => {
                     <div className="border-bottom my-2 bg-secondary"></div>
 
                     <div className="row">
-                        {store.user?.user_id ? 
+                        {store.user?.id ? 
                         <div className="col-12 text-capitalize mt-1">
                             <h5 className="mb-2">Allergens: </h5>
                             <p className="fs-5">{store.recipe?.allergens.join(", ")}</p>
@@ -302,9 +292,9 @@ export const RecipeDetails = () => {
                 </div>
             </div>
             <div className="row">
-                <div className="col-12 col-md-6">{/* Nutricional table */}
+                <div className="col-12 col-md-6 mb-4">{/* Nutricional table */}
 
-                    {store.user?.user_id ? <NutricionalTable /> : ""}
+                    {store.user?.id ? <NutricionalTable /> : ""}
 
                 </div>
             </div>

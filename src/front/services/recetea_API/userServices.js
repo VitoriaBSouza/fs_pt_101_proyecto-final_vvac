@@ -102,6 +102,7 @@ userServices.editUser = async (userData) => {
     console.log(data)
 
     //update user data locally as object, we need to use JSON.stringify()
+    localStorage.setItem("token", data.token)
     localStorage.setItem('user', JSON.stringify(data.user))
     
     return data;

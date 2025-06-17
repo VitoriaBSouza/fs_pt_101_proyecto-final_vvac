@@ -66,11 +66,15 @@ export default function storeReducer(store, action = {}) {
         user: action.payload
       };
       
-      case 'change_email':
+      case "updateUser":
         return {
           ...store,
-          user: action.payload 
-        };
+          user: {
+            ...store.user,
+            ...action.payload.user, // Merge only the updated fields
+          },
+          token: action.payload.token || store.token
+      };
 
     case 'get_all_recipes':
       return {
@@ -148,17 +152,11 @@ export default function storeReducer(store, action = {}) {
       };
     }
 
-    case 'add_recipe': {
+    case 'update_collections': {
       return {
-      ...store,
-        collections: action.payload
+        ...store,
+        collections: action.payload || []
       };
-    }
-
-    case 'remove_recipe': {
-      return {
-        ...store, collections: action.payload
-      }
     }
 
     case 'get_all_comments': {
@@ -167,12 +165,6 @@ export default function storeReducer(store, action = {}) {
         comments: action.payload || []
       }
     }
-
-    case 'add_user':
-      return {
-        ...store,
-        user: action.payload
-      };
 
     case 'set_hello':
       return {
