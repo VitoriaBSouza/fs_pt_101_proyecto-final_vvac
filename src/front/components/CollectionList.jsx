@@ -15,6 +15,7 @@ export const CollectionList = () =>{
 
     const { store, dispatch } = useGlobalReducer();
     const [collection, setCollection] = useState([]);
+    const recipe_id = store.collections?.recipe_id
 
     const getUserCollection = async () => collectionServices.getUserCollections().then(data => {
 
