@@ -44,16 +44,10 @@ export const Home = () => {
 	}, [])
 
 	return (
-		<div className="container-fluid">			
-				<div className="container-fluid">
+		<div className="container-fluid m-0 p-0 g-0">			
 					<TopSection />
-				</div>
-				<div className="container-fluid">	
 					<RecipeScroller />
-				</div>
-				<div className="container-fluid">	
 					<BottomSection />
-				</div>
 		</div>
 	);
 }; 
