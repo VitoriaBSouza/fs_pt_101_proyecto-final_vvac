@@ -47,10 +47,12 @@ userServices.login = async (formData) => {
     });
     const data = await resp.json();
 
-    if (!resp.ok) throw Error(data.error);
+    if (!resp.ok){
+      return {error: data.error || "Login failed" };
+    }
    
-    console.log(data);
     localStorage.setItem("token", data.token)
+    localStorage.setItem("user", JSON.stringify(data.user))
 
     return data;
 
@@ -98,8 +100,9 @@ userServices.editUser = async (userData) => {
 
     const data = await resp.json()
 
-    if (!resp.ok) throw Error(data.error)
-    console.log(data)
+    if (!resp.ok){
+      return {error: data.error || "Profile not updated" };
+    }
 
     //update user data locally as object, we need to use JSON.stringify()
     localStorage.setItem("token", data.token)

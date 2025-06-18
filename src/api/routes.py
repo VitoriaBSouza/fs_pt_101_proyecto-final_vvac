@@ -11,6 +11,7 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_requir
 from werkzeug.security import generate_password_hash, check_password_hash
 from api.email_utils import send_email, get_serializer
 from api.recipe_utils import convert_to_grams, get_ingredient_info, calculate_calories, calculate_carbs, calculate_fat, calculate_protein
+from api.user_utils import generate_placeholder
 import json
 
 
@@ -45,12 +46,10 @@ def get_users():
     return jsonify([user.serialize() for user in users]), 200
 
 # POST to create a new user
-
-
 @api.route('/signup', methods=['POST'])
 def signup():
     try:
-        data = request.json
+        data = request.get_json()
 
         if not data["email"] or not data["password"] or not data["username"]:
             return jsonify({"error": "Missing required information"}), 400
@@ -59,19 +58,22 @@ def signup():
         stm = select(User).where(User.email == data["email"], User.username == data["username"])
         user = db.session.execute(stm).scalar_one_or_none()
 
-        if user.email:
-            return jsonify({"error": "This email is already registered, please log in"}), 409
+        if user:
+            if user.email:
+                return jsonify({"error": "This email is already registered, please log in"}), 409
 
-        if user.username:
-            return jsonify({"error": "This username is already been used, try another one."}), 409
+            if user.username:
+                return jsonify({"error": "This username is already been used, try another one."}), 409
+
+        placeholder_url = generate_placeholder(data["username"])
 
         # hash password to not show to others
         hashed_password = generate_password_hash(data["password"])
 
         new_user = User(
             username=data["username"],
-            photo_url = data["photo_url"] or None,
-            email=data["email"],
+            photo_url=data["photo_url"] or placeholder_url,
+            email=data["email"].strip().lower(),
             password=hashed_password,
             status=UserStatus.active,  # Default status
             created_at=datetime.now(timezone.utc),
@@ -85,7 +87,6 @@ def signup():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
 
 # POST to make authentication to log in
 @api.route('/login', methods=['POST'])
@@ -102,7 +103,7 @@ def login():
         user = db.session.execute(stmt).scalar_one_or_none()
 
         if user is None:
-            return jsonify({"error": "User not found, please sign up"}), 405
+            return jsonify({"error": "User not found, please sign up"}), 404
 
         # Check if the password matches the user
         if not user or not check_password_hash(user.password, data["password"]):
@@ -163,7 +164,7 @@ def delete_user():
 
     db.session.commit()
 
-    return jsonify({"message": "You account has been successfully erased"}), 200
+    return jsonify({"message": "You account has been successfully erased", "success": True}), 200
 
 
 @api.route("/user", methods=["PUT"])
@@ -174,7 +175,10 @@ def update_user():
     data = request.json
 
     # Check if new details are already registered
-    check_stm = select(User).where((User.email == data["email"]) | (User.username == data["username"])) & (User.id != user_id)
+    check_stm = select(User).where(
+        (User.id != user_id) &
+        ((User.email == data["email"]) | (User.username == data["username"]))
+    )
     check_user = db.session.execute(check_stm).scalar_one_or_none()
 
     # Check if user exists on DB and if there is another user with same username or email
@@ -191,17 +195,19 @@ def update_user():
 
     if user is None:
         return jsonify({"error": "User not found"}), 404
+    
+    placeholder_url = generate_placeholder(data["username"])
 
    # The update does not requiere to add all fields on the body, just what you need to change
    # Sistem will not allow same email or username
     if 'email' in data:
-        user.email = data["email"]
+        user.email = data["email"].strip().lower()
     if 'password' in data:
         user.password = generate_password_hash(data["password"])
     if 'username' in data:
         user.username = data["username"]
     if 'photo_url' in data:
-        user.photo_url = data["photo_url"] or None
+        user.photo_url = data["photo_url"] or placeholder_url
     user.updated_at = datetime.now(timezone.utc)
 
     db.session.commit()

@@ -18,7 +18,7 @@ export const Search = () =>{
 
     return(
         <form onSubmit={handleSearch} 
-        className="d-flex mx-auto w-75 align-items-center position-relative 
+        className="d-flex mx-auto align-items-center position-relative 
         p-2 rounded-pill border-0 search_box_bg">
             <input 
                 className="form-control me-2 search_input_bg border-0" 
