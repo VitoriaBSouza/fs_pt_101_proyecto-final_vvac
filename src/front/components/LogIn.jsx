@@ -29,35 +29,31 @@ export const LogIn = () => {
         try {
             const data = await userServices.login(formData);
             console.log("Login response data:", data);
-            
-            // Ensure token exists before saving
-            if (data.token) { 
+
+            if (data.success){
 
                 // Store token on store
                 localStorage.setItem("token", data.token);
+                console.log(data.token);
 
                 // Store full user data on store to easy fetch
                 localStorage.setItem("user", JSON.stringify(data.user));
                 console.log(data.user);
-                
 
-                if (data.success){
-                    // Dispatch user data including token if needed
-                    dispatch({ type: "logIn", payload: { token: data.token, user: data.user } });
+                // Dispatch user data including token if needed
+                dispatch({ type: "logIn", payload: { token: data.token, user: data.user } });
 
-                    //Will keep on home page but for users
-                    navigate("/profile")
-                
-                } else{
-                    //we can set another page here or change to a banner
-                    window.alert(data.error)
-                    navigate("/login")
-                }
+                //Will keep on home page but for users
+                navigate("/profile")
+            
+            } else{
+                //we can set another page here or change to a banner
+                window.alert(data.error)
             }
 
         } catch(error){
             console.log("Login error:", error);
-            window.alert("Something went wrong. Please try again.")
+            window.alert(error)
         }
     }    
 

@@ -9,7 +9,8 @@ import startOfWeek from "date-fns/startOfWeek";
 import getDay from "date-fns/getDay";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import mealPlanServices from "../services/recetea_API/mealplan";
-import "../index.css";
+import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import "../index.css"; // ✅ Forma de importación acordada
 
 const localizer = dateFnsLocalizer({
   format,
@@ -30,8 +31,8 @@ const mapEntriesToEvents = (entries) => {
     resource: {
       id: entry.id,
       recipe_id: entry.recipe_id,
-      meal_type: entry.meal_type
-    }
+      meal_type: entry.meal_type,
+    },
   }));
 };
 
@@ -43,13 +44,14 @@ export const MealPlannerCalendar = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [formData, setFormData] = useState({ recipe_id: "", meal_type: "" });
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [currentView, setCurrentView] = useState(Views.MONTH);
+  const { store } = useGlobalReducer();
   const navigate = useNavigate();
 
   const loadMealPlanEntries = useCallback(async () => {
     try {
       const entries = await mealPlanServices.getAllEntries();
-      setEvents(mapEntriesToEvents(entries));
+      const mappedEvents = mapEntriesToEvents(entries);
+      setEvents(mappedEvents);
     } catch (err) {
       console.error("Error loading calendar data:", err);
       setError("Failed to load calendar entries.");
@@ -84,10 +86,11 @@ export const MealPlannerCalendar = () => {
         recipe_id: parseInt(formData.recipe_id),
         meal_type: formData.meal_type,
       };
+
       await mealPlanServices.addEntry(payload);
-      setModalVisible(false);
       setFormData({ recipe_id: "", meal_type: "" });
-      loadMealPlanEntries();
+      setModalVisible(false);
+      await loadMealPlanEntries();
     } catch (err) {
       alert("Error saving meal plan entry.");
     }
@@ -114,14 +117,14 @@ export const MealPlannerCalendar = () => {
   const yearOptions = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i);
 
   return (
-    <div className="container-fluid">
-      
-        
-          <h2 className="text-center text-danger-emphasis fw-bold mb-3 display-6">Meal Plan</h2>
+    <div className="container my-5">
+      <div className="card shadow border-0 bg-white rounded-4">
+        <div className="card-body px-5 py-4">
+          <h2 className="text-center text-danger-emphasis fw-bold mb-4 display-6">Meal Plan</h2>
 
-          <div className="d-flex justify-content-center flex-wrap gap-3 mb-4">
+          <div className="d-flex justify-content-center gap-3 mb-4">
             <div className="dropdown">
-              <button className="btn btn-outline-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <button className="btn btn-outline-danger dropdown-toggle" type="button" data-bs-toggle="dropdown">
                 {monthOptions[currentDate.getMonth()]}
               </button>
               <ul className="dropdown-menu">
@@ -136,7 +139,7 @@ export const MealPlannerCalendar = () => {
             </div>
 
             <div className="dropdown">
-              <button className="btn btn-outline-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <button className="btn btn-outline-danger dropdown-toggle" type="button" data-bs-toggle="dropdown">
                 {currentDate.getFullYear()}
               </button>
               <ul className="dropdown-menu">
@@ -148,18 +151,6 @@ export const MealPlannerCalendar = () => {
                   </li>
                 ))}
               </ul>
-            </div>
-
-            <div className="btn-group">
-              {calendarViews.map((view) => (
-                <button
-                  key={view}
-                  className={`btn btn-outline-danger ${currentView === view ? "active" : ""}`}
-                  onClick={() => setCurrentView(view)}
-                >
-                  {view.charAt(0).toUpperCase() + view.slice(1).toLowerCase()}
-                </button>
-              ))}
             </div>
           </div>
 
@@ -174,15 +165,13 @@ export const MealPlannerCalendar = () => {
               {error}
             </div>
           ) : (
-            <div className="calendar-wrapper calendar-theme">
+            <div className="calendar-wrapper calendar-theme p-4 rounded">
               <Calendar
                 localizer={localizer}
                 events={events}
                 startAccessor="start"
                 endAccessor="end"
                 views={calendarViews}
-                view={currentView}
-                onView={setCurrentView}
                 defaultView={Views.MONTH}
                 date={currentDate}
                 onNavigate={setCurrentDate}
@@ -191,12 +180,12 @@ export const MealPlannerCalendar = () => {
                 onSelectSlot={handleSelectSlot}
                 selectable
                 popup
-                toolbar={false}
+                toolbar={true}
               />
             </div>
           )}
-        
-      
+        </div>
+      </div>
 
       {modalVisible && (
         <div className="modal d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
@@ -204,23 +193,26 @@ export const MealPlannerCalendar = () => {
             <div className="modal-content border-0 shadow-lg rounded-4">
               <div className="modal-header bg-danger text-white">
                 <h5 className="modal-title fw-semibold">Add Meal Plan Entry</h5>
-                <button
-                  type="button"
-                  className="btn-close btn-close-white"
-                  onClick={() => setModalVisible(false)}
-                ></button>
+                <button type="button" className="btn-close btn-close-white" onClick={() => setModalVisible(false)}></button>
               </div>
               <form onSubmit={handleModalSubmit} className="needs-validation p-3">
                 <div className="mb-3">
-                  <label className="form-label fw-semibold">Recipe ID</label>
-                  <input
-                    type="number"
-                    className="form-control border-1 border-secondary shadow-sm"
+                  <label className="form-label fw-semibold">Recipe</label>
+                  <select
+                    className="form-select border-1 border-secondary shadow-sm"
                     name="recipe_id"
                     value={formData.recipe_id}
                     onChange={handleModalChange}
                     required
-                  />
+                  >
+                    <option value="">Select a recipe</option>
+                    {store.collections &&
+                      store.collections.map((recipe) => (
+                        <option key={recipe.recipe_id} value={recipe.recipe_id}>
+                          {recipe.recipe_title}
+                        </option>
+                      ))}
+                  </select>
                 </div>
                 <div className="mb-3">
                   <label className="form-label fw-semibold">Meal Type</label>
@@ -241,11 +233,7 @@ export const MealPlannerCalendar = () => {
                   <button type="submit" className="btn btn-danger px-4">
                     Save
                   </button>
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary px-4"
-                    onClick={() => setModalVisible(false)}
-                  >
+                  <button type="button" className="btn btn-outline-secondary px-4" onClick={() => setModalVisible(false)}>
                     Cancel
                   </button>
                 </div>

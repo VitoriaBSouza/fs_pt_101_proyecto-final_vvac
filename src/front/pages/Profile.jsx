@@ -11,129 +11,84 @@ export const Profile = () => {
     const navigate = useNavigate();
 
     const { dispatch, store } = useGlobalReducer();
+    const [formData, setFormData] = useState(null);
+    const [repeatPasswd, setRepeatPasswd] = useState("")
 
-    // Preparamos cambio de username
-    const [NewUsername, setNewUsername] = useState("")
-
-    // Preparamos cambio de email
-    const [NewMail, setNewMail] = useState("")
-    const [emailSuccess, setEmailSuccess] = useState("")
-
-    // Preparamos el cambio de contraseña
-    const [NewPasswd, setNewPasswd] = useState("")
-    const [RepeatPasswd, setRepeatPasswd] = useState("")
-
-    // Cambio de username
-    const handleInputChangeUsername = (e) => {
-        e.preventDefault();
-        const target = e.target;
-        setNewUsername(target.value)
+    const handleChange = e => {
+        setFormData({
+            ...formData, 
+            [e.target.name]: e.target.value
+        })
     }
 
-    const handleChangeUsername = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (formData.password !== repeatPasswd) {
+            window.alert("The password does not match")
+            //this will stop submission if does not match
+            return;
+        }
+
         try {
-            const userData = { "username": NewUsername }
-            const resultado = await userServices.editUser(userData)
+            const data = await userServices.editUser(formData)
 
-            if (resultado.success) {
-
-                dispatch({ type: "updateUser", payload: { username: resultado.user.username }, token: resultado.token });
-                window.alert("Your new username is: " + resultado.user.username);
-                setNewUsername("");
+            if (data.success) {
+                dispatch({ type: "updateUser", payload: data.user, token: data.token });
+                window.alert("Your profile has been updated");
+                console.log(data);
+                
+                setFormData({
+                    username: data.user.username || "",
+                    email: data.user.email || "",
+                    password: "",
+                    photo_url: data.user.photo_url || ""
+                });
+                setRepeatPasswd("");
 
             } else {
-                window.alert("An ERROR has ocurred! Please try again later.");
+                window.alert(data.error || "Something went wrong, please try again.")
             }
 
         } catch (error) {
-            window.alert("Something went wrong. Please try again: " + error)
+            window.alert(error)
         }
     }
-
-
-    //Cambio de contraseña:
-    const handleInputChangePass = (e) => {
-        const target = e.target;
-        target.name == 'NewPasswd' ? setNewPasswd(target.value) : setRepeatPasswd(target.value)
-    }
-
-    const handleSubmitUpdatePasswd = async (e) => {
-        e.preventDefault();
-        try {
-            //Comprobar si la contraseña anterior es correcta <-- ToDo por falta de método de comprobacion de contraseña al usuario actual en la API.
-            //Comprobar si las contraseñas son iguales --> ok
-            //Actualizar la contraseña del usuario en la bdd. --> ok
-
-            if (NewPasswd !== RepeatPasswd) {
-                window.alert("Las contraseñas no coinciden. ")
-            }
-            else {
-                const userData = { "password": NewPasswd.toString() }
-                const resultado = await userServices.editUser(userData)
-                resultado.success ? window.alert("Your password has been changed.") : window.alert("An ERROR has ocurred! Please try again later.")
-                
-                setNewPasswd("");
-                setRepeatPasswd("");
-            }
-        } catch (error) {
-            window.alert("Something went wrong. Please try again: " + error)
-        }
-    }
-
-    // Cambio de correo
-
-    const handleInputChangeMail = (e) => {
-        e.preventDefault();
-        setNewMail(e.target.value)
-        setEmailSuccess("")
-    }
-
-    const handleChangeEmail = async (e) => {
-
-        e.preventDefault();
-
-        try {
-            const userData = { "email": NewMail }
-            const resultado = await userServices.editUser(userData)
-
-            // despachamos al store global
-            dispatch({ type: "updateUser", payload: { email: resultado.user.email } });
-
-            // mostramos mensaje
-            setEmailSuccess(`Your new e-mail is: ${resultado.user.email}`)
-            // opcional: limpiar input
-            setNewMail("")
-        } catch (error) {
-            setEmailSuccess(`Error updating e-mail: ${error.message || error}`)
-        }
-    }
-
-    useEffect(() => {
-        if (store.user) {
-            localStorage.setItem("user", JSON.stringify(store.user))
-            localStorage.setItem("token", store.token);
-        }
-    }, [store.user])
-
-
 
     // Borrar cuenta
     const handleDeleteAccount = async (e) => {
         e.preventDefault();
         try {
-            const resultado = await userServices.deleteUser(store.user?.id)
-            window.alert("Resultado de la eliminación de la cuenta: " + resultado)
-            navigate("/")
+            const resultado = await userServices.deleteUser()
+            if(resultado.success){
+                //delete from store the user and token saved
+                dispatch({ type: "logout" });
+                window.alert("You account has been deleted")
+                navigate("/")
+            }else {
+                window.alert("Failed to delete account: " + (resultado.error || "Unknown error"));
+            }
             
         } catch (error) {
-            window.alert("Something went wrong. Please try again: " + error)
+            window.alert(error || "Something went wrong. Please try again.")
         }
     }
+
+    console.log(store.user);
+    
     // hasta aqui
 
+    useEffect(() => {
+        if (store.user) {
+            setFormData({
+                username: store.user.username || "",
+                email: store.user.email || "",
+                password: "",
+                photo_url: store.user.photo_url || ""
+            });
 
+        }
+    }, [store.user])
 
     return (
         <>
@@ -157,57 +112,72 @@ export const Profile = () => {
 
                                 <div className="d-flex align-items-start flex-column mb-3 edit-perfil">
 
-                                    {/* Pendiente hook para cambiar imagen de perfil!!!*/}
-                                    <div className="change-picture" data-mdb-ripple-color="light">
+                                    {/* Pendiente function para cambiar imagen de perfil!!!*/}
+                                    <div className="change-picture mx-auto" data-mdb-ripple-color="light">
                                         <img src="https://thispersondoesnotexist.com/" alt="Your profile pic" className="rounded-circle pic-perfil" />
 
                                         <div className="mask-change-pic">
 
                                             <h4><i className="fa-solid fa-camera"></i></h4>
-                                            <p className="text-change">Change</p>
+                                            <p className="text-change">Edit</p>
 
                                         </div>
                                     </div>
-                                    <form className="text-start form-perfil w-75">
+                                    <form className="text-start form-perfil w-75 mx-auto" onSubmit={handleSubmit}>
 
-                                        <div className="mb-3 ">
-                                            <label htmlFor="username" className="form label mt-3">Username </label>
-                                            <input type="text" className="form-control" id="username" onChange={handleInputChangeUsername} placeholder={store.user?.username} />
-                                            <p className="change-email">
-                                                {/* Link no existe aun! o sera solo un modal?? */}
-                                                <Link to="/change-email" onClick={handleChangeUsername}>CHANGE USERNAME</Link>
+                                        <div className="mb-3">
+                                            <label htmlFor="username" className="form label my-3 fw-bold">Username</label>
+                                            <input type="text" 
+                                            className="form-control"
+                                            name="username" 
+                                            id="username" 
+                                            onChange={handleChange}
+                                            placeholder={formData?.username || ""} />
+                                            <p className="change-email text-danger fw-bold" onClick={handleSubmit}>
+                                                CHANGE USERNAME
                                             </p>
+                                        </div>
+                                        <div className="mb-3">
+                                            <label htmlFor="Email1" className="form-label my-3 fw-bold">Email address</label>
+                                            <input type="email" 
+                                            className="form-control"
+                                            name="email" 
+                                            id="Email1" 
+                                            onChange={handleChange}
+                                            placeholder={store.user?.email || ""} />
 
-                                            <label htmlFor="Email1" className="form-label">Email address</label>
-                                            <input type="email" className="form-control" id="Email1" onChange={handleInputChangeMail} placeholder="the_bestcooker@mail.com" />
-
-                                            <p className="change-email">
-                                                {/* Link no existe aun! o sera solo un modal?? */}
-                                                <Link to="/change-email" onClick={handleChangeEmail}>CHANGE E-MAIL</Link>
+                                            <p className="change-email text-danger fw-bold" onClick={handleSubmit}>
+                                                CHANGE E-MAIL
                                             </p>
                                             {/* Mensaje de OK o error */}
-                                            {emailSuccess && (
+                                            {store.user?.success && (
                                                 <div className="alert alert-info mt-2">
-                                                    {emailSuccess}
+                                                    "Your email has been updated."
                                                 </div>
                                             )}
-
                                         </div>
-                                    </form>
-                                    <form className="text-start form-perfil w-75" id="passwdchange">
-                                        <div className="form-group mb-3">
-                                            <label className="form-label">Change password</label>
+                                        <div className="form-group mb-4">
+                                            <label className="form-label my-3 fw-bold">Change password</label>
                                             {/* FALTARIA UN METODO EN LA API PARA COMPROBAR SI LA PASSW ANTIGUA COINCIDE CON LA INTRODUCIDA AQUI.... <input type="password" className="form-control" id="current-password" placeholder="*Current password" /> */}
-                                            <input type="password" name="NewPasswd" onChange={handleInputChangePass} className="form-control" id="NewPasswd" placeholder="*Type new password" />
-                                            <input type="password" name="RepeatPasswd" onChange={handleInputChangePass} className="form-control" id="RepeatPasswd" placeholder="*Repeat new password" />
+                                            <input type="password" 
+                                            name="password" 
+                                            onChange={handleChange} 
+                                            className="form-control" 
+                                            id="password" 
+                                            placeholder="*Type new password" />
+                                            <input type="password" 
+                                            name="repeatPasswd" 
+                                            onChange={e => setRepeatPasswd(e.target.value)} 
+                                            className="form-control" 
+                                            id="repeatPasswd" 
+                                            placeholder="*Repeat new password" />
                                         </div>
                                         <div className="actions-profile">
 
-                                            <button type="submit" className="btn btn-secondary" onClick={handleSubmitUpdatePasswd}>Update</button>
+                                            <button type="submit" className="btn btn-secondary">Update</button>
                                             <button type="reset" className="btn btn-danger ms-2">Cancel</button>
                                         </div>
                                     </form>
-
                                 </div>
                             </div>
 

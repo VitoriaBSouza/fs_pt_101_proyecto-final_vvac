@@ -19,17 +19,18 @@ export const RecipeCard = (props) => {
 
     const handleClick = (e) => {
         navigate("/recipes/" + props.id)
+        window.history.scrollRestoration = 'manual'
         getOneRecipe()
-    } 
+    }
 
     return(
-        <div className="col-12 col-sm-6 col-md-5 col-lg-4 w-50">
-            <div 
-            className="card bg-dark text-white mx-2" 
-            onClick={handleClick}>
-                <img src={props.url} className="img-fluid w-100 card-img recipe_img" alt="recipe_img"/>
-                <div className="card-img-overlay img_bg_overlay">
-                    <h2 className="card-title">{props.name}</h2>
+        <div className="m-2 recipes_cards_bg border" onClick={handleClick}>
+            <div className="card row_bg_suggestions text-white p-3 border-0 position-relative overflow-hidden">
+                <img src={props.url} className="img-fluid card-img recipes_card_img border-0" alt="recipe_img"/>
+                <div className="card-img-overlay p-0 d-flex align-items-end">
+                    <div className="w-100 bg-opacity-50 text-center title_suggestion_card m-3">
+                        <p className="card-title text-light fs-3 p-3">{props.name}</p>
+                    </div>
                 </div>
             </div>
         </div>
