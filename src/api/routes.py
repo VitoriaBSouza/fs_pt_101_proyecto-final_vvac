@@ -56,6 +56,7 @@ def signup():
 
         # Check if user is registered
         stm = select(User).where(User.email == data["email"], User.username == data["username"])
+        stm = select(User).where(User.email == data["email"], User.username == data["username"])
         user = db.session.execute(stm).scalar_one_or_none()
 
         if user:
@@ -72,7 +73,7 @@ def signup():
 
         new_user = User(
             username=data["username"],
-            photo_url = data.get("photo_url", placeholder_url),
+            photo_url=data["photo_url"] or placeholder_url,
             email=data["email"].strip().lower(),
             password=hashed_password,
             status=UserStatus.active,  # Default status
@@ -154,6 +155,7 @@ def delete_user():
     user.password = generate_password_hash(f"User{user_id}NoLongerExists")
     user.status = UserStatus.deleted  # Mark as deleted status
     user.photo_url = None
+    user.photo_url = None
     user.updated_at = datetime.now(timezone.utc)
 
     # We also delete the comments and fav list.
@@ -204,6 +206,7 @@ def update_user():
         user.email = data["email"].strip().lower()
     if 'password' in data:
         user.password = generate_password_hash(data["password"])
+    if 'username' in data:
     if 'username' in data:
         user.username = data["username"]
     if 'photo_url' in data:
@@ -1149,6 +1152,7 @@ def get_all_collections():
 
     return jsonify([c.serialize() for c in collections]), 200
 
+# GET collection of recipes of a specific user
 # GET collection of recipes of a specific user
 @api.route('/user/collection', methods=['GET'])
 @jwt_required()

@@ -19,6 +19,11 @@ export const Profile = () => {
             ...formData, 
             [e.target.name]: e.target.value
         })
+    const handleChange = e => {
+        setFormData({
+            ...formData, 
+            [e.target.name]: e.target.value
+        })
     }
 
     const handleSubmit = async (e) => {
@@ -114,11 +119,14 @@ export const Profile = () => {
 
                                     {/* Pendiente function para cambiar imagen de perfil!!!*/}
                                     <div className="change-picture mx-auto" data-mdb-ripple-color="light">
+                                    {/* Pendiente function para cambiar imagen de perfil!!!*/}
+                                    <div className="change-picture mx-auto" data-mdb-ripple-color="light">
                                         <img src="https://thispersondoesnotexist.com/" alt="Your profile pic" className="rounded-circle pic-perfil" />
 
                                         <div className="mask-change-pic">
 
                                             <h4><i className="fa-solid fa-camera"></i></h4>
+                                            <p className="text-change">Edit</p>
                                             <p className="text-change">Edit</p>
 
                                         </div>
@@ -151,7 +159,9 @@ export const Profile = () => {
                                             </p>
                                             {/* Mensaje de OK o error */}
                                             {store.user?.success && (
+                                            {store.user?.success && (
                                                 <div className="alert alert-info mt-2">
+                                                    "Your email has been updated."
                                                     "Your email has been updated."
                                                 </div>
                                             )}
@@ -171,10 +181,22 @@ export const Profile = () => {
                                             className="form-control" 
                                             id="repeatPasswd" 
                                             placeholder="*Repeat new password" />
+                                            <input type="password" 
+                                            name="password" 
+                                            onChange={handleChange} 
+                                            className="form-control" 
+                                            id="password" 
+                                            placeholder="*Type new password" />
+                                            <input type="password" 
+                                            name="repeatPasswd" 
+                                            onChange={e => setRepeatPasswd(e.target.value)} 
+                                            className="form-control" 
+                                            id="repeatPasswd" 
+                                            placeholder="*Repeat new password" />
                                         </div>
                                         <div className="actions-profile">
 
-                                            <button type="submit" className="btn btn-secondary">Update</button>
+                                            <button type="submit" className="btn btn-secondary" onClick={handleSubmitUpdatePasswd}>Change password</button>
                                             <button type="reset" className="btn btn-danger ms-2">Cancel</button>
                                         </div>
                                     </form>
@@ -215,6 +237,7 @@ export const Profile = () => {
                                 onClick={() => { document.activeElement?.blur(); }}></button>
                         </div>
                         <div className="modal-body">
+                            <p className="">You are going to delete this account once erased cannot be retrieved.</p>
                             <button type="button" className="btn btn-danger p-0" data-bs-dismiss="modal" aria-label="Delete&Close" onClick={handleDeleteAccount}>YES</button>
                             <button type="button" className="btn btn-secondary p-0 ms-3" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
                         </div>

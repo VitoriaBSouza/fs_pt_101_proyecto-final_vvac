@@ -19,7 +19,7 @@ time, mark, audio, video {
 	margin: 0;
 	padding: 0;
 	border: 0;
-	font-size: 80%;
+	font-size: 100%;
 	font: inherit;
 	vertical-align: baseline;
 }
@@ -50,6 +50,7 @@ table {
 
 .logIn_title{
   color: #C1454B;
+  color: #C1454B;
   font-size: 3.5rem;
   text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.516);
 }
@@ -63,7 +64,7 @@ table {
 /* From here is SignUp CSS classes */
 
 .sigUp_title{
-  color: #C1454B;
+  color: #b8212e;
   font-size: 3.5rem;
   text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.516);
 }
@@ -111,6 +112,7 @@ table {
 
 .steps_bg{
   background-color: #C1454B;
+  background-color: #C1454B;
 }
 
 .border_steps{
@@ -147,6 +149,7 @@ table {
 
 .recipe_card_prep{
   background-color: #C1454B;
+  background-color: #C1454B;
   width: 45%;
 }
 
@@ -155,6 +158,7 @@ table {
 }
 
 .color_icons{
+	color: #C1454B;
 	color: #C1454B;
 
 }
@@ -169,6 +173,31 @@ div.scroll-container {
 /* Here starts the recipe card css */
 /* We also used recipe_img class on the scroll galery for home page */
 
+.recipes_card_img{
+	object-fit: cover;
+  width: 700px;
+  height: 250px;
+  background-color: #C1454B;
+}
+
+.row_bg_suggestions{
+  background-color: #C1454B;
+}
+
+.recipes_cards_bg {
+  min-width: 25rem;
+  border-radius: 0.8rem;
+  border: 1px solid white;
+  overflow: hidden;
+  background-color: white;
+  padding: 0.2rem;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+}
+
+.title_suggestion_card{
+  background-color: #4a5a79a1;
+  height: 5rem;
+  border-radius: 0.4rem;
 .recipes_card_img{
 	object-fit: cover;
   width: 700px;
@@ -212,6 +241,7 @@ div.scroll-container {
   position: absolute;
   bottom: -0.3125rem;     
   right: -0.3125rem;    
+  background-color: #C1454B;
   background-color: #C1454B;
   color: white;
   font-size: 0.75rem;    
@@ -301,6 +331,21 @@ div.scroll-container {
   color: #C1454B;
 }
 
+.comment_overflow{
+  min-height: 10rem;
+  max-height: 25rem;
+}
+
+.text_box{
+  width: 100%;
+  min-height: 1rem;
+  max-height: 9rem;
+}
+
+.send_btn{
+  color: #C1454B;
+}
+
 
 /* End of share button CSS */
 
@@ -330,6 +375,7 @@ div.scroll-container {
 }
 
 .links-menu {
+  background-color: #C1454B ;
   background-color: #C1454B ;
   border-radius: 8px;
   padding: 1.5rem 1rem;
@@ -392,6 +438,7 @@ div.scroll-container {
 }
 
 .btn-circle:hover {
+  background-color: #C1454B;
   background-color: #C1454B;
 }
 
@@ -494,6 +541,7 @@ div.scroll-container {
 
 .change-email a {
   font-size: 0.85rem;
+  color: #C1454B;
   color: #C1454B;
   text-decoration: none;
   font-weight: 500;
@@ -989,7 +1037,7 @@ div.scroll-container {
   }
 
   .recipe_card_prep{
-    background-color: #C1454B;
+    background-color: #C25C52;
     width: 100%;
   }
 
@@ -1022,7 +1070,7 @@ div.scroll-container {
   }
 
   .recipe_card_prep{
-    background-color: #C1454B;
+    background-color: #C25C52;
     width: 100%;
   }
 
