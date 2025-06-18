@@ -46,8 +46,7 @@ export const Comments = (props) => {
         //check bringhtness to stablish the letter color
         const textColor = brightness < 125 ? 'fff' : '000';
 
-        const firstLetter = comment.username?.charAt(0).toUpperCase() || "R";
-        const placeHolderImage = `https://ui-avatars.com/api/?name=${firstLetter}&background=${randomColor}&color=${textColor}`;
+        
 
         return (
             <div className="row mb-4 ms-4 p-4" key={comment.id}>

@@ -28,11 +28,14 @@ export const CollectionList = () =>{
         
     })
 
+    console.log(store.collections?.recipe_id);
+    
+
     useEffect(() => {
         if (store.user?.id) {
             getUserCollection()
         }
-    }, [store.user?.id]);
+    }, [store.user?.id, store.collections]);
 
     const handleDelete = async (recipe_id) => {
 
