@@ -196,11 +196,7 @@ export const Profile = () => {
                                         </div>
                                         <div className="actions-profile">
 
-<<<<<<< HEAD
-                                            <button type="submit" className="btn btn-secondary">Update</button>
-=======
                                             <button type="submit" className="btn btn-secondary" onClick={handleSubmitUpdatePasswd}>Change password</button>
->>>>>>> af8661d (retoques)
                                             <button type="reset" className="btn btn-danger ms-2">Cancel</button>
                                         </div>
                                     </form>
