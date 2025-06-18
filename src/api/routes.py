@@ -72,7 +72,7 @@ def signup():
 
         new_user = User(
             username=data["username"],
-            photo_url=data["photo_url"] or placeholder_url,
+            photo_url = data.get("photo_url", placeholder_url),
             email=data["email"].strip().lower(),
             password=hashed_password,
             status=UserStatus.active,  # Default status
