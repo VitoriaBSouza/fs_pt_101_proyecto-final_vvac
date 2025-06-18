@@ -102,8 +102,7 @@ export const CollectionButton = (props) =>{
 
     return(
         <div>
-            {
-            store.user?.id ?
+            {store.user?.id ?
 
                 <button type="button" 
                 className="btn border-0"

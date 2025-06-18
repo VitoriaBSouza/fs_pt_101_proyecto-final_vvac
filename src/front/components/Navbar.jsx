@@ -10,7 +10,6 @@ import logo from "../assets/img/recetea-logo.png";
 import { LogOut } from "../components/LogOut.jsx";
 import { CollectionList } from "../components/CollectionList.jsx";
 import { Search } from '../components/Search.jsx';
-import { Search } from '../components/Search.jsx';
 
 export const Navbar = () => {
 

@@ -39,7 +39,7 @@ export const CollectionFav = () => {
 
     const fetchCollectionsRaw = async () => {
       const data = await collectionServices.getUserCollections()
-      const formatted = (Array.isArray(data.data) ? data.data : data || []).map(item => ({
+      const formatted = (Array.isArray(data) ? data : data.collection || []).map(item => ({
         id: item.recipe_id,               // aquí recipe_id
         userId: item.user_id,
       }))
@@ -112,7 +112,7 @@ export const CollectionFav = () => {
             key={recipe.id}
             id={recipe.id}
             name={recipe.title}
-            url={recipe.media?.[0]?.url || ""}
+            imageUrl={recipe.media?.[0]?.url || ""}
             nutriScore={recipe.nutriScore}
             isSaved={false}
             onClick={() => console.log("Detalle", recipe.id)}
@@ -136,7 +136,7 @@ export const CollectionFav = () => {
             key={r.id}
             id={r.id}
             name={r.name}
-            url={r.imageUrl}
+            imageUrl={r.imageUrl}
             nutriScore={r.nutriScore}
             isSaved={false}
             onClick={() => console.log("Detalle usuario", r.id)}
@@ -159,7 +159,7 @@ export const CollectionFav = () => {
             key={c.id}
             id={c.id}
             name={c.title}
-            url={c.media?.[0]?.url || ""}
+            imageUrl={c.media?.[0]?.url || ""}
             nutriScore={c.nutriScore}
             isSaved={true}
             onClick={() => console.log("Colección detalle", c.id)}

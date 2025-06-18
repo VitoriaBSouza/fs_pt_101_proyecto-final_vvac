@@ -13,9 +13,6 @@ export const ShoppingList = () => {
     
     const {store, dispatch} = useGlobalReducer();
 
-    // const [newIngredient, setNewIngredient]
-
-    //función para remover ingrediente y resetear la lista: 
     const removeIngredient = (idx) => {
         dispatch({type:'remove_ingredient', payload: idx })
     }
