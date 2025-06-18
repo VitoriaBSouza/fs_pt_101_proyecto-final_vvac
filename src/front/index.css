@@ -1090,6 +1090,7 @@ div.scroll-container {
 /*recipescroll in landingPage*/
 
 .recipe-scroller-container {
+  max-width: 100%;
   padding: 1rem;
   background-color: #B47E58;
 }
@@ -1098,7 +1099,6 @@ div.scroll-container {
   margin-bottom: 1rem;
   font-size: 3rem;
   color: white;
-  font
 }
 
 .scroller {
@@ -1149,5 +1149,4 @@ div.scroll-container {
   background-color: #ca3e49;
   border-color: #000000;
   border-width: 1px;
-  bo
 }

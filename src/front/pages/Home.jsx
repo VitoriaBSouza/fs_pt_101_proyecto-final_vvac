@@ -9,8 +9,9 @@ import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 
 //components
 import { RecipeCard } from "../components/RecipeCard.jsx";
-import { RecipeScroller } from '../components/landingPage/RecipeScroller.jsx';
-import { BottomSection } from '../components/landingPage/BottomSection.jsx';
+import { TopSection } from "../components/TopSection.jsx";
+import { RecipeScroller } from '../components/RecipeScroller.jsx';
+import { BottomSection } from '../components/BottomSection.jsx';
 
 export const Home = () => {
 
@@ -43,13 +44,16 @@ export const Home = () => {
 	}, [])
 
 	return (
-		<div className="container-fluid">
-			<div className="row">			
+		<div className="container-fluid">			
 				<div className="container-fluid">
+					<TopSection />
+				</div>
+				<div className="container-fluid">	
 					<RecipeScroller />
+				</div>
+				<div className="container-fluid">	
 					<BottomSection />
 				</div>
-			</div>
 		</div>
 	);
 }; 

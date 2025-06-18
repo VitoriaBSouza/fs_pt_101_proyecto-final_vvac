@@ -17,8 +17,8 @@ import { CollectionFav } from "./pages/CollectionFav";
 import { MealPlanner } from "./pages/MealPlanner";
 import { Single } from "./pages/Single";
 import { Demo } from "./pages/Demo";
-import { RecipeScroller } from './RecipeScroller';
-import { RecipeDetails } from './pages/RecipeDetails';
+
+
 
 
 
@@ -44,7 +44,7 @@ export const router = createBrowserRouter(
         <Route path="/meal-planner" element={<MealPlanner />} />
         <Route path="/single/:theId" element={ <Single />} />  {/* Dynamic route for single items */}
         <Route path="/demo" element={<Demo />} />
-        <Route path="/" element={<RecipeScroller />} />
+        
         
       </Route>
     ),
