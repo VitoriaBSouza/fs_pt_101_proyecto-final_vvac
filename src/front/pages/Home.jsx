@@ -9,7 +9,7 @@ import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 
 //components
 import { RecipeCard } from "../components/RecipeCard.jsx";
-import { HorizontalScroll } from '../components/landingPage/HorizontalScroll.jsx';
+import { RecipeScroller } from '../components/landingPage/RecipeScroller.jsx';
 import { BottomSection } from '../components/landingPage/BottomSection.jsx';
 
 export const Home = () => {
@@ -46,7 +46,7 @@ export const Home = () => {
 		<div className="container-fluid">
 			<div className="row">			
 				<div className="container-fluid">
-					<HorizontalScroll />
+					<RecipeScroller />
 					<BottomSection />
 				</div>
 			</div>
