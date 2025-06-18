@@ -17,8 +17,7 @@ import { CollectionFav } from "./pages/CollectionFav";
 import { MealPlanner } from "./pages/MealPlanner";
 import { Single } from "./pages/Single";
 import { Demo } from "./pages/Demo";
-import { RecipeScroller } from './RecipeScroller';
-import { RecipeDetails } from './pages/RecipeDetails';
+import { RecipeScroller } from './components/landingPage/RecipeScroller';
 
 
 
