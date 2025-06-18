@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-
+import { useNavigate } from 'react-router-dom';
 
 export const RecipeScroller = () => {
   const [recipes, setRecipes] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRandomRecipes = async () => {
@@ -49,6 +50,9 @@ export const RecipeScroller = () => {
                 <li key={index}>{ing}</li>
               ))}
             </ul>
+            <button onClick={() => navigate(`/recipe/${recipe.id}`)} className="details-btn">
+              See Recipe
+            </button>
           </div>
         ))}
       </div>
