@@ -180,7 +180,7 @@ class Collection(db.Model):
             "username": self.user.username,
             "recipe_media": [media.serialize() for media in self.recipe.media],
             "recipe_title": self.recipe.title,
-            "recipe_difficultty": self.recipe.difficulty_type,
+            "recipe_difficultty": self.recipe.difficulty_type.value,
             "prep_time": self.recipe.prep_time,
         }
 

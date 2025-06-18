@@ -8,7 +8,14 @@ export const initialStore=()=>{
     collections: [],
     scores: [],
     shoppingList: [
-      "Cauliflower, 1000, g",
+      "Cauliflower",
+      "Tomato",
+      "Mozzarella cheese",
+      "Eggs",
+      "Olive oil",
+      "Pepper",
+      "Salt",
+      "Wheat flour",
     ],
     message: null,
     todos: [
