@@ -60,7 +60,7 @@ export const RecipeScroller = () => {
               <h5 className="card-title">{recipe.name}</h5>
               <ul className="list-unstyled small mb-3">
                 {recipe.ingredients.slice(0, 5).map((ing, index) => (
-                  <li key={index}>• {ing}</li>
+                  <li key={ing.ingredient_id || index}>• {ing.ingredient_name || ing}</li>
                 ))}
               </ul>
               <button
