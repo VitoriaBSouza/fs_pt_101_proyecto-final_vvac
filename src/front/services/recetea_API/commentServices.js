@@ -30,7 +30,7 @@ commentServices.getCommentsByRecipe = async (recipe_id) => {
 // POST a new comment (need to log in)
 commentServices.createComment = async (recipe_id, content) => {
   try {
-    const resp = await fetch(url + "users/recipes/" + recipe_id + "/comments", {
+    const resp = await fetch(url + "/api/user/recipes/" + recipe_id + "/comments", {
       method: "POST",
       headers: authHeaders(),
       //content field is required
@@ -39,7 +39,10 @@ commentServices.createComment = async (recipe_id, content) => {
 
     const data = await resp.json();
 
-    if (!resp.ok) throw new Error(data.error || data.message);
+    if (!resp.ok){
+      return {error: data.error || "Could not post comment, please try aggain." };
+    }
+
     return data;
 
   } catch (error) {
@@ -51,7 +54,7 @@ commentServices.createComment = async (recipe_id, content) => {
 // PUT to update comment (need to log in)
 commentServices.editComment = async (recipe_id, comment_id, content) => {
   try {
-    const resp = await fetch(url + "users/recipes/" + recipe_id + "/comments/" + comment_id, {
+    const resp = await fetch(url + "/api/user/recipes/" + recipe_id + "/comments/" + comment_id, {
       method: "PUT",
       headers: authHeaders(),
       //content field is required
@@ -59,7 +62,10 @@ commentServices.editComment = async (recipe_id, comment_id, content) => {
     });
     const data = await resp.json();
 
-    if (!resp.ok) throw new Error(data.error || data.message);
+    if (!resp.ok){
+      return {error: data.error || "Comment not updated, please try again." };
+    }
+
     return data;
 
   } catch (error) {
@@ -71,14 +77,17 @@ commentServices.editComment = async (recipe_id, comment_id, content) => {
 // DELETE a comment (need to log in)
 commentServices.deleteComment = async (recipe_id, comment_id) => {
   try {
-    const resp = await fetch(url + "users/recipes/" + recipe_id + "/comments/" + comment_id, {
+    const resp = await fetch(url + "/api/user/recipes/" + recipe_id + "/comments/" + comment_id, {
       method: "DELETE",
       headers: authHeaders(),
     });
 
     const data = await resp.json();
 
-    if (!resp.ok) throw new Error(data.error || data.message);
+    if (!resp.ok){
+      return {error: data.error || "Comment not deleted, try again." };
+    }
+
     return data;
 
   } catch (error) {

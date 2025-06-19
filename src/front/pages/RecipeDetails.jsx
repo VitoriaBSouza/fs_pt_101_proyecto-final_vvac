@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import React, { useEffect, useRef, useMemo } from "react";
+import React, { useEffect, useRef } from "react";
 
 //hooks
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
@@ -40,31 +40,6 @@ export const RecipeDetails = () => {
         dispatch({ type: 'get_one_recipe', payload: data });
     })   
     
-    //Generats random color
-    function getRandomColor() {
-        return Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
-    }
-
-    //Gets brightness based on random color
-    function getBrightness(hexColor) {
-        const r = parseInt(hexColor.substring(0, 2), 16);
-        const g = parseInt(hexColor.substring(2, 4), 16);
-        const b = parseInt(hexColor.substring(4, 6), 16);
-        return (299 * r + 587 * g + 114 * b) / 1000;
-    }
-
-    //will only change if we change users, otherwise will not render
-    const userBackground = useMemo(() => getRandomColor(), []);
-
-    //Takes first letter from username
-    const firstLetter = store.recipe?.username?.charAt(0).toUpperCase() || "R"
-
-    //check bringhtness to stablish the letter color
-    const textColor = getBrightness(userBackground) < 125 ? 'fff' : '000';
-
-    //creates place holder image with random background and letter
-    const placeHolderImage = `https://ui-avatars.com/api/?name=${firstLetter}&background=random&color=${textColor}`
-
     // Convert published date into more user friendly
     const formattedDate = new Date(store.recipe?.published).toLocaleString("en-US", {
         year: "numeric",
@@ -107,7 +82,7 @@ export const RecipeDetails = () => {
 
     return (
         <div className="container-fluid recipe_card_bg1" ref={printRef}>
-            <div className="row recipe_card_bg2 my-4 -2 p-4 mt-4">
+            <div className="row recipe_card_bg2 my-4 p-4 mt-4">
 
                 <div className="col-12 col-md-12 col-lg-7 col-xl-7 d-flex mt-2 my-4 justify-content-center">
 
@@ -167,7 +142,7 @@ export const RecipeDetails = () => {
                         {/* User image profile */}
                         <div className="col-12 col-md-12 col-lg-3 col-xl-2
                         g-0 my-sm-1 d-flex justify-content-center justify-content-lg-end">
-                            <img src={store.recipe?.user_photo || placeHolderImage} 
+                            <img src={store.recipe?.user_photo} 
                             className="float-start user_img border-0" 
                             alt="user_img" />
                         </div>
@@ -222,7 +197,7 @@ export const RecipeDetails = () => {
                         {store.user?.id ? 
                         <div className="col-12 text-capitalize mt-1">
                             <h5 className="mb-2">Allergens: </h5>
-                            <p className="fs-5">{store.recipe?.allergens.join(", ")}</p>
+                            <p className="fs-5">{Array.isArray(store.recipe?.allergens) ? store.recipe?.allergens.join(", ") : ""}</p>
                         </div>
                         :
                         ""}
@@ -304,7 +279,7 @@ export const RecipeDetails = () => {
             <Comments recipe_id={id} />
 
             <div className="row row_bg_suggestions">
-                <h2 className="m-4 text-light">Latest Recipes</h2>
+                <h2 className="p-4 text-light">Latest Recipes</h2>
                 <div className="col-12">
                     <div className="scroll-container d-flex p-3">
 
