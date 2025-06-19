@@ -65,7 +65,7 @@ export const Search = () =>{
 
     return(
         // OnBlur will make when we click out of search bar to lose focus and clear data to close results
-        <div className="position-relative mx-auto searchBar">
+        <div className="ms-0 ms-md-4 position-relative mx-auto searchBar">
             <form onSubmit={handleSearch} className=" d-flex align-items-center p-1 rounded-pill 
             border-0 search_box_bg w-100">
                 <input 

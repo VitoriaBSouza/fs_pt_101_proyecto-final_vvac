@@ -65,7 +65,7 @@ export const CollectionList = () =>{
     
 
     return(
-        <div className="btn-group border-0 ms-3">
+        <div className="btn-group border-0 ms-3 ms-auto">
             <button type="button" 
             className="btn rounded-circle nav_collection_btn border-0" 
             aria-expanded="false"

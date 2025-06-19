@@ -1126,7 +1126,6 @@ table {
   background-color: inherit;
 }
 
-<<<<<<< HEAD
 .searchResult {
   top: 100%;
   left: 50%; 
@@ -1148,7 +1147,6 @@ input[type="search"]::-webkit-search-cancel-button {
   display: none;
 }
 
-=======
 /*recipescroll in landingPage*/
 
 .recipe-scroller-container {
@@ -1212,4 +1210,3 @@ input[type="search"]::-webkit-search-cancel-button {
   border-color: #000000;
   border-width: 1px;
 }
->>>>>>> cb3e854f5c5f38b6d6dde692d0b9f4923cdf2843
