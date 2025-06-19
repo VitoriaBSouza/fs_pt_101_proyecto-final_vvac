@@ -5,7 +5,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer";
 import { RightMenu } from "../components/RightMenu";
 import { useNavigate } from "react-router-dom";
 import userServices from "../services/recetea_API/userServices.js"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 
 export const Profile = () => {
     const navigate = useNavigate();
@@ -13,6 +13,65 @@ export const Profile = () => {
     const { dispatch, store } = useGlobalReducer();
     const [formData, setFormData] = useState(null);
     const [repeatPasswd, setRepeatPasswd] = useState("")
+
+    //Nuevos estados, modal y refers para imagen de perfil
+    const [profileImage, SetProfileImage] = useState(store.user?.photo_url || 'https://pixabay.com/vectors/avatar-icon-placeholder-profile-3814081/' );
+    const fileInputRef = useRef(null);
+    const [showUrlModal, setShowUrlModal] = useState(false);
+    const [tempImageUrl, setTempImageUrl] =useState("");
+
+    //Función profile img, para subir desde el ordenador:
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                SetProfileImage(reader.result);
+                setFormData(prevFormData => ({
+                    ...prevFormData,
+                    photo_url: reader.result
+                }));
+                console.log("Imagen local seleccionada? resultado:", reader.result);
+            };
+            reader.readAsDataURL(file)
+        }
+    };
+    
+    //Función profile img, para subir desde URL:
+    const handleUrlChange = (e) => {
+        const url = event.target.value;
+        if (url) {
+            SetProfileImage(url);
+            setFormData(prevFormData => ({
+                ...prevFormData,
+                photo_url: url
+            }));
+            console.log("URL imagen seleccionada!!!!, URL:", url);
+        }
+    };
+
+    //Función click input del archivo
+    const triggerFileInput = () => {
+        fileInputRef.current.click();
+    }
+
+    //Nueva función modal img por url
+    const handleOpenUrlModal = () => {
+        setTempImageUrl(profileImage.startWith('http') ? profileImage : '');
+        setShowUrlModal(true);
+    }
+
+    const handleSaveUrlImage = () => {
+        if (tempImageUrl) {
+            SetProfileImage(tempImageUrl);
+            setFormData(prevFormData => ({
+                ...prevFormData,
+                photo_url: tempImageUrl
+            }));
+            console.log("Frontend: URL image confirmed from modal:", tempImageUrl);
+        }
+        handleCloseUrlModal();
+    }
 
     const handleChange = e => {
         setFormData({
@@ -86,6 +145,7 @@ export const Profile = () => {
                 password: "",
                 photo_url: store.user.photo_url || ""
             });
+            SetProfileImage(store.user.photo_url || 'https://pixabay.com/vectors/avatar-icon-placeholder-profile-3814081/')         //Para iniciar profile img con la url del usuario!
 
         }
     }, [store.user])
@@ -112,9 +172,9 @@ export const Profile = () => {
 
                                 <div className="d-flex align-items-start flex-column mb-3 edit-perfil">
 
-                                    {/* Pendiente function para cambiar imagen de perfil!!!*/}
+
                                     <div className="change-picture mx-auto" data-mdb-ripple-color="light">
-                                        <img src="https://thispersondoesnotexist.com/" alt="Your profile pic" className="rounded-circle pic-perfil" />
+                                        <img src={profileImage} alt="Your profile pic" className="rounded-circle pic-perfil" />
 
                                         <div className="mask-change-pic">
 
@@ -122,7 +182,26 @@ export const Profile = () => {
                                             <p className="text-change">Edit</p>
 
                                         </div>
+
+                                        {/* Nuevo input para subir img desde ordenador */}
+                                        <input 
+                                            className="change-profile-img"
+                                            type="file"
+                                            ref={fileInputRef} 
+                                            accept="image/*"
+                                            onChange={handleFileChange}
+                                        />
+
                                     </div>
+
+                                    {/* Opc. cambiar img por URL
+                                    <div className="mt-4 w-100">
+                                        <div className="mb-3">
+                                            <label htmlFor="imageUrl" className="form-label">You can also paste the URL:</label>
+                                            <input type="text" className="form-control" id="imageUrl" onChange={handleUrlChange} />
+                                        </div>
+                                    </div> */}
+
                                     <form className="text-start form-perfil w-75 mx-auto" onSubmit={handleSubmit}>
 
                                         <div className="mb-3">
@@ -202,7 +281,7 @@ export const Profile = () => {
                     </div>
                 </div>
             </div>
-            {/* Modal setting here */}
+            {/* Modal setting here, to delete account: */}
             <div className="modal fade" id="modalDeleteAccount" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="modalDeleteAccountLabel" aria-hidden="true">
                 <div className="modal-dialog w-75">
                     <div className="modal-content">
@@ -222,6 +301,52 @@ export const Profile = () => {
                     </div>
                 </div>
             </div>
+
+            
+             {/* --- NUEVO MODAL PARA CAMBIAR IMAGEN POR URL --- */}
+            {showUrlModal && ( // Solo renderiza el modal si showUrlModal es true
+                <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1" role="dialog" aria-labelledby="imageUrlModalLabel" aria-hidden="true">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title" id="imageUrlModalLabel">Cambiar imagen por URL</h5>
+                                <button 
+                                    type="button" 
+                                    className="btn-close" 
+                                    aria-label="Close" 
+                                    onClick={handleCloseUrlModal}
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="mb-3">
+                                    <label htmlFor="modalImageUrl" className="form-label">You can also paste the URL:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="modalImageUrl"
+                                        placeholder="Ej: https://example.com/my-avatar.jpg"
+                                        value={tempImageUrl} // Controla el input con el estado
+                                        onChange={(e) => setTempImageUrl(e.target.value)}
+                                    />
+                                    {/* Pequeña vista previa en el modal (opcional) */}
+                                    {tempImageUrl && (
+                                        <div className="mt-3 text-center modal-url-profile">
+                                            <img src={tempImageUrl} alt="Preview" className="img-thumbnail" />
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={handleCloseUrlModal}>Cancel</button>
+                                <button type="button" className="btn btn-primary" onClick={handleSaveUrlImage}>Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showUrlModal && <div className="modal-backdrop fade show"></div>} {/* Para el fondo oscuro del modal */}
+            {/* --- FIN NUEVO MODAL --- */}
+            
         </>
     )
 }

@@ -76,6 +76,18 @@ export default function storeReducer(store, action = {}) {
           token: action.payload.token || store.token
       };
 
+      case 'updateProfileImage':
+        const updatedUserWithImage = {
+          ...store.user,
+          photo_url: action.payload.photo_url 
+        };
+            // Necesario para actualizar en local storage:
+          localStorage.setItem('user', JSON.stringify(updatedUserWithImage));             
+        return {
+          ...store,
+          user: updatedUserWithImage
+        };
+
     case 'get_all_recipes':
       return {
         ...store,
