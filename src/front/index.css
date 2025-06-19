@@ -1125,9 +1125,13 @@ table {
 /*recipescroll in landingPage*/
 
 .recipe-scroller-container {
-  max-width: 100%;
-  padding: 1rem;
-  background-color: #B47E58; 
+  overflow-x: auto;
+  display: flex;
+  flex-wrap: nowrap; /* importante: que no hagan wrap */
+  gap: 16px; /* espacio entre tarjetas */
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 16px; /* para que el scrollbar no tape nada */
 }
 
 .title {
@@ -1145,7 +1149,7 @@ table {
 }
 
 .card {
-  min-width: 200px;
+  min-width: 20px;
   flex-shrink: 0;
   background: #ffffff;
   border-radius: 12px;
@@ -1153,20 +1157,6 @@ table {
   padding: 2rem;
   scroll-snap-align: start;
   text-align: center;
-}
-
-.card img {
-  width: 100%;
-  border-radius: 8px;
-}
-
-.card ul {
-  list-style: none;
-  padding: 0;
-  margin-top: 0.5rem;
-  text-align: center;
-  color: #000000;
-  text-size-adjust: 10px;
 }
 
 .details-btn {
@@ -1184,4 +1174,15 @@ table {
   background-color: #ca3e49;
   border-color: #000000;
   border-width: 1px;
+}
+
+.recipe-card-wrapper {
+  flex: 0 0 250px; 
+  scroll-snap-align: start;
+}
+
+/* Topsection de landing page */
+
+div.bg-dark {
+    background-color: rgba(0, 0, 0, 0.6)
 }
