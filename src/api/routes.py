@@ -72,7 +72,7 @@ def signup():
 
         new_user = User(
             username=data["username"],
-            photo_url=data["photo_url"] or placeholder_url,
+            photo_url = data.get("photo_url", placeholder_url),
             email=data["email"].strip().lower(),
             password=hashed_password,
             status=UserStatus.active,  # Default status
@@ -366,8 +366,6 @@ def get_user_recipe(recipe_id):
     return jsonify(recipe.serialize()), 200
 
 # POST to create a new recipe(need to log in)
-
-
 @api.route('/user/recipes', methods=['POST'])
 @jwt_required()
 def create_recipe():
@@ -888,15 +886,14 @@ def create_comment(recipe_id):
     try:
         data = request.json
 
-        stmt_recipe = select(Recipe).where(
-            Recipe.id == recipe_id, Recipe.author == user_id)
+        stmt_recipe = select(Recipe).where(Recipe.id == recipe_id)
         recipe = db.session.execute(stmt_recipe).scalar_one_or_none()
 
         if recipe is None:
             return jsonify({"error": "Recipe not found"}), 404
 
-        if not data["content"]:
-            return jsonify({"error": "Missing content"}), 400
+        if not data or not data["content"]:
+            return jsonify({"error": "Missing or empty comment content"}), 400
 
         new_comment = Comment(
             user_id=user_id,
@@ -907,7 +904,7 @@ def create_comment(recipe_id):
         db.session.add(new_comment)
         db.session.commit()
 
-        return jsonify(new_comment.serialize()), 201
+        return jsonify({"data": [new_comment.serialize()], "success": True}), 201
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -938,7 +935,8 @@ def edit_comment(recipe_id, comment_id):
             comment.content = data["content"]
 
         db.session.commit()
-        return jsonify(comment.serialize()), 200
+
+        return jsonify({"data": [comment.serialize()], "success": True}), 201
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -967,7 +965,7 @@ def delete_comment(recipe_id, comment_id):
         db.session.delete(comment)
         db.session.commit()
 
-        return jsonify({"message": "Comment deleted"}), 200
+        return jsonify({"message": "Comment deleted", "success": True}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

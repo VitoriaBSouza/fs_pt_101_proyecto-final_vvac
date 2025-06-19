@@ -17,6 +17,8 @@ export const initialStore=()=>{
       "Salt",
       "Wheat flour",
     ],
+    comments: [],
+    comment: [],
     message: null,
     todos: [
       {
@@ -60,10 +62,9 @@ export default function storeReducer(store, action = {}) {
         user: action.payload
       };
     
-    case 'add_user':
+    case 'signUp':
       return {
         ...store,
-        user: action.payload
       };
       
       case "updateUser":
@@ -75,6 +76,18 @@ export default function storeReducer(store, action = {}) {
           },
           token: action.payload.token || store.token
       };
+
+      case 'updateProfileImage':
+        const updatedUserWithImage = {
+          ...store.user,
+          photo_url: action.payload.photo_url 
+        };
+            // Necesario para actualizar en local storage:
+          localStorage.setItem('user', JSON.stringify(updatedUserWithImage));             
+        return {
+          ...store,
+          user: updatedUserWithImage
+        };
 
     case 'get_all_recipes':
       return {
@@ -164,6 +177,27 @@ export default function storeReducer(store, action = {}) {
         ...store, 
         comments: action.payload || []
       }
+    }
+
+    case 'add_comment': {
+      return {
+        ...store,
+        comment: [action.payload, ...store.comment]
+      };
+    }
+
+    case 'edit_comment': {
+      return {
+        ...store,
+        comment: [action.payload, ...store.comment]
+      };
+    }
+
+    case 'delete_comment': {
+      return {
+        ...store,
+        comments: store.comments.filter(comment => comment.id !== action.payload)
+      };
     }
 
     case 'set_hello':

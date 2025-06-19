@@ -28,17 +28,14 @@ export const LogIn = () => {
         e.preventDefault();
         try {
             const data = await userServices.login(formData);
-            console.log("Login response data:", data);
 
             if (data.success){
 
                 // Store token on store
                 localStorage.setItem("token", data.token);
-                console.log(data.token);
 
                 // Store full user data on store to easy fetch
                 localStorage.setItem("user", JSON.stringify(data.user));
-                console.log(data.user);
 
                 // Dispatch user data including token if needed
                 dispatch({ type: "logIn", payload: { token: data.token, user: data.user } });
