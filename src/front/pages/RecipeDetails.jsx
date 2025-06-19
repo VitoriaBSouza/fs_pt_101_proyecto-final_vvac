@@ -78,7 +78,7 @@ export const RecipeDetails = () => {
     useEffect(() => {
         window.scrollTo(0, 0);
         getRecipe();
-    }, [store.user?.id, store.recipe?.id]);
+    }, [store.user?.id, id]);
 
     return (
         <div className="container-fluid recipe_card_bg1" ref={printRef}>
