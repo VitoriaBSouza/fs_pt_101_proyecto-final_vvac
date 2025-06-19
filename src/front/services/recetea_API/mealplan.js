@@ -1,145 +1,99 @@
-const url = import.meta.env.VITE_BACKEND_URL.replace(/\/+$/, "");
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
-const mealPlanServices = {};
-
-// Utility: add JWT token
-const authHeaders = () => ({
-  'Authorization': 'Bearer ' + localStorage.getItem('token'),
-  'Content-Type': 'application/json'
-});
-
-// Ensure date is in ISO format
-const ensureISODate = (date) => {
-  if (typeof date === "string") return date; // Already formatted
-  if (date instanceof Date) return date.toISOString();
-  return new Date(date).toISOString(); // fallback
-};
-
-// GET: all meal plan entries
-mealPlanServices.getAllEntries = async () => {
+// GET all meal plan entries
+const getAllEntries = async () => {
   try {
-    const resp = await fetch(`${url}/user/mealplan`, {
-      method: "GET",
-      headers: authHeaders(),
+    const res = await fetch(`${API_URL}/api/user/mealplan`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
     });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || data.message);
-    return data;
-  } catch (error) {
-    console.error("Error fetching meal plan entries:", error);
-    return [];
-  }
-};
 
-// GET: structured by date and meal_type
-mealPlanServices.getStructuredEntries = async () => {
-  try {
-    const flatEntries = await mealPlanServices.getAllEntries();
-    const structured = {};
-
-    for (const entry of flatEntries) {
-      const { date, meal_type } = entry;
-      if (!structured[date]) structured[date] = {};
-      structured[date][meal_type] = entry;
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`GET failed: ${res.status} ${errorText}`);
     }
 
-    return structured;
+    return await res.json();
   } catch (error) {
-    console.error("Error structuring meal plan entries:", error);
-    return {};
+    console.error("Error fetching meal plan entries:", error);
+    throw error;
   }
 };
 
-// GET: entries by specific date
-mealPlanServices.getEntriesByDate = async (date) => {
+// POST new meal plan entry
+const addEntry = async (data) => {
   try {
-    const resp = await fetch(`${url}/user/mealplan/${date}`, {
-      method: "GET",
-      headers: authHeaders(),
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || data.message);
-    return data;
-  } catch (error) {
-    console.error("Error fetching entries by date:", error);
-    return [];
-  }
-};
-
-// POST: add a new entry
-mealPlanServices.addEntry = async ({ date, recipe_id, meal_type }) => {
-  try {
-    const payload = {
-      date: ensureISODate(date),
-      recipe_id,
-      meal_type
-    };
-    const resp = await fetch(`${url}/user/mealplan`, {
+    const res = await fetch(`${API_URL}/api/user/mealplan`, {
       method: "POST",
-      headers: authHeaders(),
-      body: JSON.stringify(payload),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify(data),
     });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || data.message);
-    return data;
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`POST failed: ${res.status} ${errorText}`);
+    }
+
+    return await res.json();
   } catch (error) {
     console.error("Error adding meal plan entry:", error);
-    return error;
+    throw error;
   }
 };
 
-// PUT: update existing entry
-mealPlanServices.updateEntry = async (entry_id, { date, recipe_id, meal_type }) => {
+// PUT update meal plan entry
+const updateEntry = async (id, data) => {
   try {
-    const payload = {
-      date: ensureISODate(date),
-      recipe_id,
-      meal_type
-    };
-    const resp = await fetch(`${url}/user/mealplan/${entry_id}`, {
+    const res = await fetch(`${API_URL}/api/user/mealplan/${id}`, {
       method: "PUT",
-      headers: authHeaders(),
-      body: JSON.stringify(payload),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify(data),
     });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || data.message);
-    return data;
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`PUT failed: ${res.status} ${errorText}`);
+    }
+
+    return await res.json();
   } catch (error) {
     console.error("Error updating meal plan entry:", error);
-    return error;
+    throw error;
   }
 };
 
-// DELETE: remove a single entry
-mealPlanServices.deleteEntry = async (entry_id) => {
+// DELETE a meal plan entry
+const deleteEntry = async (id) => {
   try {
-    const resp = await fetch(`${url}/user/mealplan/${entry_id}`, {
+    const res = await fetch(`${API_URL}/api/user/mealplan/${id}`, {
       method: "DELETE",
-      headers: authHeaders(),
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
     });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || data.message);
-    return data;
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`DELETE failed: ${res.status} ${errorText}`);
+    }
+
+    return await res.json();
   } catch (error) {
     console.error("Error deleting meal plan entry:", error);
-    return error;
+    throw error;
   }
 };
 
-// DELETE: clear all entries
-mealPlanServices.clearAllEntries = async () => {
-  try {
-    const resp = await fetch(`${url}/user/mealplan`, {
-      method: "DELETE",
-      headers: authHeaders(),
-    });
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(data.error || data.message);
-    return data;
-  } catch (error) {
-    console.error("Error clearing all meal plan entries:", error);
-    return error;
-  }
+export default {
+  getAllEntries,
+  addEntry,
+  updateEntry,
+  deleteEntry,
 };
-
-export default mealPlanServices;
