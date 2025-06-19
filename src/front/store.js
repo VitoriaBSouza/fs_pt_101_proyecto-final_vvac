@@ -62,10 +62,9 @@ export default function storeReducer(store, action = {}) {
         user: action.payload
       };
     
-    case 'add_user':
+    case 'signUp':
       return {
         ...store,
-        user: action.payload
       };
       
       case "updateUser":

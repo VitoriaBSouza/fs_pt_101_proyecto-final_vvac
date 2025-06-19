@@ -28,7 +28,6 @@ userServices.signup = async (formData) => {
       return {error: data.error || "Sign Up failed" };
     }
 
-    console.log(data);
     return data;
 
   } catch (error) {
