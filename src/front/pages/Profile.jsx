@@ -39,7 +39,7 @@ export const Profile = () => {
     
     //Función profile img, para subir desde URL:
     const handleUrlChange = (e) => {
-        const url = event.target.value;
+        const url = e.target.value;
         if (url) {
             SetProfileImage(url);
             setFormData(prevFormData => ({
@@ -57,7 +57,7 @@ export const Profile = () => {
 
     //Nueva función modal img por url
     const handleOpenUrlModal = () => {
-        setTempImageUrl(profileImage.startWith('http') ? profileImage : '');
+        setTempImageUrl(profileImage.startsWith('http') ? profileImage : '');
         setShowUrlModal(true);
     }
 
@@ -70,7 +70,7 @@ export const Profile = () => {
             }));
             console.log("Frontend: URL image confirmed from modal:", tempImageUrl);
         }
-        handleCloseUrlModal();
+        // handleCloseUrlModal();
     }
 
     const handleChange = e => {
@@ -195,12 +195,15 @@ export const Profile = () => {
                                     </div>
 
                                     {/* Opc. cambiar img por URL
-                                    <div className="mt-4 w-100">
-                                        <div className="mb-3">
-                                            <label htmlFor="imageUrl" className="form-label">You can also paste the URL:</label>
-                                            <input type="text" className="form-control" id="imageUrl" onChange={handleUrlChange} />
-                                        </div>
-                                    </div> */}
+                                    {/* **BOTÓN PARA ABRIR EL MODAL DE LA URL** */}
+                                        <div className="mt-3 text-center w-100">
+                                            <button 
+                                                type="button" 
+                                                className="btn btn-outline-secondary btn-sm"
+                                                onClick={handleOpenUrlModal} 
+                                            >
+                                            </button>
+                                        </div> 
 
                                     <form className="text-start form-perfil w-75 mx-auto" onSubmit={handleSubmit}>
 
