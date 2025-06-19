@@ -31,7 +31,7 @@ export const SignUp = () => {
             const data = await userServices.signup(formData);
             
             if (data.success){
-                console.log(data);
+                dispatch({ type: "signUp"});
                 navigate("/login")
             } else{
                 window.alert(data.error || "Could not sign up, try again.")

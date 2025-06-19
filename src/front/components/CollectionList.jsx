@@ -28,6 +28,9 @@ export const CollectionList = () =>{
         
     })
 
+    console.log(store.collections?.recipe_id);
+    
+
     useEffect(() => {
         if (store.user?.id) {
             getUserCollection()

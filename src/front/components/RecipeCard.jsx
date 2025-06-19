@@ -23,6 +23,10 @@ export const RecipeCard = (props) => {
         getOneRecipe()
     }
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [props.recipe_id]);
+
     return(
         <div className="m-2 recipes_cards_bg border" onClick={handleClick}>
             <div className="card row_bg_suggestions text-white p-3 border-0 position-relative overflow-hidden">

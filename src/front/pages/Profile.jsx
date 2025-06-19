@@ -282,7 +282,7 @@ export const Profile = () => {
                 </div>
             </div>
             {/* Modal setting here, to delete account: */}
-            <div className="modal fade" id="modalDeleteAccount" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="modalDeleteAccountLabel" aria-hidden="true">
+            <div className="modal fade" id="modalDeleteAccount" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="modalDeleteAccountLabel">
                 <div className="modal-dialog w-75">
                     <div className="modal-content">
                         <div className="modal-header">
@@ -294,8 +294,8 @@ export const Profile = () => {
                                 onClick={() => { document.activeElement?.blur(); }}></button>
                         </div>
                         <div className="modal-body">
-                            <button type="button" className="btn btn-danger p-0" data-bs-dismiss="modal" aria-label="Delete&Close" onClick={handleDeleteAccount}>YES</button>
-                            <button type="button" className="btn btn-secondary p-0 ms-3" data-bs-dismiss="modal" aria-label="Close">Cancel</button>
+                            <button type="button" className="btn btn-danger p-0" data-bs-dismiss="modal" aria-label="Delete&Close" onClick={() => { document.activeElement?.blur()}, handleDeleteAccount}>YES</button>
+                            <button type="button" className="btn btn-secondary p-0 ms-3" data-bs-dismiss="modal" aria-label="Close" onClick={() => { document.activeElement?.blur()} }>Cancel</button>
                         </div>
 
                     </div>

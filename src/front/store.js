@@ -17,6 +17,8 @@ export const initialStore=()=>{
       "Salt",
       "Wheat flour",
     ],
+    comments: [],
+    comment: [],
     message: null,
     todos: [
       {
@@ -60,10 +62,9 @@ export default function storeReducer(store, action = {}) {
         user: action.payload
       };
     
-    case 'add_user':
+    case 'signUp':
       return {
         ...store,
-        user: action.payload
       };
       
       case "updateUser":
@@ -176,6 +177,27 @@ export default function storeReducer(store, action = {}) {
         ...store, 
         comments: action.payload || []
       }
+    }
+
+    case 'add_comment': {
+      return {
+        ...store,
+        comment: [action.payload, ...store.comment]
+      };
+    }
+
+    case 'edit_comment': {
+      return {
+        ...store,
+        comment: [action.payload, ...store.comment]
+      };
+    }
+
+    case 'delete_comment': {
+      return {
+        ...store,
+        comments: store.comments.filter(comment => comment.id !== action.payload)
+      };
     }
 
     case 'set_hello':

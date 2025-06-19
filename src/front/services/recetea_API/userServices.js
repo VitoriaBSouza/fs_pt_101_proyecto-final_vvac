@@ -24,9 +24,10 @@ userServices.signup = async (formData) => {
 
     const data = await resp.json();
 
-    if (!resp.ok) throw new Error(data.error);
+    if (!resp.ok){
+      return {error: data.error || "Sign Up failed" };
+    }
 
-    console.log(data);
     return data;
 
   } catch (error) {
@@ -73,7 +74,9 @@ userServices.getUser = async () => {
 
     const data = await resp.json()
 
-    if (!resp.ok) throw Error(data.error)
+    if (!resp.ok){
+      return {error: data.error || "Could not fetch user" };
+    }
     console.log(data)
 
     //add user data as object, we need to use JSON.stringify()
@@ -130,7 +133,9 @@ userServices.forgotPassword = async (email) => {
 
     const data = await resp.json();
 
-    if (!resp.ok) throw Error(data.error || data.message);
+    if (!resp.ok){
+      return {error: data.error || "Could not reset password" };
+    }
 
     console.log("Forgot Password:", data);
     return data;
@@ -156,7 +161,9 @@ userServices.resetPassword = async (token, new_password) => {
 
     const data = await resp.json();
 
-    if (!resp.ok) throw Error(data.error || data.message);
+    if (!resp.ok){
+      return {error: data.error || "Password reset failed" };
+    }
 
     console.log("Reset Password:", data);
     return data;
@@ -178,7 +185,10 @@ userServices.deleteUser = async () => {
 
     const data = await resp.json()
 
-    if (!resp.ok) throw Error(data.error)
+    if (!resp.ok){
+      return {error: data.error || "Could not delete user account" };
+    }
+    
     console.log(data)
 
     //we remove the user and token from local storage in order to log them out
