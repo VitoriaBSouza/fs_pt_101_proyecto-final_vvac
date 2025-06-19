@@ -29,6 +29,7 @@ class User(db.Model):
     collection: Mapped[list["Collection"]] = relationship(back_populates="user")
     recipes: Mapped[list["Recipe"]] = relationship(back_populates="user")
     shopping_list: Mapped[list["ShoppingListItem"]] = relationship(back_populates="user")
+    meal_plan: Mapped[list["MealPlanEntry"]] = relationship(back_populates="user")
 
 
     def serialize(self):
@@ -96,6 +97,7 @@ class Recipe(db.Model):
     ingredients: Mapped[list["RecipeIngredient"]] = relationship(back_populates="recipe") #cambio de ingredient a ingredients por reutilizacion en distintas recetas
     comments: Mapped[list["Comment"]] = relationship(back_populates="recipe")
     collection: Mapped[list["Collection"]] = relationship(back_populates="recipe")
+    meal_plan_entries: Mapped[list["MealPlanEntry"]] = relationship(back_populates="recipe")
 
     def serialize(self):
 
@@ -287,12 +289,11 @@ class MealPlanEntry(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id"), nullable=False)
-
     meal_type: Mapped[MealType] = mapped_column(Enum(MealType), nullable=False)
     date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
-    user: Mapped["User"] = relationship()
-    recipe: Mapped["Recipe"] = relationship()
+    user: Mapped["User"] = relationship(back_populates="meal_plan")
+    recipe: Mapped["Recipe"] = relationship(back_populates="meal_plan_entries")
 
     def serialize(self):
         return {

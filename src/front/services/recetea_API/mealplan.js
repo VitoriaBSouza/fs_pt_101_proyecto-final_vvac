@@ -1,4 +1,4 @@
-const url = import.meta.env.VITE_BACKEND_URL;
+const url = import.meta.env.VITE_BACKEND_URL.replace(/\/+$/, "");
 
 const mealPlanServices = {};
 
@@ -8,7 +8,14 @@ const authHeaders = () => ({
   'Content-Type': 'application/json'
 });
 
-// GET: all meal plan entries for the logged-in user
+// Ensure date is in ISO format
+const ensureISODate = (date) => {
+  if (typeof date === "string") return date; // Already formatted
+  if (date instanceof Date) return date.toISOString();
+  return new Date(date).toISOString(); // fallback
+};
+
+// GET: all meal plan entries
 mealPlanServices.getAllEntries = async () => {
   try {
     const resp = await fetch(`${url}/user/mealplan`, {
@@ -24,32 +31,26 @@ mealPlanServices.getAllEntries = async () => {
   }
 };
 
-// ✅ NEW: Get entries structured by date and meal_type
+// GET: structured by date and meal_type
 mealPlanServices.getStructuredEntries = async () => {
   try {
     const flatEntries = await mealPlanServices.getAllEntries();
-
     const structured = {};
 
     for (const entry of flatEntries) {
       const { date, meal_type } = entry;
-
-      if (!structured[date]) {
-        structured[date] = {};
-      }
-
-      // Only one recipe per meal_type per date (latest one wins)
+      if (!structured[date]) structured[date] = {};
       structured[date][meal_type] = entry;
     }
 
-    return structured; // Example: { "2025-06-17": { breakfast: {…}, lunch: {…} } }
+    return structured;
   } catch (error) {
     console.error("Error structuring meal plan entries:", error);
     return {};
   }
 };
 
-// GET: entries by specific date (YYYY-MM-DD)
+// GET: entries by specific date
 mealPlanServices.getEntriesByDate = async (date) => {
   try {
     const resp = await fetch(`${url}/user/mealplan/${date}`, {
@@ -65,13 +66,18 @@ mealPlanServices.getEntriesByDate = async (date) => {
   }
 };
 
-// POST: add a new meal plan entry
+// POST: add a new entry
 mealPlanServices.addEntry = async ({ date, recipe_id, meal_type }) => {
   try {
+    const payload = {
+      date: ensureISODate(date),
+      recipe_id,
+      meal_type
+    };
     const resp = await fetch(`${url}/user/mealplan`, {
       method: "POST",
       headers: authHeaders(),
-      body: JSON.stringify({ date, recipe_id, meal_type }),
+      body: JSON.stringify(payload),
     });
     const data = await resp.json();
     if (!resp.ok) throw new Error(data.error || data.message);
@@ -82,13 +88,18 @@ mealPlanServices.addEntry = async ({ date, recipe_id, meal_type }) => {
   }
 };
 
-// PUT: update an existing entry
+// PUT: update existing entry
 mealPlanServices.updateEntry = async (entry_id, { date, recipe_id, meal_type }) => {
   try {
+    const payload = {
+      date: ensureISODate(date),
+      recipe_id,
+      meal_type
+    };
     const resp = await fetch(`${url}/user/mealplan/${entry_id}`, {
       method: "PUT",
       headers: authHeaders(),
-      body: JSON.stringify({ date, recipe_id, meal_type }),
+      body: JSON.stringify(payload),
     });
     const data = await resp.json();
     if (!resp.ok) throw new Error(data.error || data.message);
@@ -115,7 +126,7 @@ mealPlanServices.deleteEntry = async (entry_id) => {
   }
 };
 
-// DELETE: clear all meal plan entries for the user
+// DELETE: clear all entries
 mealPlanServices.clearAllEntries = async () => {
   try {
     const resp = await fetch(`${url}/user/mealplan`, {

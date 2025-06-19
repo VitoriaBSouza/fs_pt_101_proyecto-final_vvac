@@ -10,7 +10,7 @@ import getDay from "date-fns/getDay";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import mealPlanServices from "../services/recetea_API/mealplan";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
-import "../index.css"; // ✅ Forma de importación acordada
+import "../index.css";
 
 const localizer = dateFnsLocalizer({
   format,
@@ -23,17 +23,24 @@ const localizer = dateFnsLocalizer({
 const calendarViews = [Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA];
 
 const mapEntriesToEvents = (entries) => {
-  return entries.map((entry) => ({
-    title: `${entry.recipe_title} (${entry.meal_type})`,
-    start: new Date(entry.date),
-    end: new Date(entry.date),
-    allDay: true,
-    resource: {
-      id: entry.id,
-      recipe_id: entry.recipe_id,
-      meal_type: entry.meal_type,
-    },
-  }));
+  return entries.map((entry) => {
+    const datetime = new Date(entry.date);
+    const start = new Date(datetime);
+    const end = new Date(datetime);
+    start.setHours(12);
+    end.setHours(13);
+    return {
+      title: `${entry.recipe_title} (${entry.meal_type})`,
+      start,
+      end,
+      allDay: false,
+      resource: {
+        id: entry.id,
+        recipe_id: entry.recipe_id,
+        meal_type: entry.meal_type,
+      },
+    };
+  });
 };
 
 export const MealPlannerCalendar = () => {
@@ -42,7 +49,8 @@ export const MealPlannerCalendar = () => {
   const [error, setError] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [formData, setFormData] = useState({ recipe_id: "", meal_type: "" });
+  const [formData, setFormData] = useState({ recipe_id: "", meal_type: "", time: "12:00" });
+  const [editingEvent, setEditingEvent] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const { store } = useGlobalReducer();
   const navigate = useNavigate();
@@ -65,12 +73,24 @@ export const MealPlannerCalendar = () => {
   }, [loadMealPlanEntries]);
 
   const handleSelectEvent = (event) => {
-    const recipeId = event.resource.recipe_id;
-    navigate(`/recipes/${recipeId}`);
+    const entry = events.find(e => e.resource.id === event.resource.id);
+    if (!entry) return;
+    const datetime = new Date(entry.start);
+    const time = datetime.toTimeString().split(":").slice(0, 2).join(":");
+    setFormData({
+      recipe_id: entry.resource.recipe_id,
+      meal_type: entry.resource.meal_type,
+      time,
+    });
+    setSelectedSlot(datetime);
+    setEditingEvent(entry);
+    setModalVisible(true);
   };
 
   const handleSelectSlot = (slotInfo) => {
     setSelectedSlot(slotInfo.start);
+    setFormData({ recipe_id: "", meal_type: "", time: "12:00" });
+    setEditingEvent(null);
     setModalVisible(true);
   };
 
@@ -81,18 +101,41 @@ export const MealPlannerCalendar = () => {
   const handleModalSubmit = async (e) => {
     e.preventDefault();
     try {
+      const [hours, minutes] = formData.time.split(":");
+      const datetime = new Date(selectedSlot);
+      datetime.setHours(+hours);
+      datetime.setMinutes(+minutes);
+
       const payload = {
-        date: selectedSlot.toISOString().split("T")[0],
+        date: datetime.toISOString(),
         recipe_id: parseInt(formData.recipe_id),
         meal_type: formData.meal_type,
       };
 
-      await mealPlanServices.addEntry(payload);
-      setFormData({ recipe_id: "", meal_type: "" });
+      if (editingEvent) {
+        await mealPlanServices.updateEntry(editingEvent.resource.id, payload);
+      } else {
+        await mealPlanServices.addEntry(payload);
+      }
+
+      setFormData({ recipe_id: "", meal_type: "", time: "12:00" });
       setModalVisible(false);
+      setEditingEvent(null);
       await loadMealPlanEntries();
     } catch (err) {
       alert("Error saving meal plan entry.");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!editingEvent) return;
+    try {
+      await mealPlanServices.deleteEntry(editingEvent.resource.id);
+      setModalVisible(false);
+      setEditingEvent(null);
+      await loadMealPlanEntries();
+    } catch (err) {
+      alert("Error deleting meal plan entry.");
     }
   };
 
@@ -192,7 +235,9 @@ export const MealPlannerCalendar = () => {
           <div className="modal-dialog modal-dialog-centered" role="document">
             <div className="modal-content border-0 shadow-lg rounded-4">
               <div className="modal-header bg-danger text-white">
-                <h5 className="modal-title fw-semibold">Add Meal Plan Entry</h5>
+                <h5 className="modal-title fw-semibold">
+                  {editingEvent ? "Edit Meal Plan Entry" : "Add Meal Plan Entry"}
+                </h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setModalVisible(false)}></button>
               </div>
               <form onSubmit={handleModalSubmit} className="needs-validation p-3">
@@ -206,10 +251,10 @@ export const MealPlannerCalendar = () => {
                     required
                   >
                     <option value="">Select a recipe</option>
-                    {store.collections &&
-                      store.collections.map((recipe) => (
-                        <option key={recipe.recipe_id} value={recipe.recipe_id}>
-                          {recipe.recipe_title}
+                    {store.recipes &&
+                      store.recipes.map((recipe) => (
+                        <option key={recipe.id} value={recipe.id}>
+                          {recipe.title}
                         </option>
                       ))}
                   </select>
@@ -225,11 +270,35 @@ export const MealPlannerCalendar = () => {
                   >
                     <option value="">Select one</option>
                     <option value="breakfast">Breakfast</option>
+                    <option value="morning_snack">Morning Snack</option>
+                    <option value="brunch">Brunch</option>
                     <option value="lunch">Lunch</option>
+                    <option value="afternoon_snack">Afternoon Snack</option>
                     <option value="dinner">Dinner</option>
+                    <option value="supper">Supper</option>
+                    <option value="snack">Snack</option>
+                    <option value="pre_workout">Pre-workout</option>
+                    <option value="post_workout">Post-workout</option>
+                    <option value="other">Other</option>
                   </select>
                 </div>
+                <div className="mb-3">
+                  <label className="form-label fw-semibold">Time</label>
+                  <input
+                    type="time"
+                    className="form-control border-1 border-secondary shadow-sm"
+                    name="time"
+                    value={formData.time}
+                    onChange={handleModalChange}
+                    required
+                  />
+                </div>
                 <div className="modal-footer border-0 pt-3">
+                  {editingEvent && (
+                    <button type="button" className="btn btn-outline-danger me-auto" onClick={handleDelete}>
+                      Delete
+                    </button>
+                  )}
                   <button type="submit" className="btn btn-danger px-4">
                     Save
                   </button>

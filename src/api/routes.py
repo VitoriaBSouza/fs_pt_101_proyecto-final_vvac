@@ -1351,7 +1351,7 @@ def clear_shopping_list():
 # Meal Plan Endpoints
 # =======================================
 
-# GET: All meal plan entries for the logged-in user, ordered by date
+# GET: All meal plan entries for the logged-in user
 @api.route('/user/mealplan', methods=['GET'])
 @jwt_required()
 def get_meal_plan():
@@ -1359,12 +1359,21 @@ def get_meal_plan():
     entries = MealPlanEntry.query.filter_by(user_id=user_id).order_by(MealPlanEntry.date).all()
     return jsonify([entry.serialize() for entry in entries]), 200
 
-# GET: Meal plan entries by specific date for the logged-in user
+# GET: Meal plan entries by specific date (YYYY-MM-DD)
 @api.route('/user/mealplan/<string:date>', methods=['GET'])
 @jwt_required()
 def get_meal_plan_by_date(date):
     user_id = get_jwt_identity()
-    entries = MealPlanEntry.query.filter_by(user_id=user_id, date=date).order_by(MealPlanEntry.meal_type).all()
+    try:
+        parsed_date = datetime.fromisoformat(date).date()
+    except ValueError:
+        return jsonify({"error": "Invalid date format. Use YYYY-MM-DD."}), 400
+
+    entries = MealPlanEntry.query.filter(
+        db.func.date(MealPlanEntry.date) == parsed_date,
+        MealPlanEntry.user_id == user_id
+    ).order_by(MealPlanEntry.meal_type).all()
+
     return jsonify([entry.serialize() for entry in entries]), 200
 
 # POST: Add a new meal plan entry
@@ -1374,18 +1383,19 @@ def add_meal_plan_entry():
     user_id = get_jwt_identity()
     data = request.get_json()
 
-    date = data.get("date")
+    date_str = data.get("date")
     recipe_id = data.get("recipe_id")
     meal_type = data.get("meal_type")
 
-    if not date or not recipe_id or not meal_type:
+    if not date_str or not recipe_id or not meal_type:
         return jsonify({"error": "Missing required fields: date, recipe_id, meal_type"}), 400
 
     try:
+        parsed_date = datetime.fromisoformat(date_str)
         entry = MealPlanEntry(
             user_id=user_id,
             recipe_id=recipe_id,
-            date=date,
+            date=parsed_date,
             meal_type=MealType[meal_type.upper()]
         )
         db.session.add(entry)
@@ -1394,6 +1404,8 @@ def add_meal_plan_entry():
 
     except KeyError:
         return jsonify({"error": f"'{meal_type}' is not a valid meal type."}), 400
+    except ValueError:
+        return jsonify({"error": "Invalid date format. Use ISO 8601 (e.g., 2025-06-20T12:00:00)."}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -1409,8 +1421,10 @@ def update_meal_plan_entry(entry_id):
         return jsonify({"error": "Entry not found"}), 404
 
     try:
-        entry.date = data.get("date", entry.date)
-        entry.recipe_id = data.get("recipe_id", entry.recipe_id)
+        if "date" in data:
+            entry.date = datetime.fromisoformat(data["date"])
+        if "recipe_id" in data:
+            entry.recipe_id = data["recipe_id"]
         if "meal_type" in data:
             entry.meal_type = MealType[data["meal_type"].upper()]
         db.session.commit()
@@ -1418,6 +1432,8 @@ def update_meal_plan_entry(entry_id):
 
     except KeyError:
         return jsonify({"error": f"'{data.get('meal_type')}' is not a valid meal type"}), 400
+    except ValueError:
+        return jsonify({"error": "Invalid date format. Use ISO 8601."}), 400
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -1440,7 +1456,6 @@ def delete_meal_plan_entry(entry_id):
 @jwt_required()
 def clear_meal_plan():
     user_id = get_jwt_identity()
-
-    deleted = db.session.query(MealPlanEntry).filter_by(user_id=user_id).delete()
+    deleted = MealPlanEntry.query.filter_by(user_id=user_id).delete()
     db.session.commit()
     return jsonify({"message": f"{deleted} entries deleted from meal plan"}), 200
