@@ -160,8 +160,8 @@ table {
 }
 
 div.scroll-container {
-    overflow: auto;
-    white-space: nowrap;
+  overflow: auto;
+  white-space: nowrap;
 }
   
 /* End of recipe details CSS classes */
@@ -1085,4 +1085,17 @@ div.scroll-container {
   outline: none;
   box-shadow: none;
   background-color: inherit;
+}
+
+.searchResult {
+  width: 40rem;
+  height: 10rem;
+  background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+  overflow: hidden;
+  overflow-y: auto;
+}
+
+.searchResult::-webkit-scrollbar {
+  display: none;
 }

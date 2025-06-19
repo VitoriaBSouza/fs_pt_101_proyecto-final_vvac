@@ -8,7 +8,7 @@ export const LogInPage = () => {
 
     return(
        <div className="container-fluid logIn_background p-4">
-            <h1 className="p-4 text-center logIn_title">Welcomeback to Recetea!</h1>
+            <h1 className="p-4 text-center logIn_title">Welcome Back to Recetea!</h1>
             <LogIn />
         </div>
     )
