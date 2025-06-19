@@ -1,5 +1,5 @@
 import React, { useState, useEffect  } from "react";
-import { useNavigate, Link  } from "react-router-dom";
+import { useNavigate, Link, useParams  } from "react-router-dom";
 
 //hooks
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
@@ -12,58 +12,75 @@ export const Search = () =>{
 
     const { store, dispatch } = useGlobalReducer();
     const navigate = useNavigate()
+    //grab recipe id from url
+    const { id } = useParams()
 
-    const [search, setSearch] = useState("");
-    const [searchResults, setSearchResults] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
+     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState("Title"); // default filter
 
-    const handleChange = (e) => {
-        setSearch(e.target.value);
+    const handleFilter = (e) => {
+        const searchWord = e.target.value.toLowerCase();
+        setSearch(searchWord);
+
+        if (searchWord === "") {
+            setFilteredData([]);
+        }else{
+            
+            //set empty result to store based on the filter used
+            let result = [];
+
+            if (filter === 'Title') {
+                result = store.recipes?.filter((value) => {
+                    return value.title.toLowerCase().includes(searchWord);
+                });
+            } else if (filter === 'Allergens') {
+                result = store.recipes?.filter((value) => {
+                    return value.allergens?.some((allergen) =>
+                        allergen.toLowerCase().includes(searchWord)
+                    );
+                });
+            } else if (filter === 'Diets') {
+                result = store.recipes?.filter((value) => {
+                    return value.category?.toLowerCase().includes(searchWord);
+                });
+            }
+            setFilteredData(result);
+        }
+    }
+
+    const clearInput = () =>{
+        setFilteredData([])
+        setSearch("")
     }
 
     const handleSearch = (e) => {
         e.preventDefault();
-        if (searchResults.length > 0) {
-            // You might want to navigate to the first matched recipe or show results
-            navigate("/recipes/" + searchResults[0].id);
-        }
+        
     };
 
-   useEffect(() => {
-        if (!search) {
-            setSearchResults([]);
-            return;
-        }
-
-        const filtered = store.recipes.filter((recipe) => {
-            if (filter === "title") {
-                return recipe.title?.toLowerCase().includes(search.toLowerCase());
-            }
-
-            if (filter === "allergens" && Array.isArray(recipe.allergens)) {
-                return recipe.allergens.some(allergen =>
-                    allergen.toLowerCase().includes(search.toLowerCase())
-                );
-            }
-
-            return false;
-        });
-
-        setSearchResults(filtered);
-    }, [search, filter, store.recipes?.id]);
+    useEffect(() => {
+        
+    }, []);
 
     return(
-        
-        <div className="container">
-            <form onSubmit={handleSearch} className=" d-flex mx-auto align-items-center 
-            p-2 rounded-pill border-0 search_box_bg">
+        // OnBlur will make when we click out of search bar to lose focus and clear data to close results
+        <div className="position-relative mx-auto searchBar">
+            <form onSubmit={handleSearch} className=" d-flex align-items-center p-1 rounded-pill 
+            border-0 search_box_bg w-100">
                 <input 
-                className="form-control me-2 search_input_bg border-0" 
-                type="search" 
-                    placeholder={`Search by ${filter}`}
+                className="form-control me-2 p-1 search_input_bg border-0 rounded-pill" 
                 value={search}
-                onChange={handleChange}/>
-                <div className="dropdown border-start">
+                type="search" 
+                placeholder={`Search by ${filter}`}
+                onChange={handleFilter}
+                onBlur={() => setTimeout(() => clearInput(), 400)}/>
+                {search.length === 0 ? null 
+                    : 
+                    <button type="button" className="btn-close" aria-label="Close" onClick={clearInput}></button>
+                }
+                {store.user?.id ? 
+                <div className="dropdown border-start ps-2">
                     <button 
                     className="btn border-0 dropdown-toggle" 
                     type="button" 
@@ -76,23 +93,34 @@ export const Search = () =>{
 
                     <ul className="dropdown-menu" aria-labelledby="filterDropdown">
                         <li className="m-2">
-                            <button className="dropdown-item" onClick={() => setFilter('title')}>Title</button>
+                            <button className="dropdown-item" onClick={() => setFilter('Title')}>Title</button>
                         </li>
                         <li className="m-2">
-                            <button className="dropdown-item" onClick={() => setFilter('ingredients')}>Allergens</button>
+                            <button className="dropdown-item" onClick={() => setFilter('Allergens')}>Allergens</button>
                         </li>
                         <li className="m-2">
-                            <button className="dropdown-item" onClick={() => setFilter('category')}>Diets</button>
+                            <button className="dropdown-item" onClick={() => setFilter('Diets')}>Diets</button>
                         </li>
                     </ul>
                 </div>
+                :
+                null}
+                
             </form>
-            {store.recipes?.length != 0 && (
-                <div className="searchResult mx-auto mt-2">
-                    {store.recipes?.map((value, key) => {
+
+            {/* Results from search: will check if there is any match to show mapped data */}
+            {filteredData?.length != 0 && (
+                <div className="position-absolute bg-white shadow rounded mt-2 searchResult ">
+                    
+                    {/* we will only show first 10 matches from results to avoid showing too much data */}
+                    {filteredData.slice(0, 10).map((value, key) => {
                         return (
-                        <Link className="dataItem" to={"/recipes/" + value.id}>
-                            <p>{value.title} </p>
+                        <Link key={value.id} 
+                        to={"/recipes/" + value.id}
+                        className="dataItem active text-decoration-none" 
+                        onClick={() => clearInput}
+                        >
+                            <p className="ms-3">{value.title} </p>
                         </Link>
                         );
                     })}
