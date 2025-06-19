@@ -35,7 +35,7 @@ export const CollectionList = () =>{
         if (store.user?.id) {
             getUserCollection()
         }
-    }, [store.user?.id, store.collections]);
+    }, [store.user?.id]);
 
     const handleDelete = async (recipe_id) => {
 
