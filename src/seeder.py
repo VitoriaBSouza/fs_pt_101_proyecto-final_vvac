@@ -24,8 +24,7 @@ with app.app_context():
     ingredient_names = [
         "Harina", "Leche", "Huevo", "Azúcar", "Sal", "Aceite", "Tomate", "Queso", "Pollo", "Cebolla"
     ]
-    allergens_list = ["gluten", "lactosa",
-                      "", "", "", "", "", "lactosa", "", ""]
+    allergens_list = ["gluten", "lactose","", "", "", "", "", "lactose", "", ""]
     ingredients = [
         Ingredient(name=ingredient_names[i], allergens=allergens_list[i])
         for i in range(10)
