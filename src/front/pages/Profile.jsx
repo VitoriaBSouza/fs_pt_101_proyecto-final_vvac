@@ -20,7 +20,7 @@ export const Profile = () => {
     const [repeatPasswd, setRepeatPasswd] = useState("");
 
     // Estados para imagen de perfil y modal
-    const [profileImage, SetProfileImage] = useState(store.user?.photo_url || 'https://pixabay.com/vectors/avatar-icon-placeholder-profile-3814081/');
+    const [profileImage, SetProfileImage] = useState(store.user?.photo_url || '');
     const fileInputRef = useRef(null); // Ref para el input de archivo (oculto)
     const [showUrlModal, setShowUrlModal] = useState(false); // Control del toggle del modal de imagen
     const [tempImageUrl, setTempImageUrl] = useState(""); // URL temporal para el input del modal y previsualización
@@ -98,7 +98,7 @@ export const Profile = () => {
 
         if (tempImageUrl) {
             SetProfileImage(tempImageUrl); // Actualiza la vista previa del componente
-            
+
             // Crea una copia de formData con la nueva photo_url
             const updatedFormData = {
                 ...formData,
@@ -156,7 +156,7 @@ export const Profile = () => {
             window.alert("The password does not match");
             return;
         }
-        
+
         // Crea una copia de formData para evitar enviar campos vacíos si no han sido modificados
         const dataToSubmit = { ...formData };
         if (!dataToSubmit.password) { // Si la contraseña está vacía, no la envíes
@@ -220,7 +220,7 @@ export const Profile = () => {
                 password: "", // Contraseña siempre vacía para seguridad en el frontend
                 photo_url: store.user.photo_url || ""
             });
-            SetProfileImage(store.user.photo_url || 'https://pixabay.com/vectors/avatar-icon-placeholder-profile-3814081/');
+            SetProfileImage(store.user.photo_url || '');
         }
     }, [store.user]); // Dependencia: se ejecuta cuando store.user cambia
 
@@ -262,7 +262,6 @@ export const Profile = () => {
                                                 name="username"
                                                 id="username"
                                                 onChange={handleChange}
-                                                placeholder={formData?.username || ""}
                                                 value={formData?.username || ""} // Controla el input con el estado
                                             />
                                         </div>
@@ -273,7 +272,6 @@ export const Profile = () => {
                                                 name="email"
                                                 id="Email1"
                                                 onChange={handleChange}
-                                                placeholder={store.user?.email || ""}
                                                 value={formData?.email || ""} // Controla el input con el estado
                                             />
                                             {store.user?.success && (
@@ -366,7 +364,6 @@ export const Profile = () => {
                                         type="text"
                                         className="form-control"
                                         id="modalImageUrl"
-                                        placeholder="Ej: https://example.com/mi-foto.jpg"
                                         value={tempImageUrl} // Controla el input con el estado temporal
                                         onChange={(e) => setTempImageUrl(e.target.value)}
                                     />

@@ -213,23 +213,23 @@ export const CreateRecipe = () => {
         try {
             let response;
             if (id) {
-                console.log("Frontend: Sending UPDATE recipe data to backend:", dataToSend);
+                console.log("Frontend createRecipe: Sending UPDATE recipe data to backend:", dataToSend);
                 response = await recipeServices.updateRecipe(id, dataToSend);
             } else {
-                console.log("Frontend: Sending CREATE recipe data to backend:", dataToSend);
+                console.log("Frontend createRecipe: Sending CREATE recipe data to backend:", dataToSend);
                 response = await recipeServices.createRecipe(dataToSend);
             }
 
             console.log("Frontend: Backend response:", response);
 
             if (response.success) {
-                window.alert(`Recipe ${submitStatus === 'published' ? 'published' : 'saved as draft'} successfully!`);
+                window.alert(`createRecipe- Recipe ${submitStatus === 'published' ? 'published' : 'saved as draft'} successfully!`);
                 navigate(`/recipes/${response.recipe_id || id}`);
             } else {
-                window.alert(`Error ${submitStatus === 'published' ? 'publishing' : 'saving'} recipe: ` + (response.error || "Unknown error."));
+                window.alert(`createRecipe-Error ${submitStatus === 'published' ? 'publishing' : 'saving'} recipe: ` + (response.error || "Unknown error."));
             }
         } catch (error) {
-            console.error("Frontend: Error submitting recipe:", error);
+            console.error("Frontend createRecipe: Error submitting recipe:", error);
             window.alert("An error occurred while trying to save the recipe.");
         }
     };
@@ -245,7 +245,7 @@ export const CreateRecipe = () => {
                 setShowImageModal(false);
                 setCurrentAllergenInput("");
             }
-            window.alert("Changes discarded.");
+            // window.alert("Changes discarded.");
         }
     };
 
@@ -298,7 +298,7 @@ export const CreateRecipe = () => {
                                     onChange={handleChange}
                                 />
                                 <div className="d-flex align-items-center rct-author-info">
-                                    <img src={store.user?.photo_url || 'https://via.placeholder.com/30'} alt="Author Avatar" className="rct-author-avatar-small rounded-circle me-2" />
+                                    <img src={store.user?.photo_url || 'https://via.placeholder.com/30'} alt="Avatar" className="rct-author-avatar-small rounded-circle me-2" />
                                     <span className="fw-bold rct-author-username">{recipeData.author_username || "Unknown User"}</span>
                                 </div>
                                 <textarea
