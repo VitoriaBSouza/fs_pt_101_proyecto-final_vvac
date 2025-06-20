@@ -15,10 +15,10 @@ export const Profile = () => {
     const [repeatPasswd, setRepeatPasswd] = useState("")
 
     //Nuevos estados, modal y refers para imagen de perfil
-    const [profileImage, SetProfileImage] = useState(store.user?.photo_url || 'https://pixabay.com/vectors/avatar-icon-placeholder-profile-3814081/' );
+    const [profileImage, SetProfileImage] = useState(store.user?.photo_url || 'https://pixabay.com/vectors/avatar-icon-placeholder-profile-3814081/');
     const fileInputRef = useRef(null);
     const [showUrlModal, setShowUrlModal] = useState(false);
-    const [tempImageUrl, setTempImageUrl] =useState("");
+    const [tempImageUrl, setTempImageUrl] = useState("");
 
     //Función profile img, para subir desde el ordenador:
     const handleFileChange = (e) => {
@@ -36,7 +36,7 @@ export const Profile = () => {
             reader.readAsDataURL(file)
         }
     };
-    
+
     //Función profile img, para subir desde URL:
     const handleUrlChange = (e) => {
         const url = event.target.value;
@@ -75,7 +75,7 @@ export const Profile = () => {
 
     const handleChange = e => {
         setFormData({
-            ...formData, 
+            ...formData,
             [e.target.name]: e.target.value
         })
     }
@@ -96,7 +96,7 @@ export const Profile = () => {
                 dispatch({ type: "updateUser", payload: data.user, token: data.token });
                 window.alert("Your profile has been updated");
                 console.log(data);
-                
+
                 setFormData({
                     username: data.user.username || "",
                     email: data.user.email || "",
@@ -119,22 +119,22 @@ export const Profile = () => {
         e.preventDefault();
         try {
             const resultado = await userServices.deleteUser()
-            if(resultado.success){
+            if (resultado.success) {
                 //delete from store the user and token saved
                 dispatch({ type: "logout" });
                 window.alert("You account has been deleted")
                 navigate("/")
-            }else {
+            } else {
                 window.alert("Failed to delete account: " + (resultado.error || "Unknown error"));
             }
-            
+
         } catch (error) {
             window.alert(error || "Something went wrong. Please try again.")
         }
     }
 
     console.log(store.user);
-    
+
     // hasta aqui
 
     useEffect(() => {
@@ -184,10 +184,10 @@ export const Profile = () => {
                                         </div>
 
                                         {/* Nuevo input para subir img desde ordenador */}
-                                        <input 
+                                        <input
                                             className="change-profile-img"
                                             type="file"
-                                            ref={fileInputRef} 
+                                            ref={fileInputRef}
                                             accept="image/*"
                                             onChange={handleFileChange}
                                         />
@@ -206,24 +206,24 @@ export const Profile = () => {
 
                                         <div className="mb-3">
                                             <label htmlFor="username" className="form label my-3 fw-bold">Username</label>
-                                            <input type="text" 
-                                            className="form-control"
-                                            name="username" 
-                                            id="username" 
-                                            onChange={handleChange}
-                                            placeholder={formData?.username || ""} />
+                                            <input type="text"
+                                                className="form-control"
+                                                name="username"
+                                                id="username"
+                                                onChange={handleChange}
+                                                placeholder={formData?.username || ""} />
                                             <p className="change-email text-danger fw-bold" onClick={handleSubmit}>
                                                 CHANGE USERNAME
                                             </p>
                                         </div>
                                         <div className="mb-3">
                                             <label htmlFor="Email1" className="form-label my-3 fw-bold">Email address</label>
-                                            <input type="email" 
-                                            className="form-control"
-                                            name="email" 
-                                            id="Email1" 
-                                            onChange={handleChange}
-                                            placeholder={store.user?.email || ""} />
+                                            <input type="email"
+                                                className="form-control"
+                                                name="email"
+                                                id="Email1"
+                                                onChange={handleChange}
+                                                placeholder={store.user?.email || ""} />
 
                                             <p className="change-email text-danger fw-bold" onClick={handleSubmit}>
                                                 CHANGE E-MAIL
@@ -238,18 +238,18 @@ export const Profile = () => {
                                         <div className="form-group mb-4">
                                             <label className="form-label my-3 fw-bold">Change password</label>
                                             {/* FALTARIA UN METODO EN LA API PARA COMPROBAR SI LA PASSW ANTIGUA COINCIDE CON LA INTRODUCIDA AQUI.... <input type="password" className="form-control" id="current-password" placeholder="*Current password" /> */}
-                                            <input type="password" 
-                                            name="password" 
-                                            onChange={handleChange} 
-                                            className="form-control" 
-                                            id="password" 
-                                            placeholder="*Type new password" />
-                                            <input type="password" 
-                                            name="repeatPasswd" 
-                                            onChange={e => setRepeatPasswd(e.target.value)} 
-                                            className="form-control" 
-                                            id="repeatPasswd" 
-                                            placeholder="*Repeat new password" />
+                                            <input type="password"
+                                                name="password"
+                                                onChange={handleChange}
+                                                className="form-control"
+                                                id="password"
+                                                placeholder="*Type new password" />
+                                            <input type="password"
+                                                name="repeatPasswd"
+                                                onChange={e => setRepeatPasswd(e.target.value)}
+                                                className="form-control"
+                                                id="repeatPasswd"
+                                                placeholder="*Repeat new password" />
                                         </div>
                                         <div className="actions-profile">
 
@@ -294,26 +294,26 @@ export const Profile = () => {
                                 onClick={() => { document.activeElement?.blur(); }}></button>
                         </div>
                         <div className="modal-body">
-                            <button type="button" className="btn btn-danger p-0" data-bs-dismiss="modal" aria-label="Delete&Close" onClick={() => { document.activeElement?.blur()}, handleDeleteAccount}>YES</button>
-                            <button type="button" className="btn btn-secondary p-0 ms-3" data-bs-dismiss="modal" aria-label="Close" onClick={() => { document.activeElement?.blur()} }>Cancel</button>
+                            <button type="button" className="btn btn-danger p-0" data-bs-dismiss="modal" aria-label="Delete&Close" onClick={() => { document.activeElement?.blur() }, handleDeleteAccount}>YES</button>
+                            <button type="button" className="btn btn-secondary p-0 ms-3" data-bs-dismiss="modal" aria-label="Close" onClick={() => { document.activeElement?.blur() }}>Cancel</button>
                         </div>
 
                     </div>
                 </div>
             </div>
 
-            
-             {/* --- NUEVO MODAL PARA CAMBIAR IMAGEN POR URL --- */}
+
+            {/* --- NUEVO MODAL PARA CAMBIAR IMAGEN POR URL --- */}
             {showUrlModal && ( // Solo renderiza el modal si showUrlModal es true
                 <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1" role="dialog" aria-labelledby="imageUrlModalLabel" aria-hidden="true">
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title" id="imageUrlModalLabel">Cambiar imagen por URL</h5>
-                                <button 
-                                    type="button" 
-                                    className="btn-close" 
-                                    aria-label="Close" 
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    aria-label="Close"
                                     onClick={handleCloseUrlModal}
                                 ></button>
                             </div>
@@ -346,7 +346,7 @@ export const Profile = () => {
             )}
             {showUrlModal && <div className="modal-backdrop fade show"></div>} {/* Para el fondo oscuro del modal */}
             {/* --- FIN NUEVO MODAL --- */}
-            
+
         </>
     )
 }
