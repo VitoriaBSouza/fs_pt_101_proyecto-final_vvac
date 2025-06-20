@@ -6,8 +6,6 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
 //services
 import recipeServices from "../services/recetea_API/recipeServices.js"
-import collectionServices from "../services/recetea_API/collectionServices.js"
-
 
 //components
 import { Comments } from "../components/Comments.jsx";
