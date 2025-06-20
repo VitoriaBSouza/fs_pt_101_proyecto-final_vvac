@@ -6,7 +6,7 @@ export const BottomSection = () => {
     <div className="container_bottom_section" >
       <div className="container">
         <h2 className="text-center fw-bold mb-5 display-6">Explore Our Meal Options</h2>
-        <div className="row g-4">
+        <div className="row g-4 scroll-container">
             <div className="col-md-4" >
               <div className="card h-100 shadow-sm " style={{border: "2px solid #ca3e49"}}>
                 <img

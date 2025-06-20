@@ -8,7 +8,6 @@ import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 
 
 //components
-import { RecipeCard } from "../components/RecipeCard.jsx";
 import { TopSection } from "../components/TopSection.jsx";
 import { RecipeScroller } from '../components/RecipeScroller.jsx';
 import { BottomSection } from '../components/BottomSection.jsx';
@@ -47,9 +46,27 @@ export const Home = () => {
 	return (
 		<div className="container-fluid m-0 p-0 g-0">
 			<TopSection />
-			<RecipeScroller />
+			<div className="row p-4">
+				<h2 className="p-4 text-danger">Latest Recipes</h2>
+				<div className="col-12 p-4">
+					<div className="scroll-container d-flex p-3">
+
+						{/* maping over RecipeCards to create cards based on the data */}
+						{
+
+							store.recipes?.map((el) => <RecipeScroller
+								key={el.id}
+								id={el.id}
+								name={el.title}
+								url={el.media?.[0]?.url}
+
+							/>)
+						}
+					</div>
+
+				</div>
+			</div>
 			<BottomSection />
-			<SearchFilter />
 		</div>
 	);
 }; 
