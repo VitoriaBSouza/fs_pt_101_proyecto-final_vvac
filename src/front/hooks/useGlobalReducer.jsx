@@ -19,8 +19,16 @@ export function StoreProvider({ children }) {
     const loadRecipes = async () => {
         try {
             const data = await recipeServices.getAllRecipes();
-           dispatch({ type: 'get_all_recipes', payload: data })
+            dispatch({ type: 'get_all_recipes', payload: data })
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
+    const loadCollections = async () => {
+        try {
+            const data = await recipeServices.getUserCollections();
+            dispatch({ type: 'get_user_collections', payload: data });
         } catch (error) {
             console.log(error);
         }
@@ -32,16 +40,14 @@ export function StoreProvider({ children }) {
         const user = localStorage.getItem("user");
 
         if (token && user) {
-                        
-        dispatch({
-            type: "logIn",
-            payload: { token, user: JSON.parse(user) },
-        });
+            dispatch({
+                type: "logIn",
+                payload: { token, user: JSON.parse(user) },
+            });
+            loadRecipes()
+            loadCollections()
         }
-
-        loadRecipes()
     }, [])
-
 
     // Provide the store and dispatch method to all child components.
     return <StoreContext.Provider value={{ store, dispatch }}>
