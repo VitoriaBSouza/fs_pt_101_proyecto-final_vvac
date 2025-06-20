@@ -1,66 +1,98 @@
 import React from 'react';
 
-const diets = [
-  {
-    title: 'Vegan',
-    image: 'https://source.unsplash.com/280x180/?vegan-food',
-    items: ['100% plant-based', 'Rich in fiber', 'Animal-free'],
-  },
-  {
-    title: 'Vegetarian',
-    image: 'https://source.unsplash.com/280x180/?vegetarian',
-    items: ['No meat', 'Includes dairy and eggs', 'Balanced nutrition'],
-  },
-  {
-    title: 'Gluten-Free',
-    image: 'https://source.unsplash.com/280x180/?gluten-free',
-    items: ['Celiac-friendly', 'No wheat, rye or barley', 'Easier digestion'],
-  },
-  {
-    title: 'Allergen-Free',
-    image: 'https://source.unsplash.com/280x180/?allergy-food',
-    items: ['No common allergens', 'Safe and controlled', 'Tailored options'],
-  },
-  {
-    title: 'Low-Calorie',
-    image: 'https://source.unsplash.com/280x180/?low-calorie',
-    items: ['Fewer calories', 'Weight management', 'Nutrient-dense'],
-  },
-  {
-    title: 'Cheat Meals',
-    image: 'https://source.unsplash.com/280x180/?cheat-meal',
-    items: ['Occasional treat', 'High energy', 'Mindful indulgence'],
-  },
-];
 
 export const BottomSection = () => {
   return (
-    <section className="bg-light py-5">
+    <div className="container_bottom_section" >
       <div className="container">
         <h2 className="text-center fw-bold mb-5 display-6">Explore Our Meal Options</h2>
-        <div className="row g-4">
-          {diets.map((diet, index) => (
-            <div className="col-md-4" key={index}>
-              <div className="card h-100 shadow-sm">
+        <div className="row g-4 scroll-container">
+            <div className="col-md-4" >
+              <div className="card h-100 shadow-sm " style={{border: "2px solid #ca3e49"}}>
                 <img
-                  src={diet.image}
-                  alt={diet.title}
+                  src="src/front/assets/img/VeganDiet.jpg"
+                  alt=""
                   className="card-img-top"
-                  style={{ height: '180px', objectFit: 'cover' }}
+                  style={{ height: '180px', objectFit: 'cover', border: "2px solid rgb(0, 0, 0)"}}
                 />
-                <div className="card-body">
-                  <h5 className="card-title">{diet.title}</h5>
-                  <ul className="list-unstyled small mb-0">
-                    {diet.items.map((item, i) => (
-                      <li key={i}>• {item}</li>
-                    ))}
-                  </ul>
+                <div className="card_bottom">
+                  <h2 className="card-title"> VEGAN DIET </h2>
+                  <p>Recipes made entirely with plant-based ingredients.</p>
                 </div>
               </div>
             </div>
-          ))}
+            <div className="col-md-4">
+              <div className="card h-100 shadow-sm" style={{border: "2px solid #ca3e49"}}>
+                <img
+                  src="src/front/assets/img/GlutenFree.jpg"
+                  alt=""
+                  className="card-img-top"
+                  style={{ height: '180px', objectFit: 'cover', border: "2px solid rgb(0, 0, 0)" }}
+                />
+                <div className="card_bottom">
+                  <h5 className="card-title">GLUTEN FREE</h5>
+                  <p>Recipes without wheat, barley, or rye.</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="card h-100 shadow-sm" style={{border: "2px solid #ca3e49"}}>
+                <img
+                  src="src/front/assets/img/Proteic.jpg"
+                  alt=""
+                  className="card-img-top"
+                  style={{ height: '180px', objectFit: 'cover', border: "2px solid rgb(0, 0, 0)" }}
+                />
+                <div className="card_bottom">
+                  <h5 className="card-title">HIGH PROTEIC</h5>
+                  <p>Meals rich in protein for muscle and energy.</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="card h-100 shadow-sm" style={{border: "2px solid #ca3e49"}}>
+                <img
+                  src="src/front/assets/img/low-calorie.jpg"
+                  alt=""
+                  className="card-img-top"
+                  style={{ height: '180px', objectFit: 'cover', border: "2px solid rgb(0, 0, 0)" }}
+                />
+                <div className="card_bottom">
+                  <h5 className="card-title">LOW CALORIES</h5>
+                  <p> Light recipes to help you stay in shape.</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="card h-100 shadow-sm" style={{border: "2px solid #ca3e49"}}>
+                <img
+                  src="src/front/assets/img/FastRecipes.jpg"
+                  alt=""
+                  className="card-img-top"
+                  style={{ height: '180px', objectFit: 'cover', border: "2px solid rgb(0, 0, 0)" }}
+                />
+                <div className="card_bottom">
+                  <h5 className="card-title">FAST RECIPES</h5>
+                  <p>Quick meals ready in 30 minutes or less.</p>
+                </div>
+              </div>
+            </div>
+            <div className="col-md-4">
+              <div className="card h-100 shadow-sm" style={{border: "2px solid #ca3e49"}}>
+                <img
+                  src="src/front/assets/img/CheatMeals.jpg"
+                  alt=""
+                  className="card-img-top"
+                  style={{ height: '180px', objectFit: 'cover', border: "2px solid rgb(0, 0, 0)" }}
+                />
+                <div className="card_bottom">
+                  <h5 className="card-title">CHEAT MEALS</h5>
+                  <p>Indulgent treats to enjoy without guilt.</p>
+                </div>
+              </div>
+            </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };

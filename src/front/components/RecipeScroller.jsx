@@ -1,78 +1,42 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
-export const RecipeScroller = () => {
-  const [recipes, setRecipes] = useState([]);
-  const navigate = useNavigate();
+//hooks
+import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+
+//services
+import recipeServices from "../services/recetea_API/recipeServices.js"
+
+
+export const RecipeScroller = (props) => {
+
+  const navigate = useNavigate()
+  const { store, dispatch } = useGlobalReducer();
+
+  const getOneRecipe = async () => recipeServices.getOneRecipe(props.id).then(data => {
+    dispatch({ type: 'get_one_recipe', payload: data });
+  })
+
+  const handleClick = (e) => {
+    navigate("/recipes/" + props.id)
+    window.history.scrollRestoration = 'manual'
+    getOneRecipe()
+  }
 
   useEffect(() => {
-    const fetchRandomRecipes = async () => {
-      try {
-        const promises = Array.from({ length: 10 }, () =>
-          fetch('https://www.themealdb.com/api/json/v1/1/random.php').then(res => res.json())
-        );
-
-        const results = await Promise.all(promises);
-        const formatted = results.map(data => {
-          const meal = data.meals[0];
-          const ingredients = [];
-          for (let i = 1; i <= 20; i++) {
-            const ingredient = meal[`strIngredient${i}`];
-            if (ingredient) ingredients.push(ingredient);
-          }
-          return {
-            id: meal.idMeal,
-            name: meal.strMeal,
-            img: meal.strMealThumb,
-            ingredients,
-          };
-        });
-
-        setRecipes(formatted);
-      } catch (err) {
-        console.error('Error fetching random recipes:', err);
-      }
-    };
-
-    fetchRandomRecipes();
-  }, []);
+    window.scrollTo(0, 0);
+  }, [props.recipe_id]);
 
   return (
-    <div className="container my-5">
-      <h2 className="text-center fw-bold mb-4">Some Random Ideas!!</h2>
-      <div
-        className="d-flex overflow-auto gap-3 pb-3"
-        style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
-      >
-        {recipes.map(recipe => (
-          <div
-            className="card flex-shrink-0"
-            key={recipe.id}
-            style={{ width: '280px', scrollSnapAlign: 'start' }}
-          >
-            <img
-              src={recipe.img}
-              alt={recipe.name}
-              className="card-img-top"
-              style={{ height: '180px', objectFit: 'cover' }}
-            />
-            <div className="card-body">
-              <h5 className="card-title">{recipe.name}</h5>
-              <ul className="list-unstyled small mb-3">
-                {recipe.ingredients.slice(0, 5).map((ing, index) => (
-                  <li key={ing.ingredient_id || index}>• {ing.ingredient_name || ing}</li>
-                ))}
-              </ul>
-              <button
-                onClick={() => navigate(`/recipe/${recipe.id}`)}
-                className="btn btn-primary btn-sm w-100"
-              >
-                See Recipe
-              </button>
-            </div>
+    <div className="m-2 home_cards_bg border" onClick={handleClick}>
+      <div className="card row_home_scroll text-white p-3 border-0 position-relative overflow-hidden">
+        <img src={props.url} className="img-fluid card-img home_card_scroll border-0" alt="recipe_img" />
+        <div className="card-img-overlay p-0 d-flex align-items-end">
+          <div className="w-100 bg-opacity-50 text-center title_suggestion_card m-3">
+            <p className="card-title text-light fs-3 p-3">{props.name}</p>
           </div>
-        ))}
+        </div>
       </div>
     </div>
-  );
-};
+  )
+}

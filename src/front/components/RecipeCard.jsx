@@ -30,7 +30,7 @@ export const RecipeCard = (props) => {
     return(
         <div className="m-2 recipes_cards_bg border" onClick={handleClick}>
             <div className="card row_bg_suggestions text-white p-3 border-0 position-relative overflow-hidden">
-                <img src={props.url} className="img-fluid card-img recipes_card_img border-0" alt="recipe_img"/>
+                <img src={props.url} className="img-fluid recipes_card_img border-0" alt="recipe_img"/>
                 <div className="card-img-overlay p-0 d-flex align-items-end">
                     <div className="w-100 bg-opacity-50 text-center title_suggestion_card m-3">
                         <p className="card-title text-light fs-3 p-3">{props.name}</p>
