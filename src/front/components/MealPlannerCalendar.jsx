@@ -76,7 +76,7 @@ export const MealPlannerCalendar = () => {
     const entry = events.find(e => e.resource.id === event.resource.id);
     if (!entry) return;
     const datetime = new Date(entry.start);
-    const time = datetime.toTimeString().split(":").slice(0, 2).join(":");
+    const time = datetime.toTimeString().split(":" ).slice(0, 2).join(":" );
     setFormData({
       recipe_id: entry.resource.recipe_id,
       meal_type: entry.resource.meal_type,
@@ -101,7 +101,7 @@ export const MealPlannerCalendar = () => {
   const handleModalSubmit = async (e) => {
     e.preventDefault();
     try {
-      const [hours, minutes] = formData.time.split(":");
+      const [hours, minutes] = formData.time.split(":" );
       const datetime = new Date(selectedSlot);
       datetime.setHours(+hours);
       datetime.setMinutes(+minutes);
@@ -251,10 +251,10 @@ export const MealPlannerCalendar = () => {
                     required
                   >
                     <option value="">Select a recipe</option>
-                    {store.recipes &&
-                      store.recipes.map((recipe) => (
-                        <option key={recipe.id} value={recipe.id}>
-                          {recipe.title}
+                    {store.collections &&
+                      store.collections.map((item) => (
+                        <option key={item.recipe_id} value={item.recipe_id}>
+                          {item.recipe_title}
                         </option>
                       ))}
                   </select>
