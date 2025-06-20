@@ -11,192 +11,153 @@ export const Profile = () => {
     const navigate = useNavigate();
 
     const { dispatch, store } = useGlobalReducer();
-    const [formData, setFormData] = useState({ // Inicialización segura para evitar nulls
+    const [formData, setFormData] = useState({
         username: "",
         email: "",
         password: "",
         photo_url: ""
     });
     const [repeatPasswd, setRepeatPasswd] = useState("");
-
-    //Nuevos estados, modal y refers para imagen de perfil
-    const [profileImage, SetProfileImage] = useState(store.user?.photo_url || 'https://pixabay.com/vectors/avatar-icon-placeholder-profile-3814081/');
+    const [profileImage, SetProfileImage] = useState(
+        store.user?.photo_url || "https://pixabay.com/vectors/avatar-icon-placeholder-profile-3814081/"
+    );
     const fileInputRef = useRef(null);
     const [showUrlModal, setShowUrlModal] = useState(false);
     const [tempImageUrl, setTempImageUrl] = useState("");
 
-    // Función para manejar la subida de imagen desde el ordenador (dentro del modal)
+    // Helper to update only the photo_url on backend
+    const updatePhotoOnly = async (photoUrl) => {
+        try {
+            const res = await userServices.editUser({ photo_url: photoUrl });
+            if (res.success) {
+                dispatch({ type: "updateUser", payload: { user: res.user, token: res.token } });
+                window.alert("Your profile has been updated with the new image!");
+                setFormData((prev) => ({
+                    ...prev,
+                    photo_url: res.user.photo_url || ""
+                }));
+                SetProfileImage(res.user.photo_url || "");
+            } else {
+                window.alert(res.error || "Something went wrong while updating the photo.");
+            }
+        } catch (error) {
+            console.error("Error updating photo:", error);
+            window.alert("An error occurred while updating the photo.");
+        }
+    };
+
+    // Handle file selection and upload photo
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                SetProfileImage(reader.result);
-                setFormData(prevFormData => ({
-                    ...prevFormData,
-                    photo_url: reader.result
-                }));
-                console.log("Imagen local seleccionada? resultado:", reader.result);
-            };
-            reader.readAsDataURL(file)
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            const base64Image = reader.result;
+            SetProfileImage(base64Image);
+            await updatePhotoOnly(base64Image);
+            setShowUrlModal(false);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    // Toggle URL input modal for photo
+    const toggleUrlModal = () => {
+        if (!showUrlModal) {
+            setTempImageUrl(profileImage.startsWith("http") ? profileImage : "");
+        } else {
+            setTempImageUrl("");
         }
+        setShowUrlModal(!showUrlModal);
     };
 
-    //Función profile img, para subir desde URL:
-    const handleUrlChange = (e) => {
-        const url = event.target.value;
-        if (url) {
-            SetProfileImage(url);
-            setFormData(prevFormData => ({
-                ...prevFormData,
-                photo_url: url
-            }));
-            console.log("URL imagen seleccionada!!!!, URL:", url);
-        }
-    };
-
-    // Función click input del archivo (para usar con el botón dentro del modal)
-    const triggerFileInput = () => {
-        fileInputRef.current.click(); // Simula el clic en el input de tipo file oculto
-    };
-
-    // Función para guardar la URL escrita en el modal
+    // Save photo from URL input
     const handleSaveUrlImage = async (e) => {
-        e.preventDefault(); // Previene la recarga de la página si es llamado por un submit
+        e.preventDefault();
+        if (!tempImageUrl) return;
 
-        if (tempImageUrl) {
-            SetProfileImage(tempImageUrl); // Actualiza la vista previa del componente
-            
-            // Crea una copia de formData con la nueva photo_url
-            const updatedFormData = {
-                ...formData,
-                photo_url: tempImageUrl
-            };
-            setFormData(updatedFormData); // Actualiza el estado formData en React
-
-            console.log("Frontend: URL image confirmed from modal:", tempImageUrl);
-            try {
-                console.log("Frontend: Submitting formData with new photo_url (from URL input):", updatedFormData);
-                // Llama a la API con el formData actualizado
-                const res = await userServices.editUser(updatedFormData);
-                console.log("Frontend: API response data (from URL save):", res);
-
-                if (res.success) {
-                    // *** CAMBIO PARA OPCIÓN 2 ***
-                    // El payload es ahora un objeto que contiene 'user' y 'token'
-                    dispatch({ type: "updateUser", payload: { user: res.user, token: res.token } });
-                    window.alert("Your profile has been updated with the new image!");
-
-                    // Opcional: Re-sincronizar formData con el user actualizado de la API
-                    setFormData({
-                        username: res.user.username || "",
-                        email: res.user.email || "",
-                        password: "",
-                        photo_url: res.user.photo_url || ""
-                    });
-
-                } else {
-                    window.alert(res.error || "Something went wrong while saving the URL, please try again.");
-                }
-            } catch (error) {
-                console.error("Frontend: Error in handleSaveUrlImage!!!:", error);
-                window.alert("An error occurred while saving the URL: " + (error.message || error));
-            } finally {
-                toggleUrlModal(); // Cierra el modal siempre, sin importar el éxito de la API
-            }
-        }
+        SetProfileImage(tempImageUrl);
+        await updatePhotoOnly(tempImageUrl);
+        setShowUrlModal(false);
     };
 
-    // Maneja cambios en los inputs del formulario (username, email, password)
-    const handleChange = e => {
+    // Trigger file input click from button
+    const triggerFileInput = () => {
+        fileInputRef.current.click();
+    };
+
+    // Handle input changes for username, email, password
+    const handleChange = (e) => {
         setFormData({
-            ...formData,
             ...formData,
             [e.target.name]: e.target.value
         });
     };
 
-    // Maneja el envío del formulario principal (username, email, password)
+    // Handle profile form submission (without photo_url)
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Solo valida la contraseña si se está intentando cambiar (el campo password no está vacío)
         if (formData.password && formData.password !== repeatPasswd) {
             window.alert("The password does not match");
             return;
         }
-        
-        // Crea una copia de formData para evitar enviar campos vacíos si no han sido modificados
+
         const dataToSubmit = { ...formData };
-        if (!dataToSubmit.password) { // Si la contraseña está vacía, no la envíes
-            delete dataToSubmit.password;
-        }
+        if (!dataToSubmit.password) delete dataToSubmit.password;
+        delete dataToSubmit.photo_url; // Photo updated separately
 
         try {
-            console.log("Frontend: Submitting main formData:", dataToSubmit);
-            const data = await userServices.editUser(dataToSubmit); // Envía solo los campos necesarios
-            console.log("Frontend: API response data:", data);
-
+            const data = await userServices.editUser(dataToSubmit);
             if (data.success) {
-                // *** CAMBIO PARA OPCIÓN 2 ***
-                // El payload es ahora un objeto que contiene 'user' y 'token'
                 dispatch({ type: "updateUser", payload: { user: data.user, token: data.token } });
                 window.alert("Your profile has been updated");
-                console.log(data);
-
                 setFormData({
                     username: data.user.username || "",
                     email: data.user.email || "",
-                    password: "", // Limpiar el campo de contraseña después de un envío exitoso
+                    password: "",
                     photo_url: data.user.photo_url || ""
                 });
                 setRepeatPasswd("");
-
             } else {
                 window.alert(data.error || "Something went wrong, please try again.");
             }
-
         } catch (error) {
-            console.error("Frontend: Error in handleSubmit:", error);
+            console.error("Error updating profile:", error);
             window.alert("An error occurred: " + (error.message || error));
         }
     };
 
-    // Borrar cuenta
+    // Delete account handler
     const handleDeleteAccount = async (e) => {
         e.preventDefault();
         try {
-            const resultado = await userServices.deleteUser()
-            if (resultado.success) {
-                //delete from store the user and token saved
+            const result = await userServices.deleteUser();
+            if (result.success) {
                 dispatch({ type: "logout" });
-                window.alert("You account has been deleted")
-                navigate("/")
+                window.alert("Your account has been deleted");
+                navigate("/");
             } else {
-                window.alert("Failed to delete account: " + (resultado.error || "Unknown error"));
+                window.alert("Failed to delete account: " + (result.error || "Unknown error"));
             }
-
         } catch (error) {
-            console.error("Frontend: Error in handleDeleteAccount:", error);
+            console.error("Error deleting account:", error);
             window.alert("An error occurred: " + (error.message || error));
         }
-    }
+    };
 
-    console.log(store.user);
-
-    // hasta aqui
-
+    // Sync formData and profileImage when store.user changes
     useEffect(() => {
         if (store.user) {
             setFormData({
                 username: store.user.username || "",
                 email: store.user.email || "",
-                password: "", // Contraseña siempre vacía para seguridad en el frontend
+                password: "",
                 photo_url: store.user.photo_url || ""
             });
-            SetProfileImage(store.user.photo_url || 'https://pixabay.com/vectors/avatar-icon-placeholder-profile-3814081/');
+            SetProfileImage(store.user.photo_url || "https://pixabay.com/vectors/avatar-icon-placeholder-profile-3814081/");
         }
-    }, [store.user]); // Dependencia: se ejecuta cuando store.user cambia
+    }, [store.user]);
 
     return (
         <>
@@ -224,31 +185,21 @@ export const Profile = () => {
                                             <h4><i className="fa-solid fa-camera"></i></h4>
                                             <p className="text-change">Edit</p>
                                         </div>
-
-                                        {/* Nuevo input para subir img desde ordenador */}
-                                        <input
-                                            className="change-profile-img"
-                                            type="file"
-                                            ref={fileInputRef}
-                                            accept="image/*"
-                                            onChange={handleFileChange}
-                                        />
-
+                                        {/* El input de tipo file ahora estará DENTRO DEL MODAL */}
                                     </div>
 
                                     {/* Formulario principal de edición de perfil */}
                                     <form className="text-start form-perfil w-75 mx-auto" onSubmit={handleSubmit}>
                                         <div className="mb-3">
-                                            <label htmlFor="username" className="form label my-3 fw-bold">Username</label>
+                                            <label htmlFor="username" className="form-label my-3 fw-bold">Username</label>
                                             <input type="text"
                                                 className="form-control"
                                                 name="username"
                                                 id="username"
                                                 onChange={handleChange}
-                                                placeholder={formData?.username || ""} />
-                                            <p className="change-email text-danger fw-bold" onClick={handleSubmit}>
-                                                CHANGE USERNAME
-                                            </p>
+                                                placeholder={formData?.username || ""}
+                                                value={formData?.username || ""} // Controla el input con el estado
+                                            />
                                         </div>
                                         <div className="mb-3">
                                             <label htmlFor="Email1" className="form-label my-3 fw-bold">Email address</label>
@@ -257,12 +208,9 @@ export const Profile = () => {
                                                 name="email"
                                                 id="Email1"
                                                 onChange={handleChange}
-                                                placeholder={store.user?.email || ""} />
-
-                                            <p className="change-email text-danger fw-bold" onClick={handleSubmit}>
-                                                CHANGE E-MAIL
-                                            </p>
-                                            {/* Mensaje de OK o error */}
+                                                placeholder={store.user?.email || ""}
+                                                value={formData?.email || ""} // Controla el input con el estado
+                                            />
                                             {store.user?.success && (
                                                 <div className="alert alert-info mt-2">
                                                     "Your email has been updated."
@@ -271,19 +219,22 @@ export const Profile = () => {
                                         </div>
                                         <div className="form-group mb-4">
                                             <label className="form-label my-3 fw-bold">Change password</label>
-                                            {/* FALTARIA UN METODO EN LA API PARA COMPROBAR SI LA PASSW ANTIGUA COINCIDE CON LA INTRODUCIDA AQUI.... <input type="password" className="form-control" id="current-password" placeholder="*Current password" /> */}
                                             <input type="password"
                                                 name="password"
                                                 onChange={handleChange}
                                                 className="form-control"
                                                 id="password"
-                                                placeholder="*Type new password" />
+                                                placeholder="*Type new password"
+                                                value={formData?.password || ""} // Controla el input con el estado
+                                            />
                                             <input type="password"
                                                 name="repeatPasswd"
                                                 onChange={e => setRepeatPasswd(e.target.value)}
                                                 className="form-control"
                                                 id="repeatPasswd"
-                                                placeholder="*Repeat new password" />
+                                                placeholder="*Repeat new password"
+                                                value={repeatPasswd || ""} // Controla el input con el estado
+                                            />
                                         </div>
                                         <div className="actions-profile">
                                             <button type="submit" className="btn btn-secondary">Update</button>
@@ -321,26 +272,26 @@ export const Profile = () => {
                                 onClick={() => { document.activeElement?.blur(); }}></button>
                         </div>
                         <div className="modal-body">
-                            <button type="button" className="btn btn-danger p-0" data-bs-dismiss="modal" aria-label="Delete&Close" onClick={() => { document.activeElement?.blur() }, handleDeleteAccount}>YES</button>
-                            <button type="button" className="btn btn-secondary p-0 ms-3" data-bs-dismiss="modal" aria-label="Close" onClick={() => { document.activeElement?.blur() }}>Cancel</button>
+                            {/* Asegúrate que handleDeleteAccount se llame correctamente */}
+                            <button type="button" className="btn btn-danger p-0" data-bs-dismiss="modal" aria-label="Delete&Close" onClick={(e) => { document.activeElement?.blur(); handleDeleteAccount(e); }}>YES</button>
+                            <button type="button" className="btn btn-secondary p-0 ms-3" data-bs-dismiss="modal" aria-label="Close" onClick={() => { document.activeElement?.blur(); }}>Cancel</button>
                         </div>
                     </div>
                 </div>
             </div>
 
-
-            {/* --- NUEVO MODAL PARA CAMBIAR IMAGEN POR URL --- */}
+            {/* --- MODAL PARA CAMBIAR IMAGEN DE PERFIL --- */}
             {showUrlModal && ( // Solo renderiza el modal si showUrlModal es true
                 <div className="modal fade show" id="imageUrlModal" style={{ display: 'block' }} tabIndex="-1" role="dialog" aria-labelledby="imageUrlModalLabel" aria-hidden={!showUrlModal}> {/* `aria-hidden` es dinámico */}
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
-                                <h5 className="modal-title" id="imageUrlModalLabel">Cambiar imagen por URL</h5>
+                                <h5 className="modal-title" id="imageUrlModalLabel">Cambiar imagen de perfil</h5>
                                 <button
                                     type="button"
                                     className="btn-close"
                                     aria-label="Close"
-                                    onClick={handleCloseUrlModal}
+                                    onClick={toggleUrlModal} // Llama a la función de toggle para cerrar
                                 ></button>
                             </div>
                             <div className="modal-body">
@@ -390,8 +341,7 @@ export const Profile = () => {
                 </div>
             )}
             {showUrlModal && <div className="modal-backdrop fade show"></div>} {/* Para el fondo oscuro del modal */}
-            {/* --- FIN NUEVO MODAL --- */}
-
+            {/* --- FIN MODAL --- */}
         </>
     );
 };

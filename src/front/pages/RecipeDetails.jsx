@@ -162,15 +162,15 @@ export const RecipeDetails = () => {
                         {/* Prep time info */}
                         <div className="col-12 col-md-12 col-lg-6 
                         justify-content-center prep_border p-2 p-md-2 p-lg-1 d-flex">
-                            <FontAwesomeIcon icon={faClock} className='me-3 mt-1 icon_prep_type' />
-                            <p className='pt-2 text_prep_type'>{store.recipe?.prep_time} minutes</p>
+                            <FontAwesomeIcon icon={faClock} className='me-3 mt-2 icon_prep_type' />
+                            <p className='pt-1 text_prep_type'>{store.recipe?.prep_time} minutes</p>
                         </div>
 
                         {/* difficulty_type info */}
                         <div className="col-12 col-md-12 col-lg-6 
                         justify-content-center text-capitalized p-1 p-md-2 p-lg-1 d-flex">
-                            <FontAwesomeIcon icon={faUtensils} className='me-3 mt-1 icon_prep_type' />
-                            <p className='pt-2 text_prep_type'>{store.recipe?.difficulty_type}</p>
+                            <FontAwesomeIcon icon={faUtensils} className='me-3 mt-2 icon_prep_type' />
+                            <p className='pt-1 text_prep_type'>{store.recipe?.difficulty_type}</p>
                         </div>
 
                     </div>
@@ -277,7 +277,7 @@ export const RecipeDetails = () => {
             <Comments recipe_id={id} />
 
             <div className="row row_bg_suggestions">
-                <h2 className="p-4 text-light">Latest Recipes</h2>
+                <div><h2 className="p-4 text-light fs-2">Latest Recipes</h2></div>
                 <div className="col-12">
                     <div className="scroll-container d-flex p-3">
 

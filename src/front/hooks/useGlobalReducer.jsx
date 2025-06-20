@@ -5,6 +5,7 @@ import { useEffect } from "react";
 
 //services
 import recipeServices from "../services/recetea_API/recipeServices.js"
+// import collectionServices from "../services/recetea_API/collectionServices.js"
 
 // Create a context to hold the global state of the application
 // We will call this global state the "store" to avoid confusion while using local states
@@ -25,14 +26,14 @@ export function StoreProvider({ children }) {
         }
     }
 
-    const loadCollections = async () => {
-        try {
-            const data = await recipeServices.getUserCollections();
-            dispatch({ type: 'get_user_collections', payload: data });
-        } catch (error) {
-            console.log(error);
-        }
-    }
+    // const loadCollections = async () => {
+    //     try {
+    //         const data = await collectionServices.getUserCollections();
+    //         dispatch({ type: 'get_user_collections', payload: data });
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }
 
     // Load the page once only
     useEffect (() => {
@@ -45,7 +46,7 @@ export function StoreProvider({ children }) {
                 payload: { token, user: JSON.parse(user) },
             });
             loadRecipes()
-            loadCollections()
+            //loadCollections()
         }
     }, [])
 
