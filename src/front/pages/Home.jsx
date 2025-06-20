@@ -44,12 +44,14 @@ export const Home = () => {
 	}, [])
 
 	return (
-		<div className="container-fluid m-0 p-0 g-0">
+		<div className="container-fluid container_home">
 			<TopSection />
-			<div className="row p-4">
-				<h2 className="p-4 text-danger">Latest Recipes</h2>
-				<div className="col-12 p-4">
-					<div className="scroll-container d-flex p-3">
+			<div className="row bg-light">
+				<div className="col-12">
+					<h2 className="text-danger">Latest Recipes</h2>
+				</div>
+				<div className="col-12">
+					<div className="scroll-container d-flex">
 
 						{/* maping over RecipeCards to create cards based on the data */}
 						{
