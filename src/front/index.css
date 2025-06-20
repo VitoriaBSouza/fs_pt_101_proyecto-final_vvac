@@ -1149,6 +1149,23 @@ input[type="search"]::-webkit-search-cancel-button {
 
 /*recipescroll in landingPage*/
 
+.home_img{
+  max-width: 100rem;
+  height: 500px;
+  overflow: hidden;
+}
+
+.top_div{
+  min-width: 40rem;
+  max-width: 19rem;
+  max-height: 400px;
+  min-height: 300px;
+}
+
+.row_home_top{
+  padding: 30px;
+  background-color: #9C1C26;
+}
 /* .recipe-scroller-container {
   max-width: 100%;
   padding: 1rem;
