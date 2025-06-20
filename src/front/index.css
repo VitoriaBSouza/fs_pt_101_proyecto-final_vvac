@@ -2111,3 +2111,69 @@ div.container_bottom_section {
 }
 
 /* FIN create recipe */
+
+
+/************************************************************/
+/***************** Meal Plan Calendar ***********************/
+/************************************************************/
+
+/* Calendar Custom Theme */
+.calendar-wrapper.calendar-theme {
+  background-color: #ca3e49;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  color: #fff;
+  box-shadow: 0 0 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Override calendar background and typography */
+.rbc-calendar {
+  background-color: #fff;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: #212529;
+}
+
+/* Events style */
+.rbc-event {
+  background-color: #fff3f4;
+  color: #ca3e49;
+  border-left: 4px solid #ca3e49;
+  border-radius: 0.375rem;
+  padding: 4px 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+/* Toolbar header buttons */
+.rbc-toolbar button {
+  background-color: #ffffff;
+  color: #ca3e49;
+  border: 1px solid #ca3e49;
+  border-radius: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  font-weight: 500;
+  margin: 0 0.25rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.rbc-toolbar button:hover {
+  background-color: #ca3e49;
+  color: #ffffff;
+}
+
+.rbc-toolbar button.rbc-active {
+  background-color: #ca3e49;
+  color: white;
+  border: none;
+}
+
+/* Modal focus overrides */
+.modal .form-control:focus,
+.modal .form-select:focus {
+  box-shadow: 0 0 0 0.25rem rgba(202, 62, 73, 0.25);
+  border-color: #ca3e49;
+}
+
+

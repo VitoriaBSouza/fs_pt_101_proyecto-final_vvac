@@ -1,4 +1,3 @@
-
 export const initialStore=()=>{
   return{
     token: localStorage.getItem("token") || null,
@@ -31,18 +30,15 @@ export const initialStore=()=>{
         title: "Do my homework",
         background: null,
       }
-    ]
+    ],
+    selectedCalendarRecipe: null  // ✅ NUEVO: para integración con calendario
   }
 }
 
 export default function storeReducer(store, action = {}) {
   switch(action.type){
     case 'logout':
-
-    //remove the client token and user info from local
       localStorage.removeItem('token')
-
-      //remove the client token and user info from local
       localStorage.removeItem('user')
       return {
         ...store,
@@ -67,27 +63,26 @@ export default function storeReducer(store, action = {}) {
         ...store,
       };
       
-      case "updateUser":
-        return {
-          ...store,
-          user: {
-            ...store.user,
-            ...action.payload.user, // Merge only the updated fields
-          },
-          token: action.payload.token || store.token
+    case "updateUser":
+      return {
+        ...store,
+        user: {
+          ...store.user,
+          ...action.payload.user,
+        },
+        token: action.payload.token || store.token
       };
 
-      case 'updateProfileImage':
-        const updatedUserWithImage = {
-          ...store.user,
-          photo_url: action.payload.photo_url 
-        };
-            // Necesario para actualizar en local storage:
-          localStorage.setItem('user', JSON.stringify(updatedUserWithImage));             
-        return {
-          ...store,
-          user: updatedUserWithImage
-        };
+    case 'updateProfileImage':
+      const updatedUserWithImage = {
+        ...store.user,
+        photo_url: action.payload.photo_url 
+      };
+      localStorage.setItem('user', JSON.stringify(updatedUserWithImage));             
+      return {
+        ...store,
+        user: updatedUserWithImage
+      };
 
     case 'get_all_recipes':
       return {
@@ -113,10 +108,6 @@ export default function storeReducer(store, action = {}) {
     }
 
     case 'like': {
-
-      //take data from action payload
-      //we use recipe_id to create an element on the list and store data 
-      // because we need to know how many liked the recipe
       const { recipe_id, user_id } = action.payload;
       const newScoreEntry = {
         recipe_id: recipe_id,
@@ -126,11 +117,10 @@ export default function storeReducer(store, action = {}) {
       return {
         ...store,
         scores: {
-        ...store.scores,
-        // Filter out the old entry for this user/recipe if it existed, then add the new one
-        [recipe_id]: [...(store.scores[recipe_id] ?? []).filter(
-            (scoreItem) => String(scoreItem.user_id) !== String(user_id)
-        ), newScoreEntry]
+          ...store.scores,
+          [recipe_id]: [...(store.scores[recipe_id] ?? []).filter(
+              (scoreItem) => String(scoreItem.user_id) !== String(user_id)
+          ), newScoreEntry]
         }
       };
     }
@@ -207,30 +197,34 @@ export default function storeReducer(store, action = {}) {
       };
       
     case 'add_task':
-
       const { id,  color } = action.payload
-
       return {
         ...store,
         todos: store.todos.map((todo) => (todo.id === id ? { ...todo, background: color } : todo))
       };
 
-      case 'get_user_collections':
+    case 'get_user_collections':
       return {
         ...store,
         collections: action.payload
       };
 
-      case 'add_to_collection':
-        return {
-          ...store,
-          collections: [...store.collections, action.payload]
-        };
+    case 'add_to_collection':
+      return {
+        ...store,
+        collections: [...store.collections, action.payload]
+      };
         
-      case 'remove_from_collection':
-        return {
+    case 'remove_from_collection':
+      return {
         ...store,
         collections: store.collections.filter(id => id !== action.payload)
+      };
+
+    case 'set_calendar_entry_recipe':
+      return {
+        ...store,
+        selectedCalendarRecipe: action.payload
       };
 
     default:
