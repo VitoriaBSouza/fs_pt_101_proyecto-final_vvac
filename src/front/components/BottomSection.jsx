@@ -17,7 +17,7 @@ export const BottomSection = () => {
                 />
                 <div className="card_bottom">
                   <h2 className="card-title"> VEGAN DIET </h2>
-                  <p></p>
+                  <p>Recipes made entirely with plant-based ingredients.</p>
                 </div>
               </div>
             </div>
@@ -31,7 +31,7 @@ export const BottomSection = () => {
                 />
                 <div className="card_bottom">
                   <h5 className="card-title">GLUTEN FREE</h5>
-                  <p></p>
+                  <p>Recipes without wheat, barley, or rye.</p>
                 </div>
               </div>
             </div>
@@ -45,7 +45,7 @@ export const BottomSection = () => {
                 />
                 <div className="card_bottom">
                   <h5 className="card-title">HIGH PROTEIC</h5>
-                  <p></p>
+                  <p>Meals rich in protein for muscle and energy.</p>
                 </div>
               </div>
             </div>
@@ -59,7 +59,7 @@ export const BottomSection = () => {
                 />
                 <div className="card_bottom">
                   <h5 className="card-title">LOW CALORIES</h5>
-                  <p></p>
+                  <p> Light recipes to help you stay in shape.</p>
                 </div>
               </div>
             </div>
@@ -73,7 +73,7 @@ export const BottomSection = () => {
                 />
                 <div className="card_bottom">
                   <h5 className="card-title">FAST RECIPES</h5>
-                  <p></p>
+                  <p>Quick meals ready in 30 minutes or less.</p>
                 </div>
               </div>
             </div>
@@ -87,7 +87,7 @@ export const BottomSection = () => {
                 />
                 <div className="card_bottom">
                   <h5 className="card-title">CHEAT MEALS</h5>
-                  <p></p>
+                  <p>Indulgent treats to enjoy without guilt.</p>
                 </div>
               </div>
             </div>
