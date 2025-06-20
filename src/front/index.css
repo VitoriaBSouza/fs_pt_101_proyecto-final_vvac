@@ -1647,7 +1647,7 @@ input[type="search"]::-webkit-search-cancel-button {
 /***************** Meal Plan Calendar ***********************/
 /************************************************************/
 
-/* === Calendar Custom Theme === */
+/* Calendar Custom Theme */
 .calendar-wrapper.calendar-theme {
   background-color: #ca3e49;
   border-radius: 1rem;

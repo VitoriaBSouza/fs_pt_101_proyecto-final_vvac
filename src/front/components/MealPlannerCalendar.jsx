@@ -52,7 +52,7 @@ export const MealPlannerCalendar = () => {
   const [formData, setFormData] = useState({ recipe_id: "", meal_type: "", time: "12:00" });
   const [editingEvent, setEditingEvent] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const { store } = useGlobalReducer();
+  const { store, dispatch } = useGlobalReducer();
   const navigate = useNavigate();
 
   const loadMealPlanEntries = useCallback(async () => {
@@ -71,6 +71,17 @@ export const MealPlannerCalendar = () => {
   useEffect(() => {
     loadMealPlanEntries();
   }, [loadMealPlanEntries]);
+
+  useEffect(() => {
+    if (store.selectedCalendarRecipe) {
+      setFormData({
+        recipe_id: store.selectedCalendarRecipe.id.toString(),
+        meal_type: "",
+        time: "12:00",
+      });
+      dispatch({ type: "set_calendar_entry_recipe", payload: null });
+    }
+  }, [store.selectedCalendarRecipe, dispatch]);
 
   const handleSelectEvent = (event) => {
     const entry = events.find(e => e.resource.id === event.resource.id);
@@ -257,6 +268,12 @@ export const MealPlannerCalendar = () => {
                           {item.recipe_title}
                         </option>
                       ))}
+                    {store.selectedCalendarRecipe &&
+                      !store.collections.some((item) => item.recipe_id === store.selectedCalendarRecipe.id) && (
+                        <option value={store.selectedCalendarRecipe.id}>
+                          {store.selectedCalendarRecipe.title}
+                        </option>
+                      )}
                   </select>
                 </div>
                 <div className="mb-3">
