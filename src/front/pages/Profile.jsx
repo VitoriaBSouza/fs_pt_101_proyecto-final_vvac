@@ -163,6 +163,15 @@ export const Profile = () => {
             delete dataToSubmit.password;
         }
 
+        if (!dataToSubmit.email) { // Si la contraseña está vacía, no la envíes
+            delete dataToSubmit.email;
+        }
+
+        if (!dataToSubmit.username) { // Si la contraseña está vacía, no la envíes
+            delete dataToSubmit.username;
+        }
+
+        
         try {
             console.log("Frontend: Submitting main formData:", dataToSubmit);
             const data = await userServices.editUser(dataToSubmit); // Envía solo los campos necesarios
@@ -262,7 +271,7 @@ export const Profile = () => {
                                                 name="username"
                                                 id="username"
                                                 onChange={handleChange}
-                                                value={formData?.username || ""} // Controla el input con el estado
+                                                // value={formData?.username || ""} // Controla el input con el estado
                                             />
                                         </div>
                                         <div className="mb-3">
@@ -272,7 +281,7 @@ export const Profile = () => {
                                                 name="email"
                                                 id="Email1"
                                                 onChange={handleChange}
-                                                value={formData?.email || ""} // Controla el input con el estado
+                                                // value={formData?.email || ""} // Controla el input con el estado
                                             />
                                             {store.user?.success && (
                                                 <div className="alert alert-info mt-2">
@@ -288,7 +297,7 @@ export const Profile = () => {
                                                 className="form-control"
                                                 id="password"
                                                 placeholder="*Type new password"
-                                                value={formData?.password || ""} // Controla el input con el estado
+                                                // value={formData?.password || ""} // Controla el input con el estado
                                             />
                                             <input type="password"
                                                 name="repeatPasswd"
@@ -296,7 +305,7 @@ export const Profile = () => {
                                                 className="form-control"
                                                 id="repeatPasswd"
                                                 placeholder="*Repeat new password"
-                                                value={repeatPasswd || ""} // Controla el input con el estado
+                                                // value={repeatPasswd || ""} // Controla el input con el estado
                                             />
                                         </div>
                                         <div className="actions-profile">
@@ -344,7 +353,7 @@ export const Profile = () => {
             </div>
 
             {/* --- MODAL PARA CAMBIAR IMAGEN DE PERFIL --- */}
-            {showUrlModal && ( // Solo renderiza el modal si showUrlModal es true
+            {showUrlModal && ( 
                 <div className="modal fade show" id="imageUrlModal" style={{ display: 'block' }} tabIndex="-1" role="dialog" aria-labelledby="imageUrlModalLabel" aria-hidden={!showUrlModal}> {/* `aria-hidden` es dinámico */}
                     <div className="modal-dialog">
                         <div className="modal-content">
@@ -374,12 +383,13 @@ export const Profile = () => {
                                         </div>
                                     )}
                                 </div>
-                                <hr /> {/* Separador visual */}
+                                <hr />
                                 <div className="mb-3 text-center">
                                     <label className="form-label">O sube una imagen desde tu ordenador:</label>
                                     <button
                                         type="button"
                                         className="btn btn-primary mt-2"
+                                        name="photo_url"
                                         onClick={triggerFileInput} // Activa el input de archivo oculto
                                     >
                                         Subir imagen
