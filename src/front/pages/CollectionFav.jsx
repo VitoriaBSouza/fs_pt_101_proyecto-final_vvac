@@ -39,7 +39,7 @@ export const CollectionFav = () => {
 
     const fetchCollectionsRaw = async () => {
       const data = await collectionServices.getUserCollections()
-      const formatted = (Array.isArray(data) ? data : data.collection || []).map(item => ({
+      const formatted = (Array.isArray(data) ? data : data.data || []).map(item => ({
         id: item.recipe_id,               // aquí recipe_id
         userId: item.user_id,
       }))
@@ -107,7 +107,7 @@ export const CollectionFav = () => {
 
     return (
       <div className="cards-grid">
-        {allRecipes.map(recipe => (
+        {allRecipes.map((recipe,idx) => (
           <RecipeCard
             key={recipe.id}
             id={recipe.id}
