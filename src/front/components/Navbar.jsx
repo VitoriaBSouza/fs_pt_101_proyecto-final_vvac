@@ -22,7 +22,7 @@ export const Navbar = () => {
       <div className="container-fluid">
         
         <Link to="/">
-          <img src={logo} alt="Logo" className="logo-navbar" />
+          <img src={logo} alt="Logo" className="logo-navbar me-4" />
         </Link>
 
         <Search />
@@ -31,7 +31,7 @@ export const Navbar = () => {
 
           <div className="collapse navbar-collapse" id="navbarSupportedContent">
             
-            <CollectionList />
+            <CollectionList/>
 
             <ul className="navbar-nav mb-lg-0">
             

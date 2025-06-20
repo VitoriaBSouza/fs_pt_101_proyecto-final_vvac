@@ -1,18 +1,23 @@
 import { TurnHome } from "../components/buttons/TurnHome";
 import { LinksMenu } from "../components/LinksMenu";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom"; // Link no se usa, se puede quitar si no hay rutas internas explícitas
 import useGlobalReducer from "../hooks/useGlobalReducer";
 import { RightMenu } from "../components/RightMenu";
 import { useNavigate } from "react-router-dom";
-import userServices from "../services/recetea_API/userServices.js"
-import { useState, useEffect, useRef } from "react"
+import userServices from "../services/recetea_API/userServices.js";
+import { useState, useEffect, useRef } from "react";
 
 export const Profile = () => {
     const navigate = useNavigate();
 
     const { dispatch, store } = useGlobalReducer();
-    const [formData, setFormData] = useState(null);
-    const [repeatPasswd, setRepeatPasswd] = useState("")
+    const [formData, setFormData] = useState({ // Inicialización segura para evitar nulls
+        username: "",
+        email: "",
+        password: "",
+        photo_url: ""
+    });
+    const [repeatPasswd, setRepeatPasswd] = useState("");
 
     //Nuevos estados, modal y refers para imagen de perfil
     const [profileImage, SetProfileImage] = useState(store.user?.photo_url || 'https://pixabay.com/vectors/avatar-icon-placeholder-profile-3814081/');
@@ -20,7 +25,7 @@ export const Profile = () => {
     const [showUrlModal, setShowUrlModal] = useState(false);
     const [tempImageUrl, setTempImageUrl] = useState("");
 
-    //Función profile img, para subir desde el ordenador:
+    // Función para manejar la subida de imagen desde el ordenador (dentro del modal)
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -50,69 +55,112 @@ export const Profile = () => {
         }
     };
 
-    //Función click input del archivo
+    // Función click input del archivo (para usar con el botón dentro del modal)
     const triggerFileInput = () => {
-        fileInputRef.current.click();
-    }
+        fileInputRef.current.click(); // Simula el clic en el input de tipo file oculto
+    };
 
-    //Nueva función modal img por url
-    const handleOpenUrlModal = () => {
-        setTempImageUrl(profileImage.startWith('http') ? profileImage : '');
-        setShowUrlModal(true);
-    }
+    // Función para guardar la URL escrita en el modal
+    const handleSaveUrlImage = async (e) => {
+        e.preventDefault(); // Previene la recarga de la página si es llamado por un submit
 
-    const handleSaveUrlImage = () => {
         if (tempImageUrl) {
-            SetProfileImage(tempImageUrl);
-            setFormData(prevFormData => ({
-                ...prevFormData,
+            SetProfileImage(tempImageUrl); // Actualiza la vista previa del componente
+            
+            // Crea una copia de formData con la nueva photo_url
+            const updatedFormData = {
+                ...formData,
                 photo_url: tempImageUrl
-            }));
-            console.log("Frontend: URL image confirmed from modal:", tempImageUrl);
-        }
-        handleCloseUrlModal();
-    }
+            };
+            setFormData(updatedFormData); // Actualiza el estado formData en React
 
+            console.log("Frontend: URL image confirmed from modal:", tempImageUrl);
+            try {
+                console.log("Frontend: Submitting formData with new photo_url (from URL input):", updatedFormData);
+                // Llama a la API con el formData actualizado
+                const res = await userServices.editUser(updatedFormData);
+                console.log("Frontend: API response data (from URL save):", res);
+
+                if (res.success) {
+                    // *** CAMBIO PARA OPCIÓN 2 ***
+                    // El payload es ahora un objeto que contiene 'user' y 'token'
+                    dispatch({ type: "updateUser", payload: { user: res.user, token: res.token } });
+                    window.alert("Your profile has been updated with the new image!");
+
+                    // Opcional: Re-sincronizar formData con el user actualizado de la API
+                    setFormData({
+                        username: res.user.username || "",
+                        email: res.user.email || "",
+                        password: "",
+                        photo_url: res.user.photo_url || ""
+                    });
+
+                } else {
+                    window.alert(res.error || "Something went wrong while saving the URL, please try again.");
+                }
+            } catch (error) {
+                console.error("Frontend: Error in handleSaveUrlImage!!!:", error);
+                window.alert("An error occurred while saving the URL: " + (error.message || error));
+            } finally {
+                toggleUrlModal(); // Cierra el modal siempre, sin importar el éxito de la API
+            }
+        }
+    };
+
+    // Maneja cambios en los inputs del formulario (username, email, password)
     const handleChange = e => {
         setFormData({
             ...formData,
+            ...formData,
             [e.target.name]: e.target.value
-        })
-    }
+        });
+    };
 
+    // Maneja el envío del formulario principal (username, email, password)
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (formData.password !== repeatPasswd) {
-            window.alert("The password does not match")
-            //this will stop submission if does not match
+        // Solo valida la contraseña si se está intentando cambiar (el campo password no está vacío)
+        if (formData.password && formData.password !== repeatPasswd) {
+            window.alert("The password does not match");
             return;
+        }
+        
+        // Crea una copia de formData para evitar enviar campos vacíos si no han sido modificados
+        const dataToSubmit = { ...formData };
+        if (!dataToSubmit.password) { // Si la contraseña está vacía, no la envíes
+            delete dataToSubmit.password;
         }
 
         try {
-            const data = await userServices.editUser(formData)
+            console.log("Frontend: Submitting main formData:", dataToSubmit);
+            const data = await userServices.editUser(dataToSubmit); // Envía solo los campos necesarios
+            console.log("Frontend: API response data:", data);
 
             if (data.success) {
-                dispatch({ type: "updateUser", payload: data.user, token: data.token });
+                // *** CAMBIO PARA OPCIÓN 2 ***
+                // El payload es ahora un objeto que contiene 'user' y 'token'
+                dispatch({ type: "updateUser", payload: { user: data.user, token: data.token } });
                 window.alert("Your profile has been updated");
                 console.log(data);
 
                 setFormData({
                     username: data.user.username || "",
                     email: data.user.email || "",
-                    password: "",
+                    password: "", // Limpiar el campo de contraseña después de un envío exitoso
                     photo_url: data.user.photo_url || ""
                 });
                 setRepeatPasswd("");
 
             } else {
-                window.alert(data.error || "Something went wrong, please try again.")
+                window.alert(data.error || "Something went wrong, please try again.");
             }
 
         } catch (error) {
-            window.alert(error)
+            console.error("Frontend: Error in handleSubmit:", error);
+            window.alert("An error occurred: " + (error.message || error));
         }
-    }
+    };
 
     // Borrar cuenta
     const handleDeleteAccount = async (e) => {
@@ -129,7 +177,8 @@ export const Profile = () => {
             }
 
         } catch (error) {
-            window.alert(error || "Something went wrong. Please try again.")
+            console.error("Frontend: Error in handleDeleteAccount:", error);
+            window.alert("An error occurred: " + (error.message || error));
         }
     }
 
@@ -142,13 +191,12 @@ export const Profile = () => {
             setFormData({
                 username: store.user.username || "",
                 email: store.user.email || "",
-                password: "",
+                password: "", // Contraseña siempre vacía para seguridad en el frontend
                 photo_url: store.user.photo_url || ""
             });
-            SetProfileImage(store.user.photo_url || 'https://pixabay.com/vectors/avatar-icon-placeholder-profile-3814081/')         //Para iniciar profile img con la url del usuario!
-
+            SetProfileImage(store.user.photo_url || 'https://pixabay.com/vectors/avatar-icon-placeholder-profile-3814081/');
         }
-    }, [store.user])
+    }, [store.user]); // Dependencia: se ejecuta cuando store.user cambia
 
     return (
         <>
@@ -156,31 +204,25 @@ export const Profile = () => {
                 <div className="profile-container">
                     <div className="container text-center sidebar-left-profile">
                         <div className="row align-items-start g-0">
-                            {/* COLUMNA IZQ */}
-
+                            {/* COLUMNA IZQUIERDA */}
                             <div className="col-12 col-md-3">
-
                                 <div className="d-flex align-items-start">
                                     <TurnHome />
                                     <LinksMenu />
                                 </div>
-
                             </div>
 
-                            {/* COLUMNA PRINCIPAL  */}
+                            {/* COLUMNA PRINCIPAL */}
                             <div className="col-6 main-column-content">
-
                                 <div className="d-flex align-items-start flex-column mb-3 edit-perfil">
 
-
-                                    <div className="change-picture mx-auto" data-mdb-ripple-color="light">
+                                    {/* ÁREA DE IMAGEN DE PERFIL Y BOTÓN PARA ABRIR MODAL */}
+                                    {/* Al hacer clic en esta área, se abrirá el modal de cambio de imagen */}
+                                    <div className="change-picture mx-auto" data-mdb-ripple-color="light" onClick={toggleUrlModal}>
                                         <img src={profileImage} alt="Your profile pic" className="rounded-circle pic-perfil" />
-
                                         <div className="mask-change-pic">
-
                                             <h4><i className="fa-solid fa-camera"></i></h4>
                                             <p className="text-change">Edit</p>
-
                                         </div>
 
                                         {/* Nuevo input para subir img desde ordenador */}
@@ -194,16 +236,8 @@ export const Profile = () => {
 
                                     </div>
 
-                                    {/* Opc. cambiar img por URL
-                                    <div className="mt-4 w-100">
-                                        <div className="mb-3">
-                                            <label htmlFor="imageUrl" className="form-label">You can also paste the URL:</label>
-                                            <input type="text" className="form-control" id="imageUrl" onChange={handleUrlChange} />
-                                        </div>
-                                    </div> */}
-
+                                    {/* Formulario principal de edición de perfil */}
                                     <form className="text-start form-perfil w-75 mx-auto" onSubmit={handleSubmit}>
-
                                         <div className="mb-3">
                                             <label htmlFor="username" className="form label my-3 fw-bold">Username</label>
                                             <input type="text"
@@ -252,7 +286,6 @@ export const Profile = () => {
                                                 placeholder="*Repeat new password" />
                                         </div>
                                         <div className="actions-profile">
-
                                             <button type="submit" className="btn btn-secondary">Update</button>
                                             <button type="reset" className="btn btn-danger ms-2">Cancel</button>
                                         </div>
@@ -261,27 +294,21 @@ export const Profile = () => {
                             </div>
 
                             {/* COLUMNA DERECHA */}
-
                             <div className="col-3 right-profile">
-
-                                {/* Pendiente definir altura boton, cambiaría segun el footer. 
-                        La mejor opción para que esté el buton [DELETE ACCOUNT] al final de la pagina sería con el viewport (vh) */}
-
                                 <div className="d-grid row-gap-5 b-grids-right h-100">
                                     <RightMenu />
-
                                     <div className="align-self-end">
-                                        {/* ABRIR MODAL PARA CONFIRMAR EL BORRADO DE LA CUENTA */}
+                                        {/* Botón para abrir el modal de borrado de cuenta */}
                                         <button type="button" className="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalDeleteAccount">Delete account</button>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            {/* Modal setting here, to delete account: */}
+
+            {/* Modal de confirmación para eliminar cuenta (sin cambios significativos, usa Bootstrap JS) */}
             <div className="modal fade" id="modalDeleteAccount" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="modalDeleteAccountLabel">
                 <div className="modal-dialog w-75">
                     <div className="modal-content">
@@ -297,7 +324,6 @@ export const Profile = () => {
                             <button type="button" className="btn btn-danger p-0" data-bs-dismiss="modal" aria-label="Delete&Close" onClick={() => { document.activeElement?.blur() }, handleDeleteAccount}>YES</button>
                             <button type="button" className="btn btn-secondary p-0 ms-3" data-bs-dismiss="modal" aria-label="Close" onClick={() => { document.activeElement?.blur() }}>Cancel</button>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -305,7 +331,7 @@ export const Profile = () => {
 
             {/* --- NUEVO MODAL PARA CAMBIAR IMAGEN POR URL --- */}
             {showUrlModal && ( // Solo renderiza el modal si showUrlModal es true
-                <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1" role="dialog" aria-labelledby="imageUrlModalLabel" aria-hidden="true">
+                <div className="modal fade show" id="imageUrlModal" style={{ display: 'block' }} tabIndex="-1" role="dialog" aria-labelledby="imageUrlModalLabel" aria-hidden={!showUrlModal}> {/* `aria-hidden` es dinámico */}
                     <div className="modal-dialog">
                         <div className="modal-content">
                             <div className="modal-header">
@@ -319,26 +345,45 @@ export const Profile = () => {
                             </div>
                             <div className="modal-body">
                                 <div className="mb-3">
-                                    <label htmlFor="modalImageUrl" className="form-label">You can also paste the URL:</label>
+                                    <label htmlFor="modalImageUrl" className="form-label">Pega la URL de la imagen:</label>
                                     <input
                                         type="text"
                                         className="form-control"
                                         id="modalImageUrl"
-                                        placeholder="Ej: https://example.com/my-avatar.jpg"
-                                        value={tempImageUrl} // Controla el input con el estado
+                                        placeholder="Ej: https://example.com/mi-foto.jpg"
+                                        value={tempImageUrl} // Controla el input con el estado temporal
                                         onChange={(e) => setTempImageUrl(e.target.value)}
                                     />
-                                    {/* Pequeña vista previa en el modal (opcional) */}
                                     {tempImageUrl && (
                                         <div className="mt-3 text-center modal-url-profile">
-                                            <img src={tempImageUrl} alt="Preview" className="img-thumbnail" />
+                                            {/* Estilos inline para limitar el tamaño de la previsualización */}
+                                            <img src={tempImageUrl} alt="Preview" style={{ maxWidth: '100%', maxHeight: '150px', objectFit: 'contain' }} className="img-thumbnail" />
                                         </div>
                                     )}
                                 </div>
+                                <hr /> {/* Separador visual */}
+                                <div className="mb-3 text-center">
+                                    <label className="form-label">O sube una imagen desde tu ordenador:</label>
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary mt-2"
+                                        onClick={triggerFileInput} // Activa el input de archivo oculto
+                                    >
+                                        Subir imagen
+                                    </button>
+                                    {/* Input de archivo oculto - AHORA DENTRO DEL MODAL */}
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        style={{ display: 'none' }} // Input oculto
+                                        accept="image/*" // Solo acepta archivos de imagen
+                                        onChange={handleFileChange} // Maneja la selección del archivo
+                                    />
+                                </div>
                             </div>
                             <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" onClick={handleCloseUrlModal}>Cancel</button>
-                                <button type="button" className="btn btn-primary" onClick={handleSaveUrlImage}>Save</button>
+                                <button type="button" className="btn btn-secondary" onClick={toggleUrlModal}>Cancelar</button>
+                                <button type="button" className="btn btn-primary" onClick={handleSaveUrlImage}>Guardar URL</button> {/* Este botón guarda la URL y cierra el modal */}
                             </div>
                         </div>
                     </div>
@@ -348,5 +393,5 @@ export const Profile = () => {
             {/* --- FIN NUEVO MODAL --- */}
 
         </>
-    )
-}
+    );
+};
