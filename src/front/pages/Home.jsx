@@ -12,6 +12,7 @@ import { RecipeCard } from "../components/RecipeCard.jsx";
 import { TopSection } from "../components/TopSection.jsx";
 import { RecipeScroller } from '../components/RecipeScroller.jsx';
 import { BottomSection } from '../components/BottomSection.jsx';
+import { SearchFilter } from "../components/SearchFilter.jsx";
 
 export const Home = () => {
 
@@ -44,10 +45,11 @@ export const Home = () => {
 	}, [])
 
 	return (
-		<div className="container-fluid m-0 p-0 g-0">			
-					<TopSection />
-					<RecipeScroller />
-					<BottomSection />
+		<div className="container-fluid m-0 p-0 g-0">
+			<TopSection />
+			<RecipeScroller />
+			<BottomSection />
+			<SearchFilter />
 		</div>
 	);
 }; 
