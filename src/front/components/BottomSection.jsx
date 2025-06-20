@@ -3,8 +3,8 @@ import React from 'react';
 
 export const BottomSection = () => {
   return (
-    <section className="bg-light py-5" >
-      <div className="container " >
+    <div className="container_bottom_section" >
+      <div className="container">
         <h2 className="text-center fw-bold mb-5 display-6">Explore Our Meal Options</h2>
         <div className="row g-4">
             <div className="col-md-4" >
@@ -93,6 +93,6 @@ export const BottomSection = () => {
             </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };

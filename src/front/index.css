@@ -1317,6 +1317,14 @@ input[type="search"]::-webkit-search-cancel-button {
     max-width: 150px;
 }
 
+/* Bottom section*/
+
+div.container_bottom_section {
+  display: flex;
+  padding: 3rem;
+  background-color: #B47E58;
+}
+
 /* Title and Author Section */
 .rct-recipe-header-section {
     margin-bottom: 30px;
