@@ -11,8 +11,3 @@ export const SearchPage = () => {
 import React from "react";
 
 
-export const SearchPage = () => {
-    
-    return
-
-}
