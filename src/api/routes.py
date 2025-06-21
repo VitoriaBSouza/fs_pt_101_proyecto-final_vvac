@@ -703,6 +703,52 @@ def delete_one_recipe(recipe_id):
 
     return jsonify({"message": "Recipe has been deleted successfully"}), 200
 
+
+# DELETE all recipes created by user and all related data (for test)
+    
+@api.route("/user/recipes", methods=["DELETE"])
+@jwt_required()
+def delete_all_user_recipes():
+    user_id = get_jwt_identity()
+
+    # Get all recipe IDs created by the authenticated user
+    stmt = select(Recipe.id).where(Recipe.author == user_id)
+    recipe_ids = [row[0] for row in db.session.execute(stmt).all()]
+
+    if not recipe_ids:
+        return jsonify({"message": "No recipes found for this user"}), 404
+
+    # Delete all comments related to the user's recipes
+    delete_comments = delete(Comment).where(Comment.recipe_id.in_(recipe_ids))
+    db.session.execute(delete_comments)
+
+    # Delete all collection entries related to the user's recipes
+    delete_collections = delete(Collection).where(Collection.recipe_id.in_(recipe_ids))
+    db.session.execute(delete_collections)
+
+    # Delete all media entries related to the user's recipes
+    delete_media = delete(Media).where(Media.recipe_id.in_(recipe_ids))
+    db.session.execute(delete_media)
+
+    # Delete all recipe-ingredient associations for the user's recipes
+    delete_ingredients = delete(RecipeIngredient).where(
+        RecipeIngredient.recipe_id.in_(recipe_ids)
+    )
+    db.session.execute(delete_ingredients)
+
+    # Delete all meal plan entries that reference the user's recipes
+    delete_mealplans = delete(MealPlanEntry).where(MealPlanEntry.recipe_id.in_(recipe_ids))
+    db.session.execute(delete_mealplans)
+
+    # Finally, delete the recipes themselves
+    delete_recipes = delete(Recipe).where(Recipe.id.in_(recipe_ids))
+    db.session.execute(delete_recipes)
+
+    db.session.commit()
+
+    return jsonify({"message": f"Deleted {len(recipe_ids)} recipe(s) and all related data"}), 200
+
+
 # Recipe endpoints end here
 
 # ========================
