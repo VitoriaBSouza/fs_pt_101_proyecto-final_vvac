@@ -130,23 +130,15 @@ table {
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
 }
 
- .recipe-scroller-container  {
-  overflow-x: auto;
-  display: flex;
-  flex-wrap: nowrap; 
-  gap: 16px; 
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 16px;
-} 
 
-.title {
+
+.title_RecipeScroller {
   margin-bottom: 1rem;
   font-size: 3rem;
   color: white;
 }
 
-.scroller {
+.recipe-scroller-container {
   display: flex;
   overflow-x: auto;
   gap: 2rem;

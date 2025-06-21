@@ -1,41 +1,70 @@
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-//hooks
+// hooks
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
-//services
-import recipeServices from "../services/recetea_API/recipeServices.js"
+// services
+import recipeServices from "../services/recetea_API/recipeServices.js";
 
-
-export const RecipeScroller = (props) => {
-
-  const navigate = useNavigate()
+export const RecipeScroller = () => {
+  const [recipes, setRecipes] = useState([]);
+  const navigate = useNavigate();
   const { store, dispatch } = useGlobalReducer();
 
-  const getOneRecipe = async () => recipeServices.getOneRecipe(props.id).then(data => {
-    dispatch({ type: 'get_one_recipe', payload: data });
-  })
-
-  const handleClick = (e) => {
-    navigate("/recipes/" + props.id)
-    window.history.scrollRestoration = 'manual'
-    getOneRecipe()
-  }
-
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [props.recipe_id]);
+    const fetchRecipes = async () => {
+      try {
+        const data = await recipeServices.getAllRecipes(); // usa tu servicio aquí
+        setRecipes(data);
+      } catch (err) {
+        console.error('Error fetching recipes from service:', err);
+      }
+    };
+
+    fetchRecipes();
+  }, []);
+
+  const handleClick = async (id) => {
+    navigate("/recipes/" + id);
+    window.history.scrollRestoration = 'manual';
+    try {
+      const data = await recipeServices.getOneRecipe(id);
+      dispatch({ type: 'get_one_recipe', payload: data });
+    } catch (err) {
+      console.error('Error fetching recipe:', err);
+    }
+  };
 
   return (
-
-    <div className="card_row_home_scroll text-white p-3 border-0 position-relative overflow-hidden">
-      <div className="m-2 home_cards_bg border" onClick={handleClick}>
-        <img src={props.url} className="img-fluid card-img home_card_scroll border-0" alt="recipe_img" />
-        <div className="card-img-overlay p-0 d-flex align-items-end">
-          <div className="w-100 bg-opacity-50 text-center title_suggestion_card m-3">
-            <p className="card-title text-light fs-3 p-3">{props.name}</p>
-          </div>
+    <div className='row'>
+      <div className="container-col-12 my-5">
+        <h3 className="title_RecipeScroller text-center fw-bold mb-4 text-light">Some Random Ideas!!</h3>
+        <div
+          className="recipe-scroller-container d-flex overflow-auto gap-3 pb-3"
+          style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
+        >
+          {recipes.map(recipe => (
+            <div
+              className="m-2 recipes_cards_bg border flex-shrink-0"
+              style={{ width: '280px', scrollSnapAlign: 'start', cursor: 'pointer' }}
+              key={recipe.id}
+              onClick={() => handleClick(recipe.id)}
+            >
+              <div className="card row_bg_suggestions text-white p-3 border-0 position-relative overflow-hidden">
+                <img
+                  src={recipe.img}
+                  className="img-fluid recipes_card_img border-0"
+                  alt="recipe_img"
+                />
+                <div className="card-img-overlay p-0 d-flex align-items-end">
+                  <div className="w-100 bg-opacity-50 text-center title_suggestion_card m-3">
+                    <p className="card-title text-light fs-3 p-3">{recipe.name}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
