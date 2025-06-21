@@ -11,7 +11,7 @@ import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import { TopSection } from "../components/TopSection.jsx";
 import { RecipeScroller } from '../components/RecipeScroller.jsx';
 import { BottomSection } from '../components/BottomSection.jsx';
-import { SearchFilter } from "../components/SearchFilter.jsx";
+
 
 export const Home = () => {
 
@@ -46,6 +46,7 @@ export const Home = () => {
 	return (
 		<div className="container-fluid container_home">
 			<TopSection />
+			<RecipeScroller />
 			<div className="row bg-light">
 				<div className="col-12">
 					<h2 className="text-danger">Latest Recipes</h2>
