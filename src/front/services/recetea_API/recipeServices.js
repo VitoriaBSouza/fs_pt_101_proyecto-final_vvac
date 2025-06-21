@@ -84,6 +84,7 @@ recipeServices.getOneUserRecipe = async (id) => {
 
 // POST a new recipe (need to log in)
 recipeServices.createRecipe = async (recipeData) => {
+    console.log("------>createRecipe - Services: " + JSON.stringify(recipeData))
     try {
         const resp = await fetch(url + "/api/user/recipes", {
         method: 'POST',
