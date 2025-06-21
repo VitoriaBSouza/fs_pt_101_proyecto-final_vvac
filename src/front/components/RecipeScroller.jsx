@@ -37,35 +37,33 @@ export const RecipeScroller = () => {
   };
 
   return (
-    <div className='row'>
-      <div className="container-col-12 my-5">
-        <h3 className="title_RecipeScroller text-center fw-bold mb-4 text-light">Some Random Ideas!!</h3>
-        <div
-          className="recipe-scroller-container d-flex overflow-auto gap-3 pb-3"
-          style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
-        >
-          {recipes.map(recipe => (
-            <div
-              className="m-2 recipes_cards_bg border flex-shrink-0"
-              style={{ width: '280px', scrollSnapAlign: 'start', cursor: 'pointer' }}
-              key={recipe.id}
-              onClick={() => handleClick(recipe.id)}
-            >
-              <div className="card row_bg_suggestions text-white p-3 border-0 position-relative overflow-hidden">
-                <img
-                  src={recipe.img}
-                  className="img-fluid recipes_card_img border-0"
-                  alt="recipe_img"
-                />
-                <div className="card-img-overlay p-0 d-flex align-items-end">
-                  <div className="w-100 bg-opacity-50 text-center title_suggestion_card m-3">
-                    <p className="card-title text-light fs-3 p-3">{recipe.name}</p>
-                  </div>
+    <div className="container my-5">
+      <h2 className="text-center fw-bold mb-4 text-light">Some Random Ideas!!</h2>
+      <div
+        className="d-flex overflow-auto gap-3 pb-3"
+        style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
+      >
+        {recipes.map(recipe => (
+          <div
+            className="m-2 recipes_cards_bg border flex-shrink-0"
+            style={{ width: '280px', scrollSnapAlign: 'start', cursor: 'pointer' }}
+            key={recipe.id}
+            onClick={() => handleClick(recipe.id)}
+          >
+            <div className="card row_bg_suggestions text-white p-3 border-0 position-relative overflow-hidden">
+              <img
+                src={recipe.img}
+                className="img-fluid recipes_card_img border-0"
+                alt="recipe_img"
+              />
+              <div className="card-img-overlay p-0 d-flex align-items-end">
+                <div className="w-100 bg-opacity-50 text-center title_suggestion_card m-3">
+                  <p className="card-title text-light fs-3 p-3">{recipe.name}</p>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
