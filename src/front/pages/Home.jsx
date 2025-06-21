@@ -46,7 +46,6 @@ export const Home = () => {
 	return (
 		<div className="container-fluid container_home">
 			<TopSection />
-			<RecipeScroller />
 			<div className="row bg-light">
 				<div className="col-12">
 					<h2 className="text-danger">Latest Recipes</h2>
