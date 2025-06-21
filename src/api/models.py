@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, Boolean, Enum, DateTime, func, ForeignKey, Text, Float
+from sqlalchemy import String, Boolean, Enum, DateTime, func, ForeignKey, Text, Float, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 import enum
@@ -90,6 +90,9 @@ class Recipe(db.Model):
     steps: Mapped[str] = mapped_column(Text, nullable=False)
     published: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
+    #API Gemini call
+    diet_label: Mapped[str] = mapped_column(String, nullable=True)
+
     #Relatioship with other tables
     user: Mapped["User"] = relationship(back_populates="recipes")
     media: Mapped[list["Media"]] = relationship(back_populates="recipe")
@@ -116,6 +119,7 @@ class Recipe(db.Model):
             "media": [media.serialize() for media in self.media],
             "published": self.published.isoformat() if self.published else None,
             "difficulty_type": self.difficulty_type.value,
+            "diet_label": self.diet_label,
             "portions": self.portions,
             "total_grams":self.total_grams,
             "prep_time": self.prep_time,
@@ -304,3 +308,16 @@ class MealPlanEntry(db.Model):
             "meal_type": self.meal_type.value,
             "date": self.date.date().isoformat()
         }
+    
+class GeminiUsage(db.Model):
+    __tablename__ = "gemini_usage"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
+    feature_name: Mapped[str] = mapped_column(String, nullable=False)
+    usage_count: Mapped[int] = mapped_column(Integer, default=1)
+    last_used: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    def increment_usage(self) -> None:
+        self.usage_count += 1
+        self.last_used = func.now()

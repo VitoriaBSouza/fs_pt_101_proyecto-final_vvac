@@ -1,38 +1,45 @@
 from werkzeug.security import generate_password_hash
 from random import randint, choice, uniform
-from api.models import User, Recipe, Ingredient, RecipeIngredient, Comment, Media, Collection, RecipeScore, ShoppingListItem, UserStatus, DifficultyType, MediaType
+from api.models import (
+    User, Recipe, Ingredient, RecipeIngredient, Comment, Media,
+    Collection, RecipeScore, ShoppingListItem, UserStatus, DifficultyType, MediaType
+)
 from app import app, db
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
-
 with app.app_context():
+    # Reset DB
     db.drop_all()
+
+    print("DB URI:", app.config['SQLALCHEMY_DATABASE_URI'])
     db.create_all()
 
-    # Crear 3 usuarios
+    # Create Users
     users = [
-        User(username="user1", email="user1@mail.com", password=generate_password_hash('user123'), status=UserStatus.active, photo_url="https://loremflickr.com/400/400/food"),
-        User(username="user2", email="user2@mail.com", password=generate_password_hash('user123'), status=UserStatus.active, photo_url="https://loremflickr.com/400/400/food"),
-        User(username="user3", email="user3@mail.com", password=generate_password_hash('user123'), status=UserStatus.active, photo_url="https://loremflickr.com/400/400/food"),
+        User(
+            username=f"user{i+1}",
+            email=f"user{i+1}@mail.com",
+            password=generate_password_hash('user123'),
+            status=UserStatus.active,
+        ) for i in range(3)
     ]
     db.session.add_all(users)
-    db.session.commit()
+    db.session.commit()  # commit to get user IDs
 
-    # Crear 10 ingredientes
-    ingredient_names = [
-        "Harina", "Leche", "Huevo", "Azúcar", "Sal", "Aceite", "Tomate", "Queso", "Pollo", "Cebolla"
-    ]
-    allergens_list = ["gluten", "lactose","", "", "", "", "", "lactose", "", ""]
+    # Create Ingredients with allergens
+    ingredient_names = ["Harina", "Leche", "Huevo", "Azúcar", "Sal", "Aceite", "Tomate", "Queso", "Pollo", "Cebolla"]
+    allergens_list = ["gluten", "lactose", "", "", "", "", "", "lactose", "", ""]
     ingredients = [
         Ingredient(name=ingredient_names[i], allergens=allergens_list[i])
-        for i in range(10)
+        for i in range(len(ingredient_names))
     ]
     db.session.add_all(ingredients)
-    db.session.commit()
+    db.session.commit()  # commit to get ingredient IDs
 
-    # Crear 10 recetas
+    # Create Recipes
     recipes = []
     for i in range(10):
         recipe = Recipe(
@@ -45,18 +52,18 @@ with app.app_context():
         )
         recipes.append(recipe)
     db.session.add_all(recipes)
-    db.session.commit()
+    db.session.commit()  # commit to get recipe IDs
 
-    # Crear 10 RecipeIngredient por receta (100 en total)
+    # Create RecipeIngredients: 10 ingredients per recipe, no repeats
     recipe_ingredients = []
     for recipe in recipes:
-        used_ingredients = set()
+        used_ids = set()
         for _ in range(10):
             ing = choice(ingredients)
-            # Evitar ingredientes repetidos en la misma receta
-            while ing.id in used_ingredients:
+            while ing.id in used_ids:
                 ing = choice(ingredients)
-            used_ingredients.add(ing.id)
+            used_ids.add(ing.id)
+
             ri = RecipeIngredient(
                 recipe_id=recipe.id,
                 ingredient_id=ing.id,
@@ -76,50 +83,50 @@ with app.app_context():
     db.session.add_all(recipe_ingredients)
     db.session.commit()
 
-    # Crear 10 medios
+    # Create Media (1 per recipe)
     medias = [
         Media(
-            recipe_id=recipes[i].id,
+            recipe_id=recipe.id,
             type_media=MediaType.IMAGE,
             url="https://loremflickr.com/400/400/food"
-        ) for i in range(10)
+        ) for recipe in recipes
     ]
     db.session.add_all(medias)
     db.session.commit()
 
-    # Crear 10 comentarios
+    # Create Comments (1 per recipe)
     comments = [
         Comment(
             user_id=choice(users).id,
-            recipe_id=recipes[i].id,
-            content=f"Comentario {i+1} sobre la receta {i+1}"
-        ) for i in range(10)
+            recipe_id=recipe.id,
+            content=f"Comentario sobre la receta {recipe.id}"
+        ) for recipe in recipes
     ]
     db.session.add_all(comments)
     db.session.commit()
 
-    # Crear 10 puntuaciones
+    # Create RecipeScores (1 per recipe)
     scores = [
         RecipeScore(
             user_id=choice(users).id,
-            recipe_id=recipes[i].id,
+            recipe_id=recipe.id,
             score=randint(1, 5)
-        ) for i in range(10)
+        ) for recipe in recipes
     ]
     db.session.add_all(scores)
     db.session.commit()
 
-    # Crear 10 colecciones
+    # Create Collections (1 per recipe)
     collections = [
         Collection(
             user_id=choice(users).id,
-            recipe_id=recipes[i].id
-        ) for i in range(10)
+            recipe_id=recipe.id
+        ) for recipe in recipes
     ]
     db.session.add_all(collections)
     db.session.commit()
 
-    # Crear 10 items de lista de compras
+    # Create ShoppingListItems
     shopping_items = [
         ShoppingListItem(
             user_id=choice(users).id,
@@ -131,4 +138,4 @@ with app.app_context():
     db.session.add_all(shopping_items)
     db.session.commit()
 
-    print("Seed ejecutado correctamente.")
+    print("Seeder executed successfully.")

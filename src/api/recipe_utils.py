@@ -94,7 +94,7 @@ def convert_to_grams(ingredient_name: str, unit: str, quantity: float) -> float:
     if unit in FALLBACK_UNIT_CONVERSIONS:
         return FALLBACK_UNIT_CONVERSIONS[unit] * quantity
 
-    # Unknown unit — safest fallback
+    # Unknown unit fallback
     return 0
 
 def get_common_allergens_fuzzy(name):
@@ -104,15 +104,10 @@ def get_common_allergens_fuzzy(name):
             return COMMON_INGREDIENT_ALLERGENS[key]
     return []
 
-#Fetch of Open Foods API to request allergens and nutritional value
 def get_ingredient_info(name):
-
     normalized_name = name.lower().strip()
-
-    # Check first if we do not have in our fallback list
     fallback_allergens = COMMON_INGREDIENT_ALLERGENS.get(normalized_name, [])
 
-    # Fetch from API if none found
     search_url = "https://world.openfoodfacts.org/cgi/search.pl"
     params = {
         "search_terms": normalized_name,
@@ -127,9 +122,8 @@ def get_ingredient_info(name):
         response.raise_for_status()
 
         data = response.json()
-        products = data.get("products", []) 
+        products = data.get("products", [])
 
-        product = {}
         selected_nutriments = {}
         selected_allergens_tags = []
 
@@ -137,19 +131,15 @@ def get_ingredient_info(name):
             product_name = p.get("product_name", "").lower().strip()
             nutriments = p.get("nutriments", {})
 
-            # Accept product with usable nutrition info
             if not selected_nutriments and any(
                 nutriments.get(key) not in [None, "", 0]
                 for key in ["energy-kcal_100g", "carbohydrates_100g", "proteins_100g"]
             ):
                 selected_nutriments = nutriments
 
-            # Prefer allergen info only from exact or close matches
             if product_name == normalized_name:
                 selected_allergens_tags = p.get("allergens_tags", [])
                 break
-
-        nutriments = product.get("nutriments", {})
 
         api_allergens = [
             a.replace("en:", "").replace("fr:", "").strip()
@@ -169,9 +159,8 @@ def get_ingredient_info(name):
             "sodium": selected_nutriments.get("sodium_100g", 0),
             "allergens": combined_allergens or fallback_allergens
         }
-    
+
     except Exception:
-        # Fallback only (in case of request failure)
         return {
             "calories": 0,
             "fat": 0,
@@ -185,7 +174,6 @@ def get_ingredient_info(name):
             "allergens": fallback_allergens
         }
 
-
 def calculate_calories(grams, calories_per_100g):
     return (grams * calories_per_100g) / 100
 
@@ -197,3 +185,42 @@ def calculate_carbs(grams, carbs_per_100g):
 
 def calculate_protein(grams, protein_per_100g):
     return (grams * protein_per_100g) / 100
+
+def calculate_salt(grams, salt_per_100g):
+    return (grams * salt_per_100g) / 100
+
+def calculate_sodium(grams, sodium_per_100g):
+    return (grams * sodium_per_100g) / 100
+
+def calculate_total_nutrition(ingredients):
+    totals = {
+        "calories": 0,
+        "fat": 0,
+        "saturated_fat": 0,
+        "carbs": 0,
+        "sugars": 0,
+        "fiber": 0,
+        "protein": 0,
+        "salt": 0,
+        "sodium": 0
+    }
+
+    for ing in ingredients:
+        name = ing["name"]
+        quantity = ing["quantity"]
+        unit = ing["unit"]
+
+        info = get_ingredient_info(name.lower().strip())
+        grams = convert_to_grams(name, unit, quantity)
+
+        totals["calories"] += calculate_calories(grams, info.get("calories", 0))
+        totals["fat"] += calculate_fat(grams, info.get("fat", 0))
+        totals["saturated_fat"] += calculate_fat(grams, info.get("saturated_fat", 0))
+        totals["carbs"] += calculate_carbs(grams, info.get("carbs", 0))
+        totals["sugars"] += calculate_carbs(grams, info.get("sugars", 0))
+        totals["fiber"] += calculate_carbs(grams, info.get("fiber", 0))
+        totals["protein"] += calculate_protein(grams, info.get("protein", 0))
+        totals["salt"] += calculate_salt(grams, info.get("salt", 0))
+        totals["sodium"] += calculate_sodium(grams, info.get("sodium", 0))
+
+    return totals
