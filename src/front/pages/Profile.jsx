@@ -9,7 +9,6 @@ import { useState, useEffect, useRef } from "react";
 
 export const Profile = () => {
     const navigate = useNavigate();
-
     const { dispatch, store } = useGlobalReducer();
     const [formData, setFormData] = useState({
         username: "",
@@ -18,35 +17,48 @@ export const Profile = () => {
         photo_url: ""
     });
     const [repeatPasswd, setRepeatPasswd] = useState("");
-    const [profileImage, SetProfileImage] = useState(
-        store.user?.photo_url || "https://pixabay.com/vectors/avatar-icon-placeholder-profile-3814081/"
-    );
+    const [profileImage, SetProfileImage] = useState(store.user?.photo_url || "");
     const fileInputRef = useRef(null);
     const [showUrlModal, setShowUrlModal] = useState(false);
     const [tempImageUrl, setTempImageUrl] = useState("");
 
-    // Helper to update only the photo_url on backend
-    const updatePhotoOnly = async (photoUrl) => {
+    // Unified profile update function
+    const handleProfileUpdate = async (updatedFields = {}) => {
+        // Merge form data with any updated fields (e.g., photo_url)
+        const mergedData = { ...formData, ...updatedFields };
+
+        // Remove password if empty or only spaces
+        if (!mergedData.password || mergedData.password.trim() === "") {
+            delete mergedData.password;
+        }
+
         try {
-            const res = await userServices.editUser({ photo_url: photoUrl });
+            console.log("Submitting merged formData:", mergedData);
+            const res = await userServices.editUser(mergedData);
+
             if (res.success) {
                 dispatch({ type: "updateUser", payload: { user: res.user, token: res.token } });
-                window.alert("Your profile has been updated with the new image!");
-                setFormData((prev) => ({
-                    ...prev,
+                window.alert("Your profile has been updated!");
+
+                // Reset form data with fresh user info and clear password fields
+                setFormData({
+                    username: res.user.username || "",
+                    email: res.user.email || "",
+                    password: "",
                     photo_url: res.user.photo_url || ""
-                }));
+                });
+                setRepeatPasswd("");
                 SetProfileImage(res.user.photo_url || "");
+
             } else {
-                window.alert(res.error || "Something went wrong while updating the photo.");
+                window.alert(res.error || "Something went wrong while updating your profile.");
             }
         } catch (error) {
-            console.error("Error updating photo:", error);
-            window.alert("An error occurred while updating the photo.");
+            console.error("Error in handleProfileUpdate:", error);
+            window.alert("An error occurred: " + (error.message || error));
         }
     };
 
-    // Handle file selection and upload photo
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -55,46 +67,41 @@ export const Profile = () => {
         reader.onloadend = async () => {
             const base64Image = reader.result;
             SetProfileImage(base64Image);
-            await updatePhotoOnly(base64Image);
+            await handleProfileUpdate({ photo_url: base64Image }); // update photo only
             setShowUrlModal(false);
         };
         reader.readAsDataURL(file);
     };
 
-    // Toggle URL input modal for photo
+    const handleSaveUrlImage = async (e) => {
+        e.preventDefault();
+        if (tempImageUrl) {
+            SetProfileImage(tempImageUrl);
+            await handleProfileUpdate({ photo_url: tempImageUrl }); // update photo only
+            toggleUrlModal();
+        }
+    };
+
     const toggleUrlModal = () => {
         if (!showUrlModal) {
-            setTempImageUrl(profileImage.startsWith("http") ? profileImage : "");
+            setTempImageUrl(profileImage.startsWith('http') ? profileImage : '');
         } else {
             setTempImageUrl("");
         }
         setShowUrlModal(!showUrlModal);
     };
 
-    // Save photo from URL input
-    const handleSaveUrlImage = async (e) => {
-        e.preventDefault();
-        if (!tempImageUrl) return;
-
-        SetProfileImage(tempImageUrl);
-        await updatePhotoOnly(tempImageUrl);
-        setShowUrlModal(false);
-    };
-
-    // Trigger file input click from button
     const triggerFileInput = () => {
         fileInputRef.current.click();
     };
 
-    // Handle input changes for username, email, password
-    const handleChange = (e) => {
+    const handleChange = e => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value
         });
     };
 
-    // Handle profile form submission (without photo_url)
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -103,37 +110,20 @@ export const Profile = () => {
             return;
         }
 
+        // Prepare data to submit (don't send empty password)
         const dataToSubmit = { ...formData };
-        if (!dataToSubmit.password) delete dataToSubmit.password;
-        delete dataToSubmit.photo_url; // Photo updated separately
-
-        try {
-            const data = await userServices.editUser(dataToSubmit);
-            if (data.success) {
-                dispatch({ type: "updateUser", payload: { user: data.user, token: data.token } });
-                window.alert("Your profile has been updated");
-                setFormData({
-                    username: data.user.username || "",
-                    email: data.user.email || "",
-                    password: "",
-                    photo_url: data.user.photo_url || ""
-                });
-                setRepeatPasswd("");
-            } else {
-                window.alert(data.error || "Something went wrong, please try again.");
-            }
-        } catch (error) {
-            console.error("Error updating profile:", error);
-            window.alert("An error occurred: " + (error.message || error));
+        if (!dataToSubmit.password || dataToSubmit.password.trim() === "") {
+            delete dataToSubmit.password;
         }
+
+        await handleProfileUpdate(dataToSubmit);
     };
 
-    // Delete account handler
     const handleDeleteAccount = async (e) => {
         e.preventDefault();
         try {
-            const result = await userServices.deleteUser();
-            if (result.success) {
+            const resultado = await userServices.deleteUser();
+            if (resultado.success) {
                 dispatch({ type: "logout" });
                 window.alert("Your account has been deleted");
                 navigate("/");
@@ -141,12 +131,11 @@ export const Profile = () => {
                 window.alert("Failed to delete account: " + (result.error || "Unknown error"));
             }
         } catch (error) {
-            console.error("Error deleting account:", error);
+            console.error("Error in handleDeleteAccount:", error);
             window.alert("An error occurred: " + (error.message || error));
         }
     };
 
-    // Sync formData and profileImage when store.user changes
     useEffect(() => {
         if (store.user) {
             setFormData({
@@ -155,9 +144,12 @@ export const Profile = () => {
                 password: "",
                 photo_url: store.user.photo_url || ""
             });
-            SetProfileImage(store.user.photo_url || "https://pixabay.com/vectors/avatar-icon-placeholder-profile-3814081/");
+            SetProfileImage(store.user.photo_url || "");
+            setRepeatPasswd("");
         }
     }, [store.user]);
+
+
 
     return (
         <>
