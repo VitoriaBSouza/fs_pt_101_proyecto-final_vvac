@@ -192,6 +192,12 @@ def calculate_salt(grams, salt_per_100g):
 def calculate_sodium(grams, sodium_per_100g):
     return (grams * sodium_per_100g) / 100
 
+def calculate_sugars(grams, sugars_per_100g):
+    return (grams * sugars_per_100g) / 100
+
+def calculate_fiber(grams, fiber_per_100g):
+    return (grams * fiber_per_100g) / 100
+
 def calculate_total_nutrition(ingredients):
     totals = {
         "calories": 0,
@@ -202,25 +208,18 @@ def calculate_total_nutrition(ingredients):
         "fiber": 0,
         "protein": 0,
         "salt": 0,
-        "sodium": 0
+        "sodium": 0,
     }
 
-    for ing in ingredients:
-        name = ing["name"]
-        quantity = ing["quantity"]
-        unit = ing["unit"]
-
-        info = get_ingredient_info(name.lower().strip())
-        grams = convert_to_grams(name, unit, quantity)
-
-        totals["calories"] += calculate_calories(grams, info.get("calories", 0))
-        totals["fat"] += calculate_fat(grams, info.get("fat", 0))
-        totals["saturated_fat"] += calculate_fat(grams, info.get("saturated_fat", 0))
-        totals["carbs"] += calculate_carbs(grams, info.get("carbs", 0))
-        totals["sugars"] += calculate_carbs(grams, info.get("sugars", 0))
-        totals["fiber"] += calculate_carbs(grams, info.get("fiber", 0))
-        totals["protein"] += calculate_protein(grams, info.get("protein", 0))
-        totals["salt"] += calculate_salt(grams, info.get("salt", 0))
-        totals["sodium"] += calculate_sodium(grams, info.get("sodium", 0))
+    for ingredient in ingredients:
+        totals["calories"] += ingredient.get("calories", 0)
+        totals["fat"] += ingredient.get("fat", 0)
+        totals["saturated_fat"] += ingredient.get("saturated_fat", 0)
+        totals["carbs"] += ingredient.get("carbs", 0)
+        totals["sugars"] += ingredient.get("sugars", 0)
+        totals["fiber"] += ingredient.get("fiber", 0)
+        totals["protein"] += ingredient.get("protein", 0)
+        totals["salt"] += ingredient.get("salt", 0)
+        totals["sodium"] += ingredient.get("sodium", 0)
 
     return totals

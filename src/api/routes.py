@@ -10,9 +10,8 @@ from datetime import datetime, timezone
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from api.email_utils import send_email, get_serializer
-from api.recipe_utils import convert_to_grams, get_ingredient_info, calculate_calories, calculate_carbs, calculate_fat, calculate_protein,calculate_total_nutrition
+from api.recipe_utils import convert_to_grams, get_ingredient_info, calculate_calories, calculate_carbs, calculate_fat, calculate_protein, calculate_salt, calculate_sodium, calculate_sugars, calculate_fiber
 from api.user_utils import generate_placeholder
-from api.gemini_utils import analyze_diet_type, track_gemini_usage
 import json
 
 
@@ -310,32 +309,17 @@ def get_recipes():
 
     return jsonify([recipe.serialize() for recipe in recipes]), 200
 
-# GET a specific recipe(guests) + will summ total for nutricional value
+#GET one recipe(guests)
 @api.route('/recipes/<int:recipe_id>', methods=['GET'])
 def get_recipe(recipe_id):
 
     stmt = select(Recipe).where(Recipe.id == recipe_id)
     recipe = db.session.execute(stmt).scalar_one_or_none()
 
-    if not recipe:
+    if recipe is None:
         return jsonify({"error": "Recipe not found"}), 404
 
-    # Prepare a list of ingredient dicts for the util
-    ingredients_data = [
-        {
-            "name": ri.ingredient.name,
-            "quantity": ri.quantity,
-            "unit": ri.unit
-        }
-        for ri in recipe.ingredients
-    ]
-
-    nutrition_totals = calculate_total_nutrition(ingredients_data)
-
-    response = recipe.serialize()
-    response["nutrition_totals"] = nutrition_totals
-
-    return jsonify(response), 200
+    return jsonify(recipe.serialize()), 200
 
 
 # GET all recipes created by an user(need to log in)
@@ -427,7 +411,7 @@ def create_recipe():
         steps_json = json.dumps(steps_list)
 
         #default prep time to 15 if none or 0
-        prep_time = data["prep_time"] if "prep_time" in data else 15
+        prep_time = data.get("prep_time", 15) or 15
 
         # We add on frontend the control of blank space and lower cases
         new_recipe = Recipe(
@@ -480,34 +464,36 @@ def create_recipe():
             grams = convert_to_grams(name, unit, quantity)
             total_grams += grams
 
+            calories = calculate_calories(grams, info["calories"])
+            fat = calculate_fat(grams, info["fat"])
+            saturated_fat = calculate_fat(grams, info["saturated_fat"])
+            carbs = calculate_carbs(grams, info["carbs"])
+            sugars = calculate_sugars(grams, info["sugars"])
+            fiber = calculate_fiber(grams, info["fiber"])
+            protein = calculate_protein(grams, info["protein"])
+            salt = calculate_salt(grams, info["salt"])
+            sodium = calculate_sodium(grams, info["sodium"])
+
             recipe_ing = RecipeIngredient(
                 recipe_id=new_recipe.id,
                 ingredient_id=ingredient.id,
                 quantity=quantity,
                 unit=unit,
-                calories=info["calories"] if "calories" in info else 0,
-                fat=info["fat"] if "fat" in info else 0,
-                saturated_fat=info["saturated_fat"] if "saturated_fat" in info else 0,
-                carbs=info["carbs"] if "carbs" in info else 0,
-                sugars=info["sugars"] if "sugars" in info else 0,
-                fiber=info["fiber"] if "fiber" in info else 0,
-                protein=info["protein"] if "protein" in info else 0,
-                salt=info["salt"] if "salt" in info else 0,
-                sodium=info["sodium"] if "sodium" in info else 0,
+                calories=calories,
+                fat=fat,
+                saturated_fat=saturated_fat,
+                carbs=carbs,
+                sugars=sugars,
+                fiber=fiber,
+                protein=protein,
+                salt=salt,
+                sodium=sodium,
             )
             new_recipe.ingredients.append(recipe_ing)
             db.session.add(recipe_ing)
 
-        #calculate total grams
         new_recipe.total_grams = total_grams
-
-        #will add the diet label
-        diet_label = analyze_diet_type(new_recipe)
-        new_recipe.diet_label = diet_label
-
-        # Track call of Gemini to avoid charges:
-        track_gemini_usage(feature_name="diet_analysis", user_id=user_id)
-
+    
         # Check for media if they added image to the recipe
         media_data = data["media"]
 
@@ -518,7 +504,8 @@ def create_recipe():
                 type_media=MediaType.IMAGE,
                 url=PLACEHOLDER_IMAGE_URL
             )
-        db.session.add(placeholder_media)
+            db.session.add(placeholder_media)
+
         db.session.commit()
 
         return jsonify({"success": True, "recipe_id": new_recipe.id}), 201
@@ -641,9 +628,6 @@ def edit_recipe(recipe_id):
                 ingredient.allergens = allergens
                 db.session.flush()
 
-            grams = convert_to_grams(name, unit, quantity)
-            total_grams += grams
-
             recipe_ing = RecipeIngredient(
                 recipe_id=recipe.id,
                 ingredient_id=ingredient.id,
@@ -661,14 +645,8 @@ def edit_recipe(recipe_id):
             )
             recipe.ingredients.append(recipe_ing)
             db.session.add(recipe_ing)
-
+        
         recipe.total_grams = total_grams
-
-        diet_label = analyze_diet_type(recipe)
-        recipe.diet_label = diet_label
-
-        # Track call of Gemini to avoid charges
-        track_gemini_usage(feature_name="diet_analysis", user_id=user_id)
 
         # Media handling
         media_data = data.get("media")

@@ -1,7 +1,7 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
-import os
+import os, sys
 from flask import Flask, request, jsonify, url_for, send_from_directory
 from flask_migrate import Migrate
 from flask_swagger import swagger
@@ -14,6 +14,8 @@ from flask_jwt_extended import JWTManager
 from itsdangerous import URLSafeTimedSerializer
 from datetime import timedelta
 from flask_cors import CORS
+from dotenv import load_dotenv
+load_dotenv()
 
 # from models import Person
 

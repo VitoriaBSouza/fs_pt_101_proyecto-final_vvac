@@ -8,18 +8,46 @@ export const NutricionalTable = () =>{
 
     // Loops through the ingredients nutricional values and stores it to return the total of each
     //If value is null or none will be 0. Otherwise, will provide a sum of the values stored.
-    const totalNutrition = store.recipe?.nutrition_totals ?? {
-        calories: 0,
-        fat: 0,
+    const totalNutrition = store.recipe?.ingredients
+    ? store.recipe.ingredients.reduce(
+        (acc, item) => {
+            acc.calories += item.calories || 0;
+            acc.fat += item.fat || 0;
+            acc.saturated_fat += item.saturated_fat || 0;
+            acc.carbs += item.carbs || 0;
+            acc.sugars += item.sugars || 0;
+            acc.fiber += item.fiber || 0;
+            acc.protein += item.protein || 0;
+            acc.salt += item.salt || 0;
+            acc.sodium += item.sodium || 0;
+            return acc;
+        },
+        { 
+            calories: 0, 
+            fat: 0, 
+            saturated_fat: 0,
+            carbs: 0, 
+            sugars: 0, 
+            fiber: 0, 
+            protein: 0, 
+            salt: 0, 
+            sodium: 0 
+        }
+    )
+    : { 
+        calories: 0, 
+        fat: 0, 
         saturated_fat: 0,
-        carbs: 0,
-        sugars: 0,
-        fiber: 0,
-        protein: 0,
-        salt: 0,
-        sodium: 0,
+        carbs: 0, 
+        sugars: 0, 
+        fiber: 0, 
+        protein: 0, 
+        salt: 0, 
+        sodium: 0 
     };
 
+    console.log(store.recipe);
+    
 
     return(
 
