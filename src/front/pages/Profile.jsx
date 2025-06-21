@@ -96,52 +96,8 @@ export const Profile = () => {
         fileInputRef.current.click();
     };
 
-    // Función para guardar la URL escrita en el modal
-    const handleSaveUrlImage = async (e) => {
-        e.preventDefault(); // Previene la recarga de la página si es llamado por un submit
-
-        if (tempImageUrl) {
-            SetProfileImage(tempImageUrl); // Actualiza la vista previa del componente
-
-            // Crea una copia de formData con la nueva photo_url
-            const updatedFormData = {
-                ...formData,
-                photo_url: tempImageUrl
-            };
-            setFormData(updatedFormData); // Actualiza el estado formData en React
-
-            console.log("Frontend: URL image confirmed from modal:", tempImageUrl);
-            try {
-                console.log("Frontend: Submitting formData with new photo_url (from URL input):", updatedFormData);
-                // Llama a la API con el formData actualizado
-                const res = await userServices.editUser(updatedFormData);
-                console.log("Frontend: API response data (from URL save):", res);
-
-                if (res.success) {
-                    // *** CAMBIO PARA OPCIÓN 2 ***
-                    // El payload es ahora un objeto que contiene 'user' y 'token'
-                    dispatch({ type: "updateUser", payload: { user: res.user, token: res.token } });
-                    window.alert("Your profile has been updated with the new image!");
-
-                    // Opcional: Re-sincronizar formData con el user actualizado de la API
-                    setFormData({
-                        username: res.user.username || "",
-                        email: res.user.email || "",
-                        password: "",
-                        photo_url: res.user.photo_url || ""
-                    });
-
-                } else {
-                    window.alert(res.error || "Something went wrong while saving the URL, please try again.");
-                }
-            } catch (error) {
-                console.error("Frontend: Error in handleSaveUrlImage!!!:", error);
-                window.alert("An error occurred while saving the URL: " + (error.message || error));
-            } finally {
-                toggleUrlModal(); // Cierra el modal siempre, sin importar el éxito de la API
-            }
-        }
-    };
+  
+   
 
     // Maneja cambios en los inputs del formulario (username, email, password)
     const handleChange = e => {
