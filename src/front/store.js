@@ -1,7 +1,7 @@
 export const initialStore=()=>{
   return{
     token: localStorage.getItem("token") || null,
-    user:localStorage.getItem("user") || null,
+    user: JSON.parse(localStorage.getItem("user") || "{}"),
     recipes: [],
     recipe: null,
     collections: [],
@@ -42,7 +42,8 @@ export default function storeReducer(store, action = {}) {
       localStorage.removeItem('user')
       return {
         ...store,
-        user: null
+        user: {},     // reset user to empty object
+        token: null,  // reset token to null
       };
     
     case 'logIn':
