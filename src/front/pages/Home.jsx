@@ -49,23 +49,23 @@ export const Home = () => {
 			<div className="row bg-light">
 				<div className="col-12">
 					<h2 className="text-danger">Latest Recipes</h2>
-				</div>
-				<div className="col-12">
-					<div className="scroll-container d-flex">
 
-						{/* maping over RecipeCards to create cards based on the data */}
-						{
+					<div className="col-12">
+						<div className="scroll-container d-flex">
 
-							store.recipes?.map((el) => <RecipeScroller
-								key={el.id}
-								id={el.id}
-								name={el.title}
-								url={el.media?.[0]?.url}
+							{/* maping over RecipeCards to create cards based on the data */}
+							{
 
-							/>)
-						}
+								store.recipes?.map((el) => <RecipeScroller
+									key={el.id}
+									id={el.id}
+									name={el.title}
+									url={el.media?.[0]?.url}
+
+								/>)
+							}
+						</div>
 					</div>
-
 				</div>
 			</div>
 			<BottomSection />
