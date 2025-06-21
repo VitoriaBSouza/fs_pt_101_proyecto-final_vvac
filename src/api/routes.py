@@ -382,7 +382,7 @@ def create_recipe():
             return jsonify({"error": "Please add a difficulty level to your recipe"}), 400
 
         if not data["portions"] or data["portions"] < 1:
-            return jsonify({"error": "Please set a valid number of portions"}), 400
+            data["portions"] = 1
 
         if not data["steps"]:
             return jsonify({"error": "Please add all the steps and instructions needed to your recipe"}), 400
