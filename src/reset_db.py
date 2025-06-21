@@ -7,9 +7,10 @@ from api.models import db
 ##Step1:
 # psql -U gitpod -h localhost postgres
 ##Step2:
-#SELECT pg_terminate_backend(pid) 
-#FROM pg_stat_activity 
-#WHERE datname = 'example' AND pid <> pg_backend_pid();
+# SELECT pg_terminate_backend(pid)
+# FROM pg_stat_activity
+# WHERE datname = 'example'
+#   AND pid <> pg_backend_pid();
 ##Step3:
 #\q
 ##Step4:

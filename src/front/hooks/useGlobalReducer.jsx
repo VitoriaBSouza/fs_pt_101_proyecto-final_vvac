@@ -25,14 +25,14 @@ export function StoreProvider({ children }) {
         }
     }
 
-    const loadCollections = async () => {
-        try {
-            const data = await recipeServices.getUserCollections();
-            dispatch({ type: 'get_user_collections', payload: data });
-        } catch (error) {
-            console.log(error);
-        }
-    }
+    // const loadCollections = async () => {
+    //     try {
+    //         const data = await recipeServices.getUserCollections();
+    //         dispatch({ type: 'get_user_collections', payload: data });
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }
 
     // Load the page once only
     useEffect (() => {
@@ -45,7 +45,7 @@ export function StoreProvider({ children }) {
                 payload: { token, user: JSON.parse(user) },
             });
             loadRecipes()
-            loadCollections()
+            // loadCollections()
         }
     }, [])
 
