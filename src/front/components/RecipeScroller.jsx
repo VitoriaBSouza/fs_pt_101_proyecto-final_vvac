@@ -38,5 +38,5 @@ export const RecipeScroller = (props) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
