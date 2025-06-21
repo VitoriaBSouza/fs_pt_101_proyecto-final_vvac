@@ -9,87 +9,91 @@ import { useState, useEffect, useRef } from "react";
 
 export const Profile = () => {
     const navigate = useNavigate();
-
     const { dispatch, store } = useGlobalReducer();
-    const [formData, setFormData] = useState({ // Inicialización segura para evitar nulls
+
+    const [formData, setFormData] = useState({
         username: "",
         email: "",
         password: "",
         photo_url: ""
     });
     const [repeatPasswd, setRepeatPasswd] = useState("");
+    const [profileImage, SetProfileImage] = useState(store.user?.photo_url || "");
+    const fileInputRef = useRef(null);
+    const [showUrlModal, setShowUrlModal] = useState(false);
+    const [tempImageUrl, setTempImageUrl] = useState("");
 
-    // Estados para imagen de perfil y modal
-    const [profileImage, SetProfileImage] = useState(store.user?.photo_url || '');
-    const fileInputRef = useRef(null); // Ref para el input de archivo (oculto)
-    const [showUrlModal, setShowUrlModal] = useState(false); // Control del toggle del modal de imagen
-    const [tempImageUrl, setTempImageUrl] = useState(""); // URL temporal para el input del modal y previsualización
+    // Unified profile update function
+    const handleProfileUpdate = async (updatedFields = {}) => {
+        // Merge form data with any updated fields (e.g., photo_url)
+        const mergedData = { ...formData, ...updatedFields };
 
-    // Función para manejar la subida de imagen desde el ordenador (dentro del modal)
+        // Remove password if empty or only spaces
+        if (!mergedData.password || mergedData.password.trim() === "") {
+            delete mergedData.password;
+        }
+
+        try {
+            console.log("Submitting merged formData:", mergedData);
+            const res = await userServices.editUser(mergedData);
+
+            if (res.success) {
+                dispatch({ type: "updateUser", payload: { user: res.user, token: res.token } });
+                window.alert("Your profile has been updated!");
+
+                // Reset form data with fresh user info and clear password fields
+                setFormData({
+                    username: res.user.username || "",
+                    email: res.user.email || "",
+                    password: "",
+                    photo_url: res.user.photo_url || ""
+                });
+                setRepeatPasswd("");
+                SetProfileImage(res.user.photo_url || "");
+
+            } else {
+                window.alert(res.error || "Something went wrong while updating your profile.");
+            }
+        } catch (error) {
+            console.error("Error in handleProfileUpdate:", error);
+            window.alert("An error occurred: " + (error.message || error));
+        }
+    };
+
     const handleFileChange = (e) => {
         const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = async () => { // Marcado como async para la llamada a la API
-                const base64Image = reader.result;
-                SetProfileImage(base64Image); // Actualiza la vista previa en el componente
+        if (!file) return;
 
-                // Crea un objeto con la photo_url actualizada y fusiona con los datos existentes
-                const updatedFormData = {
-                    ...formData,
-                    photo_url: base64Image // photo_url ahora es la cadena Base64
-                };
-                setFormData(updatedFormData); // Actualiza el estado formData en React
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+            const base64Image = reader.result;
+            SetProfileImage(base64Image);
+            await handleProfileUpdate({ photo_url: base64Image }); // update photo only
+            setShowUrlModal(false);
+        };
+        reader.readAsDataURL(file);
+    };
 
-                console.log("Imagen local seleccionada, resultado (Base64 parcial):", base64Image.substring(0, 50) + '...');
-
-                try {
-                    console.log("Frontend: Submitting formData with new photo_url (from file):", updatedFormData);
-                    // Llama a la API con el formData actualizado
-                    const res = await userServices.editUser(updatedFormData);
-                    console.log("Frontend: API response data (from file upload):", res);
-
-                    if (res.success) {
-                        // *** CAMBIO PARA OPCIÓN 2 ***
-                        // El payload es ahora un objeto que contiene 'user' y 'token'
-                        dispatch({ type: "updateUser", payload: { user: res.user, token: res.token } });
-                        window.alert("Your profile has been updated with the new image!");
-
-                        // Opcional: Re-sincronizar formData con el user actualizado de la API para mantener consistencia
-                        setFormData({
-                            username: res.user.username || "",
-                            email: res.user.email || "",
-                            password: "",
-                            photo_url: res.user.photo_url || ""
-                        });
-                    } else {
-                        window.alert(res.error || "Something went wrong during file upload, please try again.");
-                    }
-                } catch (error) {
-                    console.error("Frontend: Error uploading file!!!:", error);
-                    window.alert("An error occurred during file upload: " + (error.message || error));
-                } finally {
-                    setShowUrlModal(false); // Cierra el modal siempre, sin importar el éxito de la API
-                }
-            };
-            reader.readAsDataURL(file); // Lee el archivo como Base64
+    const handleSaveUrlImage = async (e) => {
+        e.preventDefault();
+        if (tempImageUrl) {
+            SetProfileImage(tempImageUrl);
+            await handleProfileUpdate({ photo_url: tempImageUrl }); // update photo only
+            toggleUrlModal();
         }
     };
 
-    // Función para alternar el modal (ABRIR/CERRAR)
     const toggleUrlModal = () => {
-        if (!showUrlModal) { // Si el modal va a abrirse
-            // Precarga la URL actual del perfil en el input temporal del modal
+        if (!showUrlModal) {
             setTempImageUrl(profileImage.startsWith('http') ? profileImage : '');
-        } else { // Si el modal va a cerrarse
-            setTempImageUrl(""); // Limpia la URL temporal al cerrar
+        } else {
+            setTempImageUrl("");
         }
-        setShowUrlModal(!showUrlModal); // Alterna el estado de visibilidad del modal
+        setShowUrlModal(!showUrlModal);
     };
 
-    // Función click input del archivo (para usar con el botón dentro del modal)
     const triggerFileInput = () => {
-        fileInputRef.current.click(); // Simula el clic en el input de tipo file oculto
+        fileInputRef.current.click();
     };
 
     // Función para guardar la URL escrita en el modal
@@ -147,11 +151,9 @@ export const Profile = () => {
         });
     };
 
-    // Maneja el envío del formulario principal (username, email, password)
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Solo valida la contraseña si se está intentando cambiar (el campo password no está vacío)
         if (formData.password && formData.password !== repeatPasswd) {
             window.alert("The password does not match");
             return;
@@ -159,15 +161,15 @@ export const Profile = () => {
 
         // Crea una copia de formData para evitar enviar campos vacíos si no han sido modificados
         const dataToSubmit = { ...formData };
-        if (!dataToSubmit.password) { // Si la contraseña está vacía, no la envíes
+        if (!dataToSubmit.password || dataToSubmit.password.trim() === "") {
             delete dataToSubmit.password;
         }
 
-        if (!dataToSubmit.email) { // Si la contraseña está vacía, no la envíes
+        if (!dataToSubmit.email || dataToSubmit.password.trim() === "") { 
             delete dataToSubmit.email;
         }
 
-        if (!dataToSubmit.username) { // Si la contraseña está vacía, no la envíes
+        if (!dataToSubmit.username || dataToSubmit.password.trim() === "") { 
             delete dataToSubmit.username;
         }
 
@@ -208,30 +210,32 @@ export const Profile = () => {
         try {
             const resultado = await userServices.deleteUser();
             if (resultado.success) {
-                dispatch({ type: "logout" }); // Limpia el usuario y token del store
+                dispatch({ type: "logout" });
                 window.alert("Your account has been deleted");
-                navigate("/"); // Redirige a la página principal
+                navigate("/");
             } else {
                 window.alert("Failed to delete account: " + (resultado.error || "Unknown error"));
             }
         } catch (error) {
-            console.error("Frontend: Error in handleDeleteAccount:", error);
+            console.error("Error in handleDeleteAccount:", error);
             window.alert("An error occurred: " + (error.message || error));
         }
     };
 
-    // Efecto para inicializar formData y profileImage cuando store.user esté disponible
     useEffect(() => {
         if (store.user) {
             setFormData({
                 username: store.user.username || "",
                 email: store.user.email || "",
-                password: "", // Contraseña siempre vacía para seguridad en el frontend
+                password: "",
                 photo_url: store.user.photo_url || ""
             });
-            SetProfileImage(store.user.photo_url || '');
+            SetProfileImage(store.user.photo_url || "");
+            setRepeatPasswd("");
         }
-    }, [store.user]); // Dependencia: se ejecuta cuando store.user cambia
+    }, [store.user]);
+
+
 
     return (
         <>
