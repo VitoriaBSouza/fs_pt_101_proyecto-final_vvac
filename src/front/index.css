@@ -176,7 +176,7 @@ table {
 /* End of recipe details CSS classes */
 
 /* Here starts the recipe card css */
-/* We also used recipe_img class on the scroll galery for home page */
+
 
 .recipes_card_img{
 	object-fit: cover;
@@ -205,7 +205,7 @@ table {
   border-radius: 0.4rem;
 }
 
-/* End of recipe details CSS classes */
+/* End of recipe cards CSS classes */
 
 /* Here starts the like button css */
 .like_btn{
@@ -1624,3 +1624,124 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 /* FIN create recipe */
+
+/* INICIO css recipecard */
+
+
+/* Base card container */
+.recipe_card_custom {
+    border: 1px solid #e0e0e0;
+    border-radius: 0.8rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    background-color: white;
+    overflow: hidden; 
+    display: flex; /* Makes the card a flex container */
+    position: relative; /* For absolute positioning of the icon */
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    margin: 0.5rem auto; 
+    width: calc(100% - 1rem); 
+    max-width: 600px; 
+}
+
+.recipe_card_custom:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Inner row for image and content */
+.recipe_card_custom .row {
+    width: 100%;
+    margin: 0; 
+    display: flex;
+    align-items: stretch; 
+}
+
+/* Small recipe image */
+.recipe_card_img_small {
+    width: 100%; 
+    height: 120px; 
+    object-fit: cover;
+    border-top-left-radius: 0.8rem; 
+    border-bottom-left-radius: 0.8rem; 
+}
+
+/* Card body padding and text alignment */
+.recipe_card_body {
+    padding: 0.8rem; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
+/* Recipe title */
+.recipe_card_title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.25rem;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; 
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Ingredients list text */
+.recipe_card_ingredients {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Author avatar */
+.recipe_card_author_avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0; 
+}
+
+/* Author name */
+.recipe_card_author_name {
+    font-size: 0.85rem;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Saved/Created date */
+.recipe_card_date {
+    font-size: 0.75rem;
+    color: #999;
+    margin-bottom: 0;
+}
+
+/* Collection icon position */
+.recipe_card_collection_icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.2rem; 
+    color: #c1454b; 
+    background-color: rgba(255, 255, 255, 0.8); 
+    border-radius: 4px;
+    padding: 3px 5px;
+    z-index: 10;
+}
+
+/* Responsive adjustments */
+@media (min-width: 576.98px) { 
+    .recipe_card_custom {
+        width: calc(100% - 1rem); 
+    }
+}
+
+/* FIN css recipecard */

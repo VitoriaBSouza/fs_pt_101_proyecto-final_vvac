@@ -38,8 +38,8 @@ export const RecipeDetails = () => {
     // Fetch of the recipe by recipe_id
     const getRecipe = async () => recipeServices.getOneRecipe(id).then(data => {
         dispatch({ type: 'get_one_recipe', payload: data });
-    })   
-    
+    })
+
     // Convert published date into more user friendly
     const formattedDate = new Date(store.recipe?.published).toLocaleString("en-US", {
         year: "numeric",
@@ -73,7 +73,7 @@ export const RecipeDetails = () => {
             .filter(step => step.length > 0);
     };
 
-    const stepsArray = splitSteps(store.recipe?.steps); 
+    const stepsArray = splitSteps(store.recipe?.steps);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -94,9 +94,9 @@ export const RecipeDetails = () => {
                             <div id="recipeCarousel" className="carousel slide" data-bs-ride="carousel">
                                 <div className="carousel-inner">
                                     {store.recipe.media.map((item, index) => (
-                                        <div key={index} 
-                                        className={`carousel-item ${index === 0 ? "active" : ""}`} 
-                                        data-bs-interval="6000"> {/*Set timer carousel*/}
+                                        <div key={index}
+                                            className={`carousel-item ${index === 0 ? "active" : ""}`}
+                                            data-bs-interval="6000"> {/*Set timer carousel*/}
 
                                             <img src={item.url}
                                                 className="img-fluid text-center d-block w-100 recipe_img"
@@ -124,7 +124,7 @@ export const RecipeDetails = () => {
                         )}
 
                         <LikeButton recipe_id={id} />
-                        
+
                     </div>
 
                 </div>
@@ -142,9 +142,9 @@ export const RecipeDetails = () => {
                         {/* User image profile */}
                         <div className="col-12 col-md-12 col-lg-3 col-xl-2
                         g-0 my-sm-1 d-flex justify-content-center justify-content-lg-end">
-                            <img src={store.recipe?.user_photo} 
-                            className="float-start user_img border-0" 
-                            alt="user_img" />
+                            <img src={store.recipe?.user_photo}
+                                className="float-start user_img border-0"
+                                alt="user_img" />
                         </div>
 
                         {/* Username */}
@@ -155,7 +155,7 @@ export const RecipeDetails = () => {
                                 @{store.recipe?.username}
                             </h5>
                         </div>
-                        
+
                     </div>
 
                     <div className="row p-1 my-4 ms-2 
@@ -180,7 +180,7 @@ export const RecipeDetails = () => {
                     {/* All buttons: Shopping list, menu plan, share and add to collection */}
                     <div className="row ps-2">
                         <div className="col-12 d-flex">
-                            <CollectionButton recipe_id={id}/>
+                            <CollectionButton recipe_id={id} />
                             <ShareButton
                                 text="Check this out!"
                                 url={window.location.href}
@@ -194,13 +194,13 @@ export const RecipeDetails = () => {
                     <div className="border-bottom my-2 bg-secondary"></div>
 
                     <div className="row">
-                        {store.user?.id ? 
-                        <div className="col-12 text-capitalize mt-1">
-                            <h5 className="mb-2">Allergens: </h5>
-                            <p className="fs-5">{Array.isArray(store.recipe?.allergens) ? store.recipe?.allergens.join(", ") : ""}</p>
-                        </div>
-                        :
-                        ""}
+                        {store.user?.id ?
+                            <div className="col-12 text-capitalize mt-1">
+                                <h5 className="mb-2">Allergens: </h5>
+                                <p className="fs-5">{Array.isArray(store.recipe?.allergens) ? store.recipe?.allergens.join(", ") : ""}</p>
+                            </div>
+                            :
+                            ""}
                         <div className="col-12 d-flex">
                             <p className="ms-auto text_published align-self-end">Published on: {formattedDate}</p>
                         </div>
@@ -286,16 +286,27 @@ export const RecipeDetails = () => {
                         {/* maping over RecipeCards to create cards based on the data */}
                         {
 
-                            store.recipes?.map((el) => <RecipeCard
-                                key={el.id}
-                                id={el.id}
-                                name={el.title}
-                                url={el.media?.[0]?.url}
-
-                            />)
+                            store.recipes?.map((el) =>
+                                // <RecipeCard
+                                //     // key={el.id}
+                                //     // id={el.id}
+                                //     // name={el.title}
+                                //     // url={el.media?.[0]?.url}
+                                // />
+                                <RecipeCard
+                                    key={el.id}
+                                    id={el.id}
+                                    imageUrl={el.media?.[0]?.url}
+                                    title={el.title}
+                                    ingredientsList={el.ingredientsList}
+                                    authorName={el.authorName}
+                                    savedDate={el.savedDate || ''}
+                                    onClick={() => navigate(`/recipes/${el.id}`)}
+                                />
+                            )
                         }
                     </div>
-            
+
                 </div>
             </div>
 

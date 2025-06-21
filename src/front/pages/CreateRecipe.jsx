@@ -12,11 +12,11 @@ export const CreateRecipe = () => {
 
     const initialRecipeState = {
         title: "",
-        author_id: store.user?.id || null,
-        author_username: store.user?.username || "",
+        id: store.user?.id || null,
+        username: store.user?.username || "",
         description: "",
         image_url: "",
-        servings: "", // Maps to 'portions' in backend JSON
+        servings: 1, // Maps to 'portions' in backend JSON
         allergens: [], // New field
         difficulty_type: "", // New field, maps to 'difficulty_type' in backend JSON
         ingredients: [{ id: 1, text: "" }],
@@ -37,16 +37,16 @@ export const CreateRecipe = () => {
         const fetchRecipe = async () => {
             if (id) {
                 try {
-                    const response = await recipeServices.getRecipeById(id);
+                    const response = await recipeServices.getOneRecipe(id);
                     if (response.success && response.recipe) {
                         const fetchedRecipe = response.recipe;
                         setRecipeData({
                             title: fetchedRecipe.title || "",
-                            author_id: fetchedRecipe.author_id || null,
-                            author_username: fetchedRecipe.author_username || "",
+                            id: fetchedRecipe.id || null,
+                            username: fetchedRecipe.username || "",
                             description: fetchedRecipe.description || "",
                             image_url: fetchedRecipe.image_url || "",
-                            servings: fetchedRecipe.portions || "", // Map 'portions' from backend to 'servings'
+                            servings: fetchedRecipe.portions || 1, // Map 'portions' from backend to 'servings'
                             allergens: fetchedRecipe.allergens || [], // Load allergens
                             difficulty_type: fetchedRecipe.difficulty_type || "", // Load difficulty
                             ingredients: fetchedRecipe.ingredients.map(ing => ({ id: ing.id, text: ing.text || ing.name })),
@@ -195,13 +195,13 @@ export const CreateRecipe = () => {
 
     const handleSubmit = async (e, submitStatus) => {
         e.preventDefault();
-        
+
         const cleanedIngredients = recipeData.ingredients.filter(ing => ing.text.trim() !== "");
         const cleanedSteps = recipeData.steps.filter(step => step.text.trim() !== "");
 
         const dataToSend = {
             ...recipeData,
-            portions: recipeData.servings, // Map 'servings' from frontend to 'portions' for backend
+            portions: recipeData.servings || 1, 
             ingredients: cleanedIngredients,
             steps: cleanedSteps,
             status: submitStatus
@@ -214,7 +214,7 @@ export const CreateRecipe = () => {
             let response;
             if (id) {
                 console.log("Frontend createRecipe: Sending UPDATE recipe data to backend:", dataToSend);
-                response = await recipeServices.updateRecipe(id, dataToSend);
+                response = await recipeServices.editRecipe(id, dataToSend);
             } else {
                 console.log("Frontend createRecipe: Sending CREATE recipe data to backend:", dataToSend);
                 response = await recipeServices.createRecipe(dataToSend);
@@ -264,7 +264,7 @@ export const CreateRecipe = () => {
                     {/* MAIN COLUMN */}
                     <div className="col-12 col-md-9 rct-main-content">
                         <div className="rct-recipe-form-area d-flex flex-column mb-3">
-                            
+
                             {/* Top Section: Image and Buttons */}
                             <div className="rct-top-section row g-0 mb-4">
                                 {/* Dish Image Area - TOP LEFT */}
@@ -299,7 +299,7 @@ export const CreateRecipe = () => {
                                 />
                                 <div className="d-flex align-items-center rct-author-info">
                                     <img src={store.user?.photo_url || 'https://via.placeholder.com/30'} alt="Avatar" className="rct-author-avatar-small rounded-circle me-2" />
-                                    <span className="fw-bold rct-author-username">{recipeData.author_username || "Unknown User"}</span>
+                                    <span className="fw-bold rct-author-username">{recipeData.username || "Unknown User"}</span>
                                 </div>
                                 <textarea
                                     className="form-control mt-3 rct-description-textarea"
@@ -325,6 +325,7 @@ export const CreateRecipe = () => {
                                         onChange={handleChange}
                                         placeholder="Ex: 4"
                                         min="1"
+                                        required
                                     />
                                 </div>
 
@@ -344,7 +345,7 @@ export const CreateRecipe = () => {
                                         ))}
                                     </select>
                                 </div>
-                                
+
                                 {/* Allergens Input */}
                                 <div className="col-12 col-md-4">
                                     <label htmlFor="allergenInput" className="form-label rct-form-label">Allergens</label>

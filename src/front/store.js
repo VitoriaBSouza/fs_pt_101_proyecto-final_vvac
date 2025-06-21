@@ -215,12 +215,6 @@ export default function storeReducer(store, action = {}) {
         todos: store.todos.map((todo) => (todo.id === id ? { ...todo, background: color } : todo))
       };
 
-      case 'get_user_collections':
-      return {
-        ...store,
-        collections: action.payload
-      };
-
       case 'add_to_collection':
         return {
           ...store,
