@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "77d479c924bf1fa55183c4009cb7697a17f9464962b8adb19c2c166c717753c6"
+            "sha256": "8d2fdebf8d55832148a992166efe030950a7f050ab73d989c184cff09cb88bb9"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -196,15 +196,6 @@
             "markers": "python_version >= '3.6'",
             "version": "==1.6.1"
         },
-        "flask-cors": {
-            "hashes": [
-                "sha256:c7b2cbfb1a31aa0d2e5341eea03a6805349f7a61647daee1a15c46bbe981494c",
-                "sha256:d81bcb31f07b0985be7f48406247e9243aced229b7747219160a0559edd678db"
-            ],
-            "index": "pypi",
-            "markers": "python_version >= '3.9' and python_version < '4.0'",
-            "version": "==6.0.1"
-        },
         "flask-jwt-extended": {
             "hashes": [
                 "sha256:52f35bf0985354d7fb7b876e2eb0e0b141aaff865a22ff6cc33d9a18aa987978",
@@ -290,10 +281,11 @@
             ],
             "version": "==0.2.0"
         },
-        "google.generativeai": {
+        "google-generativeai": {
             "hashes": [
                 "sha256:22b420817fb263f8ed520b33285f45976d5b21e904da32b80d4fd20c055123a2"
             ],
+            "index": "pypi",
             "markers": "python_version >= '3.9'",
             "version": "==0.8.5"
         },

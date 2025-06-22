@@ -3,9 +3,9 @@ import React from 'react';
 
 export const BottomSection = () => {
   return (
-    <div className="row g-4">
-      <h2 className="text-center fw-bold mb-5 display-6">Explore Our Meal Options</h2>
-      <div className="col-lg-12 scroll_bottom_section" >
+    <div className="row g-2 mb-4">
+      <h2 className="title_Recipe_Scroller text-center fw-bold mb-0 text-light">Explore Our Meal Options</h2>
+      <div className="col-lg-4 scroll_bottom_section" >
         <div className="card h-100 shadow-sm " style={{ border: "2px solid #ca3e49" }}>
           <img
             src="src/front/assets/img/VeganDiet.jpg"
@@ -48,8 +48,8 @@ export const BottomSection = () => {
         </div>
       </div>
       <div />
-      <div className="row g-4">
-        <div className="col-lg-12 scroll_bottom_section">
+      <div className="row g-2 mb-4">
+        <div className="col-lg-4 scroll_bottom_section">
           <div className="card h-100 shadow-sm" style={{ border: "2px solid #ca3e49" }}>
             <img
               src="src/front/assets/img/low-calorie.jpg"

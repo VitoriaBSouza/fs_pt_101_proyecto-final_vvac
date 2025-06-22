@@ -1,23 +1,11 @@
 from werkzeug.security import generate_password_hash
 from random import randint, choice, uniform
-<<<<<<< HEAD
 from api.models import User, Recipe, Ingredient, RecipeIngredient, Comment, Media, Collection, RecipeScore, ShoppingListItem, UserStatus, DifficultyType, MediaType
-=======
-from api.models import (
-    User, Recipe, Ingredient, RecipeIngredient, Comment, Media,
-    Collection, RecipeScore, ShoppingListItem, UserStatus, DifficultyType, MediaType
-)
-from app import app, db
-import os
->>>>>>> 39ce49373115be8059f1a59905890fe823598adf
 from dotenv import load_dotenv
 
 load_dotenv()
-<<<<<<< HEAD
 from app import app, db
 print("Using DB URI:", app.config['SQLALCHEMY_DATABASE_URI'])
-=======
->>>>>>> 39ce49373115be8059f1a59905890fe823598adf
 
 with app.app_context():
     # Reset DB
@@ -97,7 +85,7 @@ with app.app_context():
         Media(
             recipe_id=recipe.id,
             type_media=MediaType.IMAGE,
-            url="https://loremflickr.com/400/400/food"
+            url="https://picsum.photos/200/300"
         ) for recipe in recipes
     ]
     db.session.add_all(medias)

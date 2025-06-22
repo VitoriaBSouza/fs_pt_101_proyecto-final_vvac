@@ -37,15 +37,15 @@ export const RecipeScroller = () => {
   };
 
   return (
-    <div className="container my-5">
-      <h2 className="text-center fw-bold mb-4 text-light">Some Random Ideas!!</h2>
+    <div className="card_row_scroll my-5">
+      <h2 className="title_Recipe_Scroller text-center fw-bold mb-0 text-dark">Some Random Ideas!!</h2>
       <div
         className="d-flex overflow-auto gap-3 pb-3"
         style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
       >
         {recipes.map(recipe => (
           <div
-            className="m-2 recipes_cards_bg border flex-shrink-0"
+            className="m-2 home_cards_bg border flex-shrink-0"
             style={{ width: '280px', scrollSnapAlign: 'start', cursor: 'pointer' }}
             key={recipe.id}
             onClick={() => handleClick(recipe.id)}
