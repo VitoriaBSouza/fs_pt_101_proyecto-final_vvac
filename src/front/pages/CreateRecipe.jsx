@@ -73,7 +73,7 @@ export const CreateRecipe = () => {
     const difficultyOptions = ["Easy", "Moderate", "Hard"]; // Options for difficulty dropdown
 
     const [recipeData, setRecipeData] = useState(initialRecipeState);
-    const [mainRecipeImage, setMainRecipeImage] = useState('https://via.placeholder.com/200x200?text=Attach+dish+photo');
+    const [mainRecipeImage, setMainRecipeImage] = useState('https://picsum.photos/200/300');
     const fileInputRef = useRef(null);
     const [showImageModal, setShowImageModal] = useState(false);
     const [tempImageUrl, setTempImageUrl] = useState("");
@@ -97,12 +97,16 @@ export const CreateRecipe = () => {
                             };
                         });
 
+                        const imageUrlToDisplay = fetchedRecipe.media && fetchedRecipe.media.length > 0
+                            ? fetchedRecipe.media[0].url
+                            : PLACEHOLDER_IMAGE_URL;
+
                         setRecipeData({
                             title: fetchedRecipe.title || "",
                             id: fetchedRecipe.id || null,
                             username: fetchedRecipe.username || "",
                             description: fetchedRecipe.description || "",
-                            image_url: fetchedRecipe.image_url || "",
+                            image_url: fetchedRecipe.media && fetchedRecipe.media.length > 0 ? fetchedRecipe.media[0].url : PLACEHOLDER_IMAGE_URL,
                             servings: fetchedRecipe.portions || 1,
                             allergens: fetchedRecipe.allergens || [],
                             difficulty_type: fetchedRecipe.difficulty_type || "",
@@ -111,7 +115,7 @@ export const CreateRecipe = () => {
                             steps: fetchedRecipe.steps.map(step => ({ id: step.id, text: step.text || step.description, time: step.time || "" })),
                             status: fetchedRecipe.status || "draft"
                         });
-                        setMainRecipeImage(fetchedRecipe.image_url || 'https://via.placeholder.com/200x200?text=Attach+dish+photo');
+                        setMainRecipeImage(fetchedRecipe.media && fetchedRecipe.media.length > 0 ? fetchedRecipe.media[0].url : PLACEHOLDER_IMAGE_URL);
                     } else {
                         console.error("Error al cargar receta:", response.error || "Receta no encontrada.");
                         window.alert("No se pudo cargar la receta para editar.");
@@ -124,7 +128,7 @@ export const CreateRecipe = () => {
                 }
             } else {
                 setRecipeData(initialRecipeState);
-                setMainRecipeImage('https://via.placeholder.com/200x200?text=Adjunta foto del plato');
+                setMainRecipeImage(PLACEHOLDER_IMAGE_URL);
             }
         };
 
@@ -268,6 +272,8 @@ export const CreateRecipe = () => {
         }));
     };
 
+    const PLACEHOLDER_IMAGE_URL = 'https://picsum.photos/200/300';
+
     const handleSubmit = async (e, submitStatus) => {
         e.preventDefault();
 
@@ -281,18 +287,31 @@ export const CreateRecipe = () => {
             }));
 
         const cleanedSteps = recipeData.steps.filter(step => step.text.trim() !== "");
+        const stepsToSerialize = recipeData.steps.filter(step => step.text.trim() !== "");
+        const serializedSteps = JSON.stringify(stepsToSerialize);
 
-        const totalPrepTimeInMinutes = cleanedSteps.reduce((sum, step) => {
+
+        const totalPrepTimeInMinutes = cleanedSteps?.reduce((sum, step) => {
             return sum + parseTime(step.time);
         }, 0);
+        let media_to_send = [];
+
+        // Solo envía 'media' si la URL de la imagen NO es la de por defecto
+        if (recipeData.image_url && recipeData.image_url !== PLACEHOLDER_IMAGE_URL) {
+            media_to_send = [{
+                url: recipeData.image_url,
+                type_media: "image" // Asume que "image" es el valor esperado por el backend
+            }];
+        }
 
         const dataToSend = {
             ...recipeData,
             portions: recipeData.servings || 1,
             ingredient: cleanedIngredients,
-            steps: cleanedSteps,
+            steps: serializedSteps,
             status: submitStatus,
-            prep_time: totalPrepTimeInMinutes
+            prep_time: totalPrepTimeInMinutes,
+            media: media_to_send
 
         };
 
@@ -300,6 +319,7 @@ export const CreateRecipe = () => {
         delete dataToSend.servings;
         delete dataToSend.username;
         delete dataToSend.id;
+        delete dataToSend.image_url;
 
         try {
             let response;
@@ -331,7 +351,7 @@ export const CreateRecipe = () => {
                 window.location.reload();
             } else {
                 setRecipeData(initialRecipeState);
-                setMainRecipeImage('https://via.placeholder.com/200x200?text=Attach+dish+photo');
+                setMainRecipeImage('https://picsum.photos/200/300');
                 setTempImageUrl("");
                 setShowImageModal(false);
                 setCurrentAllergenInput("");
@@ -392,17 +412,10 @@ export const CreateRecipe = () => {
                                     <img src={store.user?.photo_url || 'https://via.placeholder.com/30'} alt="Avatar" className="rct-author-avatar-small rounded-circle me-2" />
                                     <span className="fw-bold rct-author-username">{recipeData.username || "Unknown User"}</span>
                                 </div>
-                                <textarea
-                                    className="form-control mt-3 rct-description-textarea"
-                                    name="description"
-                                    rows="3"
-                                    placeholder="Share a little more about this dish. What or who inspired you to cook? What makes it special for you? What's your favorite way to cook?"
-                                    value={recipeData.description}
-                                    onChange={handleChange}
-                                ></textarea>
+                               
                             </div>
 
-                            {/* Servings, Allergens, Difficulty */}
+                            {/* Servings, Difficulty */}
                             <div className="rct-details-section w-100 mb-4 row g-3">
                                 {/* Servings Input */}
                                 <div className="col-12 col-md-4">
@@ -436,28 +449,6 @@ export const CreateRecipe = () => {
                                             <option key={option} value={option}>{option}</option>
                                         ))}
                                     </select>
-                                </div>
-
-                                {/* Allergens Input */}
-                                <div className="col-12 col-md-4">
-                                    <label htmlFor="allergenInput" className="form-label rct-form-label">Allergens</label>
-                                    <input
-                                        type="text"
-                                        className="form-control rct-allergen-input"
-                                        id="allergenInput"
-                                        placeholder="Type allergen and press Enter (Ex: Gluten)"
-                                        value={currentAllergenInput}
-                                        onChange={handleAllergenInputChange}
-                                        onKeyPress={addAllergen}
-                                    />
-                                    <div className="rct-allergen-tags-container mt-2">
-                                        {recipeData.allergens.map((allergen, index) => (
-                                            <span key={index} className="badge bg-secondary rct-allergen-tag me-2 mb-2">
-                                                {allergen}
-                                                <button type="button" className="btn-close btn-close-white ms-1" aria-label="Remove" onClick={() => removeAllergen(allergen)}></button>
-                                            </span>
-                                        ))}
-                                    </div>
                                 </div>
                             </div>
 
