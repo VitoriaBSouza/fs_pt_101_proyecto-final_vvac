@@ -10,7 +10,6 @@ import { useState, useEffect, useRef } from "react";
 export const Profile = () => {
     const navigate = useNavigate();
     const { dispatch, store } = useGlobalReducer();
-
     const [formData, setFormData] = useState({
         username: "",
         email: "",
@@ -74,14 +73,6 @@ export const Profile = () => {
         reader.readAsDataURL(file);
     };
 
-    const handleSaveUrlImage = async (e) => {
-        e.preventDefault();
-        if (tempImageUrl) {
-            SetProfileImage(tempImageUrl);
-            await handleProfileUpdate({ photo_url: tempImageUrl }); // update photo only
-            toggleUrlModal();
-        }
-    };
 
     const toggleUrlModal = () => {
         if (!showUrlModal) {
@@ -95,6 +86,15 @@ export const Profile = () => {
     const triggerFileInput = () => {
         fileInputRef.current.click();
     };
+
+    // const handleSaveUrlImage = async (e) => {
+    //     e.preventDefault();
+    //     if (tempImageUrl) {
+    //         SetProfileImage(tempImageUrl);
+    //         await handleProfileUpdate({ photo_url: tempImageUrl }); // update photo only
+    //         toggleUrlModal();
+    //     }
+    // };
 
     // Función para guardar la URL escrita en el modal
     const handleSaveUrlImage = async (e) => {
@@ -165,15 +165,15 @@ export const Profile = () => {
             delete dataToSubmit.password;
         }
 
-        if (!dataToSubmit.email || dataToSubmit.password.trim() === "") { 
+        if (!dataToSubmit.email || dataToSubmit.password.trim() === "") {
             delete dataToSubmit.email;
         }
 
-        if (!dataToSubmit.username || dataToSubmit.password.trim() === "") { 
+        if (!dataToSubmit.username || dataToSubmit.password.trim() === "") {
             delete dataToSubmit.username;
         }
 
-        
+
         try {
             console.log("Frontend: Submitting main formData:", dataToSubmit);
             const data = await userServices.editUser(dataToSubmit); // Envía solo los campos necesarios
@@ -214,7 +214,7 @@ export const Profile = () => {
                 window.alert("Your account has been deleted");
                 navigate("/");
             } else {
-                window.alert("Failed to delete account: " + (resultado.error || "Unknown error"));
+                window.alert("Failed to delete account: " + (result.error || "Unknown error"));
             }
         } catch (error) {
             console.error("Error in handleDeleteAccount:", error);
@@ -274,8 +274,9 @@ export const Profile = () => {
                                                 className="form-control"
                                                 name="username"
                                                 id="username"
+                                                autoComplete="off"
                                                 onChange={handleChange}
-                                                // value={formData?.username || ""} // Controla el input con el estado
+                                            // placeholder={formData?.username || "" } 
                                             />
                                         </div>
                                         <div className="mb-3">
@@ -284,8 +285,9 @@ export const Profile = () => {
                                                 className="form-control"
                                                 name="email"
                                                 id="Email1"
+                                                autoComplete="off"
                                                 onChange={handleChange}
-                                                // value={formData?.email || ""} // Controla el input con el estado
+                                            // placeholder={formData?.email || "" } 
                                             />
                                             {store.user?.success && (
                                                 <div className="alert alert-info mt-2">
@@ -301,7 +303,7 @@ export const Profile = () => {
                                                 className="form-control"
                                                 id="password"
                                                 placeholder="*Type new password"
-                                                // value={formData?.password || ""} // Controla el input con el estado
+                                            // value={formData?.password || ""} // Controla el input con el estado
                                             />
                                             <input type="password"
                                                 name="repeatPasswd"
@@ -309,7 +311,7 @@ export const Profile = () => {
                                                 className="form-control"
                                                 id="repeatPasswd"
                                                 placeholder="*Repeat new password"
-                                                // value={repeatPasswd || ""} // Controla el input con el estado
+                                            // value={repeatPasswd || ""} // Controla el input con el estado
                                             />
                                         </div>
                                         <div className="actions-profile">
@@ -357,7 +359,7 @@ export const Profile = () => {
             </div>
 
             {/* --- MODAL PARA CAMBIAR IMAGEN DE PERFIL --- */}
-            {showUrlModal && ( 
+            {showUrlModal && (
                 <div className="modal fade show" id="imageUrlModal" style={{ display: 'block' }} tabIndex="-1" role="dialog" aria-labelledby="imageUrlModalLabel" aria-hidden={!showUrlModal}> {/* `aria-hidden` es dinámico */}
                     <div className="modal-dialog">
                         <div className="modal-content">

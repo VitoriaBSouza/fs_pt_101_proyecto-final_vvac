@@ -19,9 +19,45 @@ export const CreateRecipe = () => {
         servings: 1, // Maps to 'portions' in backend JSON
         allergens: [], // New field
         difficulty_type: "", // New field, maps to 'difficulty_type' in backend JSON
-        ingredients: [{ id: 1, text: "" }],
+        prep_time: "",
+        ingredient: [{ id: 1, text: "" }],
         steps: [{ id: 1, text: "", time: "" }],
         status: "draft"
+    };
+
+        // Función de utilidad para convertir string de tiempo (ej. "1h 30m") a minutos
+    const parseTime = (timeString) => {
+        if (!timeString) return 0;
+
+        let totalMinutes = 0;
+        const hoursMatch = timeString.match(/(\d+)\s*h/i); // Busca Xh o X h
+        const minutesMatch = timeString.match(/(\d+)\s*min/i); // Busca Xmin o X min
+        const minutesOnlyMatch = timeString.match(/^(\d+)\s*m$/i); // Busca solo Xm
+
+        if (hoursMatch) {
+            totalMinutes += parseInt(hoursMatch[1]) * 60;
+        }
+        if (minutesMatch) {
+            totalMinutes += parseInt(minutesMatch[1]);
+        } else if (minutesOnlyMatch && !hoursMatch) { // Si no hay horas, y solo hay "Xm"
+            totalMinutes += parseInt(minutesOnlyMatch[1]);
+        }
+        return totalMinutes;
+    };
+
+    // Función de utilidad para convertir minutos totales de vuelta a un formato legible (opcional)
+    const formatMinutesToHumanReadable = (totalMinutes) => {
+        if (totalMinutes === 0) return "";
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        let result = "";
+        if (hours > 0) {
+            result += `${hours}h `;
+        }
+        if (minutes > 0) {
+            result += `${minutes}min`;
+        }
+        return result.trim();
     };
 
     const difficultyOptions = ["Easy", "Medium", "Hard"]; // Options for difficulty dropdown
@@ -49,7 +85,8 @@ export const CreateRecipe = () => {
                             servings: fetchedRecipe.portions || 1, // Map 'portions' from backend to 'servings'
                             allergens: fetchedRecipe.allergens || [], // Load allergens
                             difficulty_type: fetchedRecipe.difficulty_type || "", // Load difficulty
-                            ingredients: fetchedRecipe.ingredients.map(ing => ({ id: ing.id, text: ing.text || ing.name })),
+                            prep_time: fetchedRecipe.prep_time || "",
+                            ingredient: fetchedRecipe.ingredient.map(ing => ({ id: ing.id, text: ing.text || ing.name })),
                             steps: fetchedRecipe.steps.map(step => ({ id: step.id, text: step.text || step.description, time: step.time || "" })),
                             status: fetchedRecipe.status || "draft"
                         });
@@ -72,6 +109,23 @@ export const CreateRecipe = () => {
 
         fetchRecipe();
     }, [id, store.user, navigate]);
+
+        useEffect(() => {
+        const totalStepsMinutes = recipeData.steps.reduce((sum, step) => {
+            return sum + parseTime(step.time);
+        }, 0);
+
+        // Formatear el total de minutos a un string legible
+        const formattedTotalTime = formatMinutesToHumanReadable(totalStepsMinutes);
+
+        // Actualizar el estado de prep_time si ha cambiado
+        if (formattedTotalTime !== recipeData.prep_time) {
+            setRecipeData(prevData => ({
+                ...prevData,
+                prep_time: formattedTotalTime
+            }));
+        }
+    }, [recipeData.steps]);
 
     const handleChange = (e) => {
         setRecipeData({
@@ -144,26 +198,26 @@ export const CreateRecipe = () => {
     const handleIngredientChange = (ingId, value) => {
         setRecipeData(prevData => ({
             ...prevData,
-            ingredients: prevData.ingredients.map(ing =>
+            ingredient: prevData.ingredient.map(ing =>
                 ing.id === ingId ? { ...ing, text: value } : ing
             )
         }));
     };
 
     const addIngredient = () => {
-        const newId = recipeData.ingredients.length > 0
-            ? Math.max(...recipeData.ingredients.map(ing => ing.id)) + 1
+        const newId = recipeData.ingredient.length > 0
+            ? Math.max(...recipeData.ingredient.map(ing => ing.id)) + 1
             : 1;
         setRecipeData(prevData => ({
             ...prevData,
-            ingredients: [...prevData.ingredients, { id: newId, text: "" }]
+            ingredient: [...prevData.ingredient, { id: newId, text: "" }]
         }));
     };
 
     const removeIngredient = (ingId) => {
         setRecipeData(prevData => ({
             ...prevData,
-            ingredients: prevData.ingredients.filter(ing => ing.id !== ingId)
+            ingredient: prevData.ingredient.filter(ing => ing.id !== ingId)
         }));
     };
 
@@ -196,13 +250,13 @@ export const CreateRecipe = () => {
     const handleSubmit = async (e, submitStatus) => {
         e.preventDefault();
 
-        const cleanedIngredients = recipeData.ingredients.filter(ing => ing.text.trim() !== "");
+        const cleanedIngredients = recipeData.ingredient.filter(ing => ing.text.trim() !== "");
         const cleanedSteps = recipeData.steps.filter(step => step.text.trim() !== "");
 
         const dataToSend = {
             ...recipeData,
-            portions: recipeData.servings || 1, 
-            ingredients: cleanedIngredients,
+            portions: recipeData.servings || 1,
+            ingredient: cleanedIngredients,
             steps: cleanedSteps,
             status: submitStatus
         };
@@ -282,7 +336,6 @@ export const CreateRecipe = () => {
                                 {/* Using ms-auto (margin-left: auto) to push buttons to the far right within its column */}
                                 <div className="rct-action-buttons col-12 col-md-6 d-flex justify-content-end align-items-start ms-auto mt-3 mt-md-0">
                                     <button className="btn btn-outline-danger rct-btn-discard me-2" onClick={handleDiscard}>Delete</button>
-                                    <button className="btn btn-outline-secondary rct-btn-save-draft me-2" onClick={(e) => handleSubmit(e, 'draft')}>Save & Exit</button>
                                     <button className="btn btn-primary rct-btn-publish" onClick={(e) => handleSubmit(e, 'published')}>Publish</button>
                                 </div>
                             </div>
@@ -371,9 +424,9 @@ export const CreateRecipe = () => {
 
 
                             {/* Ingredients */}
-                            <div className="rct-ingredients-section w-100 mb-4">
+                            <div className="rct-ingredient-section w-100 mb-4">
                                 <h3 className="mb-3 rct-section-title">Ingredients</h3>
-                                {recipeData.ingredients.map((ingredient) => (
+                                {recipeData.ingredient.map((ingredient) => (
                                     <div key={ingredient.id} className="input-group mb-2 rct-ingredient-item">
                                         <input
                                             type="text"
@@ -382,7 +435,7 @@ export const CreateRecipe = () => {
                                             value={ingredient.text}
                                             onChange={(e) => handleIngredientChange(ingredient.id, e.target.value)}
                                         />
-                                        {recipeData.ingredients.length > 1 && (
+                                        {recipeData.ingredient.length > 1 && (
                                             <button className="btn btn-outline-danger rct-remove-item-btn" type="button" onClick={() => removeIngredient(ingredient.id)}>
                                                 <i className="fa-solid fa-minus"></i>
                                             </button>
