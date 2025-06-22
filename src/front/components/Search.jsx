@@ -42,7 +42,7 @@ export const Search = () =>{
                 });
             } else if (filter === 'Diets') {
                 result = store.recipes?.filter((value) => {
-                    return value.category?.toLowerCase().includes(searchWord);
+                    return value.diet_label?.toLowerCase().includes(searchWord);
                 });
             }
             setFilteredData(result);
@@ -88,8 +88,8 @@ export const Search = () =>{
                     id="filterDropdown" 
                     data-bs-toggle="dropdown" 
                     aria-expanded="false">
-                        <FontAwesomeIcon icon={faFilter} />
-                        <span className="ms-1 text-capitalize">{filter}</span>
+                        <FontAwesomeIcon icon={faFilter} className="me-1" />
+                        <span className="ms-1 text-capitalize fs-5 m-1">{filter}</span>
                     </button>
 
                     <ul className="dropdown-menu" aria-labelledby="filterDropdown">
