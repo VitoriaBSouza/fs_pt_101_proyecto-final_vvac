@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "51286d565859f54565f32935554f3f6e653cac8ad365adecf8310f8db84640e0"
+            "sha256": "27f355ffc331ef9b3b46fc3aac6cab254ece5e97315c61bde8db3e231db119f7"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -289,13 +289,6 @@
                 "sha256:b65a0a2123300dd71281a7bf6e64d65a0759287df52729bdd1ae2e47dc311a3d"
             ],
             "version": "==0.2.0"
-        },
-        "google.generativeai": {
-            "hashes": [
-                "sha256:22b420817fb263f8ed520b33285f45976d5b21e904da32b80d4fd20c055123a2"
-            ],
-            "markers": "python_version >= '3.9'",
-            "version": "==0.8.5"
         },
         "googleapis-common-protos": {
             "hashes": [
@@ -1320,6 +1313,7 @@
                 "sha256:54b78bf3716d19a65be4fceccc0d1d7b89e608834989dfae50ea87564639213e",
                 "sha256:60723ce945c19328679790e3282cc758aa4a6040e4bb330f53d30fa546d44746"
             ],
+            "index": "pypi",
             "markers": "python_version >= '3.9'",
             "version": "==3.1.3"
         },
