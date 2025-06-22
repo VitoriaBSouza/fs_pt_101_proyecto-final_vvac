@@ -66,6 +66,14 @@ export const RecipeDetails = () => {
     };
 
     const stepsArray = splitSteps(store.recipe?.steps);
+    console.log(store.recipe?.diet_label);
+
+    //will make random number so we can sort recipe and shows differents suggestions to user
+    const getRandomItems = (array, count) => {
+        if (!Array.isArray(array)) return [];
+        return [...array].sort(() => 0.5 - Math.random()).slice(0, count);
+    };
+
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -161,6 +169,13 @@ export const RecipeDetails = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* will show only 5 first labels to reduce in case we have recipe with far too many labels */}
+                <div className="d-flex flex-wrap gap-2">
+                    {store.recipe?.diet_label?.split(',').slice(0, 5).map((diet, i) => (
+                        <span key={i} className="badge diet_label text-capitalize fs-5">{diet.trim()}</span>
+                    ))}
+                </div>
             </div>
 
             <div className="row py-2">
@@ -227,16 +242,14 @@ export const RecipeDetails = () => {
                 <h2 className="p-4 text-light">Latest Recipes</h2>
                 <div className="col-12">
                     <div className="scroll-container d-flex p-3">
-                        {store.recipes?.map((el) => (
+
+                        {/* maping over RecipeCards to create cards based on the data */}
+                        {getRandomItems(store.recipes, 15).map((el) => (
                             <RecipeCard
                                 key={el.id}
                                 id={el.id}
-                                imageUrl={el.media?.[0]?.url}
+                                url={el.media?.[0]?.url}
                                 title={el.title}
-                                ingredientsList={el.ingredientsList}
-                                authorName={el.authorName}
-                                savedDate={el.savedDate || ''}
-                                onClick={() => navigate(`/recipes/${el.id}`)}
                             />
                         ))}
                     </div>

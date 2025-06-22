@@ -36,7 +36,11 @@ export const RecipeCard = (props) => {
                 <img src={url} className="img-fluid card-img recipes_card_img border-0" alt="recipe_img" />
                 <div className="card-img-overlay p-0 d-flex align-items-end">
                     <div className="w-100 bg-opacity-50 text-center title_suggestion_card m-3">
+<<<<<<< HEAD
                         <p className="card-title text-light fs-3 p-3">{name}</p>
+=======
+                        <p className="card-title text-light fs-3 p-3">{props.title}</p>
+>>>>>>> 4cc6ac9951f854a9364ae21a5cd7c7aadbf28943
                     </div>
                 </div>
             </div>
