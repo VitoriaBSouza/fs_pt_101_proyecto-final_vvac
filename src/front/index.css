@@ -1093,6 +1093,24 @@ table {
   display: block;
 }
 
+.icon_nav_collection{
+  min-width: 3rem;
+  min-height: 3rem;
+}
+
+.nav_drop{
+  z-index: 1080;
+}
+
+.nav_user_dropdown {
+  position: fixed;
+  top: 50px;
+  right: 10px;
+  left: auto;
+  z-index: 1080;
+  width: auto;
+}
+
 /* From here is search button CSS  */
 
 .search_box_bg {

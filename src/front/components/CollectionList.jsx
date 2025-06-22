@@ -15,7 +15,6 @@ export const CollectionList = () =>{
 
     const { store, dispatch } = useGlobalReducer();
     const [collection, setCollection] = useState([]);
-    const recipe_id = store.collections?.recipe_id
 
     const getUserCollection = async () => collectionServices.getUserCollections().then(data => {
 
@@ -70,13 +69,13 @@ export const CollectionList = () =>{
             className="btn rounded-circle nav_collection_btn border-0" 
             aria-expanded="false"
             data-bs-toggle="dropdown">
-                <FontAwesomeIcon icon={faBookBookmark} className="fs-1"/>
+                <FontAwesomeIcon icon={faBookBookmark} className="icon_nav_collection"/>
             </button>
-            <ul className="dropdown-menu dropdown-menu-end">
+            <ul className="dropdown-menu dropdown-menu-end nav_drop">
                 {/* important to use condition to either show list or a span/comment with no items added */}
                 {/* we will only map if there is items on the list */}
             {store.collections && store.collections.length > 0 ? (
-                    store.collections.map((el, i) => (
+                    store.collections.map((el) => (
                         <li key={el.recipe_id} className="d-flex">
                             <button className="dropdown-item m-1" type="button" style={{ textTransform: 'capitalize' }}>
                                 {el.recipe_title}
