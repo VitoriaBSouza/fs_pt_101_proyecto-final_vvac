@@ -17,6 +17,8 @@ import { LikeButton } from '../components/buttons/likeButton.jsx';
 import { ShareButton } from "../components/buttons/shareButton.jsx";
 import { CollectionButton } from "../components/buttons/collectionButton.jsx";
 import { AddToMealPlanButton } from "../components/buttons/AddToMealPlanButton.jsx";
+import { AddIngredientsToListButton } from "../components/buttons/AddIngredientsToListButton.jsx";
+
 
 //icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -148,9 +150,7 @@ export const RecipeDetails = () => {
                                 url={window.location.href}
                                 printRef={printRef}
                                 recipe_id={id} />
-                            <div className="pe-3 ms-4 fs-2 color_icons border-end border-secondary">
-                                <FontAwesomeIcon icon={faCartPlus} />
-                            </div>
+                            <AddIngredientsToListButton ingredientList={store.recipe?.ingredients || []} />
                             <AddToMealPlanButton recipe={store.recipe} />
                         </div>
                     </div>

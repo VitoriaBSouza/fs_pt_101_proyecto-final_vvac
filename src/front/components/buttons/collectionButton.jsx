@@ -108,9 +108,9 @@ export const CollectionButton = (props) =>{
                 className="btn border-0"
                 onClick={() => isAdded ? removeFromCollection() : addToCollection()}>
                     {isAdded ? 
-                        <FontAwesomeIcon icon={faBook} className="pe-3 buttons_recipe color_icons border-end border-secondary" />
+                        <FontAwesomeIcon icon={faBook} className="ms-4 fs-2 color_icons"/>
                         :
-                        <FontAwesomeIcon icon={faBookMedical} className="pe-3 buttons_recipe color_icons border-end border-secondary" />
+                        <FontAwesomeIcon icon={faBookMedical} className="ms-4 fs-2 color_icons" />
                     }
                 </button>
 
@@ -119,7 +119,10 @@ export const CollectionButton = (props) =>{
                 <PopOver>
                     <button type="button" 
                     className="btn border-0">
-                        <FontAwesomeIcon icon={faBook} className="pe-3 buttons_recipe color_icons border-end border-secondary"/>
+                        <FontAwesomeIcon 
+                        icon={faBook} 
+                        className="ms-4 fs-2 color_icons"
+                        />
                     </button>
                 </PopOver>
             }

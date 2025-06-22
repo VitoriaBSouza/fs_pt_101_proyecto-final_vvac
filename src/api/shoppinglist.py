@@ -2,6 +2,9 @@ from sqlalchemy import func
 from api.models import db, Ingredient, RecipeIngredient, ShoppingListItem
 
 def add_recipes_to_shopping_list(recipe_ids: list[int], user_id: int):
+    if not recipe_ids:
+        return []
+
     results = (
         db.session.query(
             Ingredient.name.label("ingredient_name"),

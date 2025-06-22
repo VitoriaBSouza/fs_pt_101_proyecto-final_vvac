@@ -23,11 +23,11 @@ sentencepiece = "*"
 google-generativeai = "*"
 sqlalchemy = "*"
 python-dotenv = "*"
+werkzeug = "*"
 flask = "*"
-flask-cors = "*"
 flask-sqlalchemy = "*"
 flask-jwt-extended = "*"
-werkzeug = "*"
+flask-cors = "*"
 
 [requires]
 python_version = "3.13"
