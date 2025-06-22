@@ -2135,15 +2135,12 @@ div.container_bottom_section {
   color: #212529;
 }
 
-/* Events style */
+/* Default event style – now overridden dynamically */
 .rbc-event {
-  background-color: #fff3f4;
-  color: #ca3e49;
-  border-left: 4px solid #ca3e49;
-  border-radius: 0.375rem;
-  padding: 4px 8px;
   font-weight: 600;
   font-size: 0.85rem;
+  padding: 4px 8px;
+  border-radius: 0.375rem;
 }
 
 /* Toolbar header buttons */
@@ -2175,5 +2172,3 @@ div.container_bottom_section {
   box-shadow: 0 0 0 0.25rem rgba(202, 62, 73, 0.25);
   border-color: #ca3e49;
 }
-
-

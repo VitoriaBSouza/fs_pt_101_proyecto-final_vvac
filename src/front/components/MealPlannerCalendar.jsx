@@ -24,6 +24,20 @@ const localizer = dateFnsLocalizer({
 
 const calendarViews = [Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA];
 
+const mealTypeColors = {
+  breakfast: "#ffe6cc",
+  morning_snack: "#e6f2ff",
+  brunch: "#e6ffe6",
+  lunch: "#fff2cc",
+  afternoon_snack: "#e6e6ff",
+  dinner: "#ffe6e6",
+  supper: "#f0e6ff",
+  snack: "#ccffe6",
+  pre_workout: "#e0f7fa",
+  post_workout: "#f1f8e9",
+  other: "#f5f5f5"
+};
+
 const mapEntriesToEvents = (entries) => {
   return entries.map((entry) => {
     const datetime = new Date(entry.date);
@@ -31,6 +45,7 @@ const mapEntriesToEvents = (entries) => {
     const end = new Date(datetime);
     start.setHours(12);
     end.setHours(13);
+    const bgColor = mealTypeColors[entry.meal_type?.toLowerCase()] || "#fff3f4";
     return {
       title: `${entry.recipe_title} (${entry.meal_type})`,
       start,
@@ -41,6 +56,7 @@ const mapEntriesToEvents = (entries) => {
         recipe_id: entry.recipe_id,
         meal_type: entry.meal_type,
       },
+      backgroundColor: bgColor
     };
   });
 };
@@ -55,6 +71,7 @@ export const MealPlannerCalendar = () => {
   const [editingEvent, setEditingEvent] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [allOptions, setAllOptions] = useState([]);
+  const [currentView, setCurrentView] = useState(Views.MONTH);
   const { store, dispatch } = useGlobalReducer();
   const navigate = useNavigate();
 
@@ -194,28 +211,63 @@ export const MealPlannerCalendar = () => {
     setCurrentDate(updatedDate);
   };
 
+  const handleViewChange = (view) => {
+    setCurrentView(view);
+  };
+
   const monthOptions = Array.from({ length: 12 }, (_, i) =>
     new Date(0, i).toLocaleString("default", { month: "long" })
   );
 
   const yearOptions = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i);
 
+  const CustomToolbar = ({ label }) => (
+    <div className="rbc-toolbar custom-toolbar d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mb-3">
+      <div className="d-flex gap-2">
+        <select value={currentDate.getMonth()} onChange={handleMonthChange} className="form-select">
+          {monthOptions.map((month, i) => (
+            <option key={i} value={i}>{month}</option>
+          ))}
+        </select>
+        <select value={currentDate.getFullYear()} onChange={handleYearChange} className="form-select">
+          {yearOptions.map((year) => (
+            <option key={year} value={year}>{year}</option>
+          ))}
+        </select>
+      </div>
+      <div className="btn-group">
+        {calendarViews.map(view => (
+          <button
+            key={view}
+            type="button"
+            className={`btn btn-outline-light ${currentView === view ? 'rbc-active' : ''}`}
+            onClick={() => handleViewChange(view)}
+          >
+            {view.charAt(0).toUpperCase() + view.slice(1).toLowerCase()}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const eventPropGetter = (event) => {
+    return {
+      style: {
+        backgroundColor: event.backgroundColor,
+        color: "#ca3e49",
+        borderLeft: "4px solid #ca3e49",
+        borderRadius: "0.375rem",
+        padding: "4px 8px",
+        fontWeight: 600,
+        fontSize: "0.85rem",
+      }
+    };
+  };
+
   return (
     <div className="container mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h3>Meal Planner Calendar</h3>
-        <div className="d-flex gap-2">
-          <select value={currentDate.getMonth()} onChange={handleMonthChange} className="form-select">
-            {monthOptions.map((month, i) => (
-              <option key={i} value={i}>{month}</option>
-            ))}
-          </select>
-          <select value={currentDate.getFullYear()} onChange={handleYearChange} className="form-select">
-            {yearOptions.map((year) => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </select>
-        </div>
+      <div className="d-flex justify-content-center align-items-center mb-3">
+        <h3 className="text-light bg-danger rounded px-4 py-2 shadow">Meal Planner Calendar</h3>
       </div>
 
       {loading ? (
@@ -223,35 +275,41 @@ export const MealPlannerCalendar = () => {
       ) : error ? (
         <p className="text-danger">{error}</p>
       ) : (
-        <Calendar
-          localizer={localizer}
-          events={events}
-          startAccessor="start"
-          endAccessor="end"
-          views={calendarViews}
-          style={{ height: 600 }}
-          selectable
-          onSelectSlot={handleSelectSlot}
-          onSelectEvent={handleSelectEvent}
-          date={currentDate}
-          onNavigate={setCurrentDate}
-        />
+        <div className="calendar-wrapper calendar-theme">
+          <Calendar
+            localizer={localizer}
+            events={events}
+            startAccessor="start"
+            endAccessor="end"
+            views={calendarViews}
+            view={currentView}
+            onView={handleViewChange}
+            style={{ height: 600 }}
+            selectable
+            onSelectSlot={handleSelectSlot}
+            onSelectEvent={handleSelectEvent}
+            date={currentDate}
+            onNavigate={setCurrentDate}
+            components={{ toolbar: CustomToolbar }}
+            eventPropGetter={eventPropGetter}
+          />
+        </div>
       )}
 
       {modalVisible && (
-        <div className="modal show d-block" tabIndex="-1">
-          <div className="modal-dialog">
-            <form className="modal-content" onSubmit={handleModalSubmit}>
-              <div className="modal-header">
-                <h5 className="modal-title">{editingEvent ? "Edit" : "Add"} Meal Plan Entry</h5>
-                <button type="button" className="btn-close" onClick={() => setModalVisible(false)}></button>
+        <div className="modal d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+          <div className="modal-dialog modal-dialog-centered" role="document">
+            <form className="modal-content border-0 shadow-lg rounded-4" onSubmit={handleModalSubmit}>
+              <div className="modal-header bg-danger text-white">
+                <h5 className="modal-title fw-semibold">{editingEvent ? "Edit" : "Add"} Meal Plan Entry</h5>
+                <button type="button" className="btn-close btn-close-white" onClick={() => setModalVisible(false)}></button>
               </div>
-              <div className="modal-body">
+              <div className="modal-body p-3">
                 <div className="mb-3">
-                  <label className="form-label">Recipe</label>
+                  <label className="form-label fw-semibold">Recipe</label>
                   <select
                     name="recipe_id"
-                    className="form-select"
+                    className="form-select border-1 border-secondary shadow-sm"
                     value={formData.recipe_id}
                     onChange={handleModalChange}
                     required
@@ -263,10 +321,10 @@ export const MealPlannerCalendar = () => {
                   </select>
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Meal Type</label>
+                  <label className="form-label fw-semibold">Meal Type</label>
                   <select
                     name="meal_type"
-                    className="form-select"
+                    className="form-select border-1 border-secondary shadow-sm"
                     value={formData.meal_type}
                     onChange={handleModalChange}
                     required
@@ -290,25 +348,28 @@ export const MealPlannerCalendar = () => {
                   </select>
                 </div>
                 <div className="mb-3">
-                  <label className="form-label">Time</label>
+                  <label className="form-label fw-semibold">Time</label>
                   <input
                     type="time"
                     name="time"
-                    className="form-control"
+                    className="form-control border-1 border-secondary shadow-sm"
                     value={formData.time}
                     onChange={handleModalChange}
                     required
                   />
                 </div>
               </div>
-              <div className="modal-footer">
+              <div className="modal-footer border-0 pt-3">
                 {editingEvent && (
-                  <button type="button" className="btn btn-danger me-auto" onClick={handleDelete}>
+                  <button type="button" className="btn btn-danger me-auto px-4" onClick={handleDelete}>
                     Delete
                   </button>
                 )}
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" className="btn btn-danger px-4">
                   Save
+                </button>
+                <button type="button" className="btn btn-outline-secondary px-4" onClick={() => setModalVisible(false)}>
+                  Cancel
                 </button>
               </div>
             </form>
