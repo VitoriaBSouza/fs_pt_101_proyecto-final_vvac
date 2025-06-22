@@ -1,173 +1,199 @@
-import { useState, useEffect } from "react"
-import { TurnHome } from "../components/buttons/TurnHome"
-import { LinksMenu } from "../components/LinksMenu"
-import { RightMenu } from "../components/RightMenu"
-import { RecipeCard } from "../components/RecipeCard"
-import useGlobalReducer from "../hooks/useGlobalReducer.jsx"
-import recipeServices from "../services/recetea_API/recipeServices.js"
-import collectionServices from "../services/recetea_API/collectionServices.js"
-import { useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react";
+import { TurnHome } from "../components/buttons/TurnHome";
+import { LinksMenu } from "../components/LinksMenu";
+import { RightMenu } from "../components/RightMenu";
+import { RecipeCard } from "../components/RecipeCard"; // Ensure this path is correct
+import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import recipeServices from "../services/recetea_API/recipeServices.js";
+import collectionServices from "../services/recetea_API/collectionServices.js";
+import { useNavigate } from "react-router-dom";
 
 export const CollectionFav = () => {
-  const navigate = useNavigate()
-  const { dispatch, store } = useGlobalReducer()
+  const navigate = useNavigate();
+  const { dispatch, store } = useGlobalReducer();
 
-  const [activeTab, setActiveTab] = useState("all")
+  const [activeTab, setActiveTab] = useState("all");
 
-  // crudos/minimales
-  const [recipeItemsRaw, setRecipeItemsRaw] = useState([])
-  const [collectionItemsRaw, setCollectionItemsRaw] = useState([])
+  // Raw/minimal data
+  const [recipeItemsRaw, setRecipeItemsRaw] = useState([]);
+  const [collectionItemsRaw, setCollectionItemsRaw] = useState([]);
 
-  // para “All” con detalles completos
-  const [allRecipes, setAllRecipes] = useState([])
+  // For "All" tab with complete details
+  const [allRecipes, setAllRecipes] = useState([]);
 
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const user = JSON.parse(localStorage.getItem("user") || "{}")
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+  // Helper function to format ingredients based on the structure provided by getOneRecipe
+  const formatIngredients = (ingredients) => {
+    if (Array.isArray(ingredients) && ingredients.length > 0) {
+      // Assuming each ingredient is an object with an 'ingredient_name' property
+      return ingredients.map(ing => ing.ingredient_name).join(', ');
+    }
+    // If it's already a string or empty, return as is or a default message
+    return typeof ingredients === 'string' && ingredients.length > 0 ? ingredients : "Ingredients list not available";
+  };
+
+  // Helper function to format dates
+  const formatDate = (dateString) => {
+    return dateString ? new Date(dateString).toLocaleDateString('en-US') : '';
+  };
+
 
   useEffect(() => {
     const fetchYourRaw = async () => {
-      const resp = await recipeServices.getAllUserRecipes()
-      const arr = Array.isArray(resp) ? resp : resp.recipes || []
-      return arr.map(r => ({
+      const resp = await recipeServices.getAllUserRecipes();
+      const arr = Array.isArray(resp) ? resp : resp.recipes || [];
+      return arr.map(r => ({ //Listado de ids
         id: r.id,
-        name: r.title,
-        imageUrl: r.media?.[0]?.url || "",
-        nutriScore: r.nutri_score ?? null,
-      }))
-    }
+      }));
+    };
 
     const fetchCollectionsRaw = async () => {
-      const data = await collectionServices.getUserCollections()
+      const data = await collectionServices.getUserCollections();
       const formatted = (Array.isArray(data) ? data : data.data || []).map(item => ({
-        id: item.recipe_id,               // aquí recipe_id
+        id: item.recipe_id,
         userId: item.user_id,
-      }))
-      dispatch({ type: "get_user_collections", payload: formatted })
-      return formatted
-    }
+        saved_at: item.saved_at, // Crucial for displaying "Saved on" date
+      }));
+      dispatch({ type: "get_user_collections", payload: formatted });
+      return formatted;
+    };
 
     const load = async () => {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
       try {
         if (activeTab === "all") {
-          // 1) traemos los crudos
+          // 1) Fetch raw data for user's own recipes and collections
           const [yourRaw, collRaw] = await Promise.all([
-            fetchYourRaw(),
-            fetchCollectionsRaw(),
-          ])
-          setRecipeItemsRaw(yourRaw)
-          setCollectionItemsRaw(collRaw)
+            recipeServices.getAllUserRecipes(), // Raw recipes from user
+            collectionServices.getUserCollections(), // Raw collection items
+          ]);
 
-          // 2) extraemos IDs y deduplicamos
-          const ids = [
-            ...yourRaw.map(r => r.id),
-            ...collRaw.map(c => c.id),
-          ]
-          const uniqueIds = Array.from(new Set(ids))
+          // Extract IDs and relevant info, combine, and deduplicate
+          const uniqueRecipesMap = new Map(); // Map to store unique full recipe objects
 
-          // 3) por cada id, getOneRecipe
-          const full = await Promise.all(
-            uniqueIds.map(id => recipeServices.getOneRecipe(id))
-          )
-          setAllRecipes(full)
-        }
-        else if (activeTab === "your-recipes") {
-          const yourRaw = await fetchYourRaw()
-          setRecipeItemsRaw(yourRaw)
-        }
-        else if (activeTab === "collections") {
-          const collRaw = await fetchCollectionsRaw()
-          const ids = [
-            ...collRaw.map(c => c.id),
-          ]
-          const uniqueIds = Array.from(new Set(ids))
-          const fullColl = await Promise.all(
-            uniqueIds.map(id => recipeServices.getOneRecipe(id))
-          )
-          setCollectionItemsRaw(fullColl)
+          // Add user's own recipes
+          (Array.isArray(yourRaw) ? yourRaw : yourRaw.recipes || []).forEach(r => {
+            uniqueRecipesMap.set(r.id, { ...r, type: 'created' }); // Mark as created
+          });
 
+          // Add collection recipes, prioritizing them if they overlap with created ones
+          (Array.isArray(collRaw) ? collRaw : collRaw.data || []).forEach(c => {
+            // Get full recipe details for collection items here if not already fetched
+            // OR fetch them below in the main Promise.all for uniqueIds.
+            // For now, just mark them as saved and store saved_at
+            uniqueRecipesMap.set(c.recipe_id, {
+              id: c.recipe_id, // Use recipe_id from collection item
+              saved_at: c.saved_at, // Use saved_at from collection item
+              type: 'saved', // Mark as saved
+              // You might need to fetch more details for recipes only in collection here or later
+            });
+          });
+
+          const uniqueIds = Array.from(uniqueRecipesMap.keys());
+
+          // 3) For each unique ID, get full recipe details and normalize
+          const fullRecipesPromises = uniqueIds.map(async id => {
+            const recipeDetails = await recipeServices.getOneRecipe(id);
+            const originalItem = uniqueRecipesMap.get(id); // Get original type/saved_at info
+
+            // Return a normalized object for RecipeCard
+            return {
+              id: recipeDetails.id,
+              imageUrl: recipeDetails.media?.[0]?.url || "",
+              title: recipeDetails.title || recipeDetails.name || "Untitled Recipe",
+              ingredientsList: formatIngredients(recipeDetails.ingredients), // Format ingredients
+              authorName: recipeDetails.username || "Unknown",
+              // Decide which date to show based on 'type' and if it's saved
+              savedDate: originalItem.type === 'saved' ? formatDate(originalItem.saved_at || recipeDetails.created_at) : '', // Prefer saved_at from collection, fallback to created_at
+              createdDate: originalItem.type === 'created' ? formatDate(recipeDetails.created_at) : '',
+            };
+          });
+
+          const fullCombined = await Promise.all(fullRecipesPromises);
+          setAllRecipes(fullCombined); // Set the fully processed data for "All" tab
+
+        } else if (activeTab === "your-recipes") {
+          const yourRaw = await recipeServices.getAllUserRecipes(); // Fetch all user recipes
+          const userRecipeIds = (Array.isArray(yourRaw) ? yourRaw : yourRaw.recipes || []).map(r => r.id);
+
+          const fullYourRecipesPromises = userRecipeIds.map(async id => {
+            const recipeDetails = await recipeServices.getOneRecipe(id);
+            return {
+              id: recipeDetails.id,
+              imageUrl: recipeDetails.media?.[0]?.url || "",
+              title: recipeDetails.title || recipeDetails.name || "Untitled Recipe",
+              ingredientsList: formatIngredients(recipeDetails.ingredients),
+              authorName: recipeDetails.author?.username || "Unknown",
+              savedDate: '', // Not a saved recipe for this view
+              createdDate: formatDate(recipeDetails.created_at),
+            };
+          });
+          const fullYourRecipes = await Promise.all(fullYourRecipesPromises);
+          setRecipeItemsRaw(fullYourRecipes); // Store full details for 'your-recipes' tab
+
+        } else if (activeTab === "collections") {
+          // const collRaw = await collectionServices.getUserCollections();
+          const collRaw = store.collections
+          const collRecipeIdsAndDates = (Array.isArray(collRaw) ? collRaw : collRaw.data || []).map(item => ({
+            id: item.recipe_id,
+            saved_at: item.saved_at,
+          }));
+
+          const uniqueCollIds = Array.from(new Set(collRecipeIdsAndDates.map(c => c.id)));
+
+          const fullCollPromises = uniqueCollIds.map(async id => {
+            const recipeDetails = await recipeServices.getOneRecipe(id);
+            const savedInfo = collRecipeIdsAndDates.find(item => item.id === id); // Find saved_at for this recipe
+            return {
+              id: recipeDetails.id,
+              imageUrl: recipeDetails.media?.[0]?.url || "",
+              title: recipeDetails.title || recipeDetails.name || "Untitled Recipe",
+              ingredientsList: formatIngredients(recipeDetails.ingredients),
+              authorName: recipeDetails.author?.username || "Unknown",
+              savedDate: formatDate(savedInfo?.saved_at || recipeDetails.created_at), // Prefer saved_at, fallback to created_at
+              createdDate: '', // Not a created recipe for this view
+            };
+          });
+          const fullColl = await Promise.all(fullCollPromises);
+          setCollectionItemsRaw(fullColl); // Store full details for 'collections' tab
         }
       } catch (err) {
-        console.error(err)
-        setError("Error cargando datos")
+        console.error("Error loading data:", err); // Log the error actual 
+        setError("Error loading data. Please try again.");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    load()
-  }, [activeTab, dispatch])
+    };
+    load();
+  }, [activeTab, dispatch, store.user.id, store.collections]);
 
-  const renderAllCards = () => {
-    if (loading) return <p>Cargando todas tus recetas…</p>
-    if (error) return <p className="text-danger">{error}</p>
-    if (!allRecipes.length)
-      return <p>No hay recetas para mostrar en “All”.</p>
+  // Generic render function for cards based on provided data
+  const renderCards = (data, loadingMessage, errorMessage, noDataMessage) => {
+    if (loading) return <p>{loadingMessage}</p>;
+    if (error) return <p className="text-danger">{errorMessage}</p>;
+    if (!data.length) return <p>{noDataMessage}</p>;
 
     return (
-      <div className="cards-grid">
-        {allRecipes.map((recipe,idx) => (
+      <div className="cards-grid d-flex flex-wrap justify-content-center">
+        {data.map((recipe, idx) => (
           <RecipeCard
-            key={recipe.id}
+            key={`${recipe.id}-${idx}`}
             id={recipe.id}
-            name={recipe.title}
-            url={recipe.media?.[0]?.url || ""}
-            nutriScore={recipe.nutriScore}
-            isSaved={false}
-            onClick={() => console.log("Detalle", recipe.id)}
+            imageUrl={recipe.imageUrl}
+            title={recipe.title}
+            ingredientsList={recipe.ingredientsList}
+            authorName={recipe.authorName}
+            savedDate={recipe.savedDate || ''} 
+            onClick={() => navigate(`/recipes/${recipe.id}`)}
           />
         ))}
       </div>
-    )
-  }
-
-  const renderYourRecipes = () => {
-    if (loading) return <p>Cargando tus recetas de usuario…</p>
-    if (error) return <p className="text-danger">{error}</p>
-    if (!recipeItemsRaw.length)
-      return <p>No tienes recetas personales todavía.</p>
-
-    return (
-      <div className="cards-grid">
-        {recipeItemsRaw.map((r, idx) => (
-          <RecipeCard
-            // key={`your-${r.id}-${idx}`}
-            key={r.id}
-            id={r.id}
-            name={r.name}
-            url={r.imageUrl}
-            nutriScore={r.nutriScore}
-            isSaved={false}
-            onClick={() => console.log("Detalle usuario", r.id)}
-          />
-        ))}
-      </div>
-    )
-  }
-
-  const renderCollectionCards = () => {
-    if (loading) return <p>Cargando tus collections…</p>
-    if (error) return <p className="text-danger">{error}</p>
-    if (!collectionItemsRaw.length)
-      return <p>No tienes elementos en tu colección.</p>
-      
-    return (
-      <div className="cards-grid">
-        {collectionItemsRaw.map((c, idx) => (
-          <RecipeCard
-            key={c.id}
-            id={c.id}
-            name={c.title}
-            url={c.media?.[0]?.url || ""}
-            nutriScore={c.nutriScore}
-            isSaved={true}
-            onClick={() => console.log("Colección detalle", c.id)}
-          />
-        ))}
-      </div>
-    )
-  }
+    );
+  };
 
   return (
     <div className="main-row-all vh-100">
@@ -181,7 +207,7 @@ export const CollectionFav = () => {
               </div>
             </div>
 
-            <div className="col-6 main-column-content">
+            <div className="col-12 col-md-6 main-column-content"> 
               <div className="d-flex align-items-start flex-column mb-3 edit-perfil">
                 <h2 className="mb-3">Collection</h2>
                 <p>All, Your Recipes & Collections</p>
@@ -199,19 +225,42 @@ export const CollectionFav = () => {
                   ))}
                 </ul>
 
-                <div className="tab-content">
-                  {activeTab === "all" && <div className="tab-pane active">{renderAllCards()}</div>}
+                <div className="tab-content w-100"> 
+                  {activeTab === "all" && (
+                    <div className="tab-pane active">
+                      {renderCards(
+                        allRecipes,
+                        "Loading all your recipes...",
+                        "Error loading data.",
+                        "No recipes to display in “All”."
+                      )}
+                    </div>
+                  )}
                   {activeTab === "your-recipes" && (
-                    <div className="tab-pane active">{renderYourRecipes()}</div>
+                    <div className="tab-pane active">
+                      {renderCards(
+                        recipeItemsRaw,
+                        "Loading your personal recipes...",
+                        "Error loading data.",
+                        "You don't have any personal recipes yet."
+                      )}
+                    </div>
                   )}
                   {activeTab === "collections" && (
-                    <div className="tab-pane active">{renderCollectionCards()}</div>
+                    <div className="tab-pane active">
+                      {renderCards(
+                        collectionItemsRaw,
+                        "Loading your collections...",
+                        "Error loading data.",
+                        "You have no items in your collection."
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="col-3 right-profile">
+            <div className="col-12 col-md-3 right-profile"> 
               <div className="d-grid row-gap-5 b-grids-right h-100">
                 <RightMenu />
               </div>
@@ -220,5 +269,5 @@ export const CollectionFav = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

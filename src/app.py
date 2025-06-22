@@ -1,7 +1,7 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
-import os
+import os, sys
 from flask import Flask, request, jsonify, url_for, send_from_directory
 from flask_migrate import Migrate
 from flask_swagger import swagger
@@ -14,6 +14,8 @@ from flask_jwt_extended import JWTManager
 from itsdangerous import URLSafeTimedSerializer
 from datetime import timedelta
 from flask_cors import CORS
+from dotenv import load_dotenv
+load_dotenv()
 
 # from models import Person
 
@@ -35,7 +37,7 @@ db_url = os.getenv("DATABASE_URL")
 if db_url:
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url.replace("postgres://", "postgresql://")
 else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:////tmp/test.db"
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///./data/test.db'
 
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

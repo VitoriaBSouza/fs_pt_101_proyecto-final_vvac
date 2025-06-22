@@ -20,23 +20,22 @@ import { AddToMealPlanButton } from "../components/buttons/AddToMealPlanButton.j
 
 //icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCartPlus } from '@fortawesome/free-solid-svg-icons'
+import { faCartPlus, faCalendarDays, faUtensils, faUser } from '@fortawesome/free-solid-svg-icons'
 import { faClock } from '@fortawesome/free-regular-svg-icons'
-import { faUtensils } from '@fortawesome/free-solid-svg-icons'
-import { faUser } from '@fortawesome/free-solid-svg-icons'
 
 export const RecipeDetails = () => {
-
     const { store, dispatch } = useGlobalReducer();
     const printRef = useRef();
-
+    const navigate = useNavigate();
     const { id } = useParams();
     const portions = store.recipe?.portions;
 
+    // Fetch of the recipe by recipe_id
     const getRecipe = async () => recipeServices.getOneRecipe(id).then(data => {
         dispatch({ type: 'get_one_recipe', payload: data });
-    })   
+    })
 
+    // Convert published date into more user friendly
     const formattedDate = new Date(store.recipe?.published).toLocaleString("en-US", {
         year: "numeric",
         month: "long",
@@ -50,23 +49,23 @@ export const RecipeDetails = () => {
         if (!steps) return [];
 
         let parsedSteps;
-
         try {
             parsedSteps = JSON.parse(steps);
         } catch (e) {
             parsedSteps = steps;
         }
+
         if (Array.isArray(parsedSteps)) {
             return parsedSteps.map(step => step.trim()).filter(step => step.length > 0);
         }
 
         return steps
-            .split(/(?<=[.?!])\s+(?=[A-Z])|(?:\r?\n|^\d+[\.\)]|[-\u2022]|\bStep\s*\d+:?)/gm)
+            .split(/(?<=[.?!])\s+(?=[A-Z])|(?:\r?\n|^\d+[\.\)]|[-•]|\bStep\s*\d+:?)/gm)
             .map(step => step.trim())
             .filter(step => step.length > 0);
     };
 
-    const stepsArray = splitSteps(store.recipe?.steps); 
+    const stepsArray = splitSteps(store.recipe?.steps);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -84,6 +83,15 @@ export const RecipeDetails = () => {
                                     {store.recipe.media.map((item, index) => (
                                         <div key={index} className={`carousel-item ${index === 0 ? "active" : ""}`} data-bs-interval="6000">
                                             <img src={item.url} className="img-fluid text-center d-block w-100 recipe_img" alt={`Recipe image ${index + 1}`} />
+                                        <div key={index}
+                                            className={`carousel-item ${index === 0 ? "active" : ""}`}
+                                            data-bs-interval="6000"> {/*Set timer carousel*/}
+
+                                            <img src={item.url}
+                                                className="img-fluid text-center d-block w-100 recipe_img"
+                                                alt={`Recipe image ${index + 1}`}
+                                            />
+
                                         </div>
                                     ))}
                                 </div>
@@ -102,6 +110,7 @@ export const RecipeDetails = () => {
                             </div>
                         )}
                         <LikeButton recipe_id={id} />
+
                     </div>
                 </div>
                 <div className="col-12 col-md-12 col-lg-5 col-xl-5 mt-3 mt-md-0">
@@ -110,17 +119,26 @@ export const RecipeDetails = () => {
                             <h1 className="fs-1">{store.recipe?.title}</h1>
                         </div>
                     </div>
+
                     <div className="border-bottom my-2 bg-secondary mx-auto"></div>
+
                     <div className="row text-center p-2">
                         <div className="col-12 col-md-12 col-lg-3 col-xl-2 g-0 my-sm-1 d-flex justify-content-center justify-content-lg-end">
                             <img src={store.recipe?.user_photo} className="float-start user_img border-0" alt="user_img" />
+
+                        {/* User image profile */}
+                        <div className="col-12 col-md-12 col-lg-3 col-xl-2
+                        g-0 my-sm-1 d-flex justify-content-center justify-content-lg-end">
+                            <img src={store.recipe?.user_photo}
+                                className="float-start user_img border-0"
+                                alt="user_img" />
                         </div>
                         <div className="col-12 col-md-12 col-lg-8 col-lx-10 ms-sm-2 my-sm-1 d-flex mt-2 mt-sm-0 d-flex justify-content-center justify-content-lg-start">
-                            <h5 className="align-self-end text-center text-md-start fs-3">
-                                @{store.recipe?.username}
-                            </h5>
+                            <h5 className="align-self-end text-center text-md-start fs-3">@{store.recipe?.username}</h5>
                         </div>
+
                     </div>
+
                     <div className="row p-1 my-4 ms-2 recipe_card_prep justify-content-around text-light">
                         <div className="col-12 col-md-12 col-lg-6 justify-content-center prep_border p-2 p-md-2 p-lg-1 d-flex">
                             <FontAwesomeIcon icon={faClock} className='me-3 mt-1 icon_prep_type' />
@@ -131,9 +149,10 @@ export const RecipeDetails = () => {
                             <p className='pt-2 text_prep_type'>{store.recipe?.difficulty_type}</p>
                         </div>
                     </div>
+
                     <div className="row ps-2">
                         <div className="col-12 d-flex">
-                            <CollectionButton recipe_id={id}/>
+                            <CollectionButton recipe_id={id} />
                             <ShareButton
                                 text="Check this out!"
                                 url={window.location.href}
@@ -145,20 +164,24 @@ export const RecipeDetails = () => {
                             <AddToMealPlanButton recipe={store.recipe} />
                         </div>
                     </div>
+
                     <div className="border-bottom my-2 bg-secondary"></div>
+
                     <div className="row">
-                        {store.user?.id ? 
-                        <div className="col-12 text-capitalize mt-1">
-                            <h5 className="mb-2">Allergens: </h5>
-                            <p className="fs-5">{Array.isArray(store.recipe?.allergens) ? store.recipe?.allergens.join(", ") : ""}</p>
-                        </div>
-                        : ""}
+                        {store.user?.id ?
+                            <div className="col-12 text-capitalize mt-1">
+                                <h5 className="mb-2">Allergens: </h5>
+                                <p className="fs-5">{Array.isArray(store.recipe?.allergens) ? store.recipe?.allergens.join(", ") : ""}</p>
+                            </div>
+                            :
+                            ""}
                         <div className="col-12 d-flex">
                             <p className="ms-auto text_published align-self-end">Published on: {formattedDate}</p>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div className="row py-2">
                 <div className="col-12 col-md-12 col-lg-5 ingredients_bg p-3 mt-3 mx-auto">
                     <div className="row m-1">
@@ -182,7 +205,7 @@ export const RecipeDetails = () => {
                             <ul>
                                 {store.recipe?.ingredients?.map((ing, i) => (
                                     <li key={i} className="m-0 p-0 d-flex justify-content-center justify-content-lg-start">
-                                        <p className="text_ing1 me-2" >{ing.quantity} {ing.unit}</p>
+                                        <p className="text_ing1 me-2">{ing.quantity} {ing.unit}</p>
                                         <p className="text_ing_steps">of <span className='text-capitapzed'>{ing.ingredient_name}</span></p>
                                     </li>
                                 ))}
@@ -190,6 +213,7 @@ export const RecipeDetails = () => {
                         </div>
                     </div>
                 </div>
+
                 <div className="col-12 col-lg-6 p-4 steps_bg g-0 mb-2">
                     <div className="row m-2">
                         <div className="col-12">
@@ -209,25 +233,46 @@ export const RecipeDetails = () => {
                     </div>
                 </div>
             </div>
+
             <div className="row">
                 <div className="col-12 col-md-6 mb-4">
                     {store.user?.id ? <NutricionalTable /> : ""}
                 </div>
             </div>
+
             <Comments recipe_id={id} />
+
             <div className="row row_bg_suggestions">
                 <h2 className="p-4 text-light">Latest Recipes</h2>
                 <div className="col-12">
                     <div className="scroll-container d-flex p-3">
-                        {store.recipes?.map((el) => <RecipeCard
-                            key={el.id}
-                            id={el.id}
-                            name={el.title}
-                            url={el.media?.[0]?.url}
-                        />)}
+
+                        {/* maping over RecipeCards to create cards based on the data */}
+                        {
+
+                            store.recipes?.map((el) =>
+                                // <RecipeCard
+                                //     // key={el.id}
+                                //     // id={el.id}
+                                //     // name={el.title}
+                                //     // url={el.media?.[0]?.url}
+                                // />
+                                <RecipeCard
+                                    key={el.id}
+                                    id={el.id}
+                                    imageUrl={el.media?.[0]?.url}
+                                    title={el.title}
+                                    ingredientsList={el.ingredientsList}
+                                    authorName={el.authorName}
+                                    savedDate={el.savedDate || ''}
+                                    onClick={() => navigate(`/recipes/${el.id}`)}
+                                />
+                            )
+                        }
                     </div>
+
                 </div>
             </div>
         </div>
     );
-}
+};
