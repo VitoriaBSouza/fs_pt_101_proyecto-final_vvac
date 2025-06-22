@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, Boolean, Enum, DateTime, func, ForeignKey, Text, Float
+from sqlalchemy import String, Boolean, Enum, DateTime, func, ForeignKey, Text, Float, Integer, Date, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from datetime import datetime
+from datetime import datetime, timezone
 import enum
 
 db = SQLAlchemy()
@@ -90,6 +90,9 @@ class Recipe(db.Model):
     steps: Mapped[str] = mapped_column(Text, nullable=False)
     published: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
+    #API Gemini call
+    diet_label: Mapped[str] = mapped_column(String, nullable=True)
+
     #Relatioship with other tables
     user: Mapped["User"] = relationship(back_populates="recipes")
     media: Mapped[list["Media"]] = relationship(back_populates="recipe")
@@ -116,6 +119,7 @@ class Recipe(db.Model):
             "media": [media.serialize() for media in self.media],
             "published": self.published.isoformat() if self.published else None,
             "difficulty_type": self.difficulty_type.value,
+            "diet_label": self.diet_label,
             "portions": self.portions,
             "total_grams":self.total_grams,
             "prep_time": self.prep_time,
@@ -304,3 +308,4 @@ class MealPlanEntry(db.Model):
             "meal_type": self.meal_type.value,
             "date": self.date.date().isoformat()
         }
+
