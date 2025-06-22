@@ -133,8 +133,6 @@ table {
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
 }
 
-
-
 .title_Recipe_Scroller {
   margin-bottom: 1rem;
   font-size: 3rem;
@@ -402,6 +400,7 @@ table {
 .text_box {
   min-height: 1rem;
   max-height: 9rem;
+  min-width:  5rem;
 }
 
 .comments_container {
@@ -412,7 +411,7 @@ table {
 }
 
 .comments_container.scrollable {
-  max-height: 600px; /* adjust to fit about 6 comments height */
+  max-height: 580px; /* adjust to fit about 6 comments height */
   overflow-y: auto;
 }
 
@@ -1176,7 +1175,7 @@ table {
 }
 
 .nav_collection_btn {
-  color: #c1454b;
+  color: #9c1c26;
   border-radius: 50%;
   min-width: 4rem;
   max-width: 7rem;
@@ -1185,6 +1184,16 @@ table {
   object-fit: cover;
   display: block;
 }
+
+.collection_btn_list {
+  max-width: 180px;      
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis; /*keep recipe title on one line and ... at the end*/
+  display: inline-block;
+  vertical-align: middle;
+}
+
 
 .icon_nav_collection{
   min-width: 3rem;

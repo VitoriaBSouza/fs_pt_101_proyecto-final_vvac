@@ -54,7 +54,7 @@ export const NutricionalTable = () =>{
         <div className="card p-2 ms-auto my-3 my-md-0 mt-md-3">
             <div className="card-body">
                 <div className="card-title">
-                    <h5 className="nutricional_title fs-3">Nutricional Vaue</h5>
+                    <h5 className="nutricional_title fs-3 fw-bold">Nutricional Vaue</h5>
                 </div>
 
                 <div className="border-bottom my-2 bg-secondary my-3"></div>

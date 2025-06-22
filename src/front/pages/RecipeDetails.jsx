@@ -114,7 +114,7 @@ export const RecipeDetails = () => {
                 <div className="col-12 col-md-12 col-lg-5 col-xl-5 mt-3 mt-md-0">
                     <div className="row p-2">
                         <div className="col-12">
-                            <h1 className="fs-1">{store.recipe?.title}</h1>
+                            <h1 className="fs-1 fw-bold">{store.recipe?.title}</h1>
                         </div>
                     </div>
 
@@ -131,11 +131,11 @@ export const RecipeDetails = () => {
 
                     <div className="row p-1 my-4 ms-2 recipe_card_prep justify-content-around text-light">
                         <div className="col-12 col-md-12 col-lg-6 justify-content-center prep_border p-2 p-md-2 p-lg-1 d-flex">
-                            <FontAwesomeIcon icon={faClock} className='me-3 mt-1 icon_prep_type' />
+                            <FontAwesomeIcon icon={faClock} className='me-3 mt-2 p-1 icon_prep_type' />
                             <p className='pt-2 text_prep_type'>{store.recipe?.prep_time} minutes</p>
                         </div>
                         <div className="col-12 col-md-12 col-lg-6 justify-content-center text-capitalized p-1 p-md-2 p-lg-1 d-flex">
-                            <FontAwesomeIcon icon={faUtensils} className='me-3 mt-1 icon_prep_type' />
+                            <FontAwesomeIcon icon={faUtensils} className='me-3 mt-2 p-1 icon_prep_type' />
                             <p className='pt-2 text_prep_type'>{store.recipe?.difficulty_type}</p>
                         </div>
                     </div>
@@ -159,8 +159,8 @@ export const RecipeDetails = () => {
 
                     <div className="row">
                         {store.user?.id && (
-                            <div className="col-12 text-capitalize mt-1">
-                                <h5 className="mb-2">Allergens: </h5>
+                            <div className="col-12 text-capitalize mt-1 order-1">
+                                <h5 className="mb-2 fs-4 fw-bold">Allergens: </h5>
                                 <p className="fs-5">{Array.isArray(store.recipe?.allergens) ? store.recipe.allergens.join(", ") : ""}</p>
                             </div>
                         )}
@@ -171,7 +171,7 @@ export const RecipeDetails = () => {
                 </div>
 
                 {/* will show only 5 first labels to reduce in case we have recipe with far too many labels */}
-                <div className="d-flex flex-wrap gap-2">
+                <div className="d-flex flex-wrap order-2 gap-2">
                     {store.recipe?.diet_label?.split(',').slice(0, 5).map((diet, i) => (
                         <span key={i} className="badge diet_label text-capitalize fs-5">{diet.trim()}</span>
                     ))}
@@ -188,11 +188,11 @@ export const RecipeDetails = () => {
                     <div className="row m-2">
                         <div className="col-10 d-flex justify-content-around justify-content-lg-between mx-auto">
                             <div className="color_icons d-flex">
-                                <FontAwesomeIcon icon={faUser} className='color_icons fs-4 me-2' />
-                                <h1 className="text_ing1 p-0 mt-2 align-self-end">{portions}</h1>
+                                <FontAwesomeIcon icon={faUser} className='color_icons fs-4 me-2 mt-2' />
+                                <h1 className="text_ing1 mb-4 align-self-end fs-4">{portions}</h1>
                             </div>
-                            <div className="mt-2 color_icons">
-                                <p className="text_ing1">{(store.recipe?.total_grams / portions).toFixed(1)}g / portion</p>
+                            <div className="mt-1 color_icons">
+                                <p className="text_ing1 fs-4">{(store.recipe?.total_grams / portions).toFixed(1)}g / portion</p>
                             </div>
                         </div>
                     </div>
@@ -201,8 +201,8 @@ export const RecipeDetails = () => {
                             <ul>
                                 {store.recipe?.ingredients?.map((ing, i) => (
                                     <li key={i} className="m-0 p-0 d-flex justify-content-center justify-content-lg-start">
-                                        <p className="text_ing1 me-2">{ing.quantity} {ing.unit}</p>
-                                        <p className="text_ing_steps">of <span className='text-capitapzed'>{ing.ingredient_name}</span></p>
+                                        <p className="text_ing1 me-2 fs-4">{ing.quantity} {ing.unit}</p>
+                                        <p className="text_ing_steps fs-4">of <span className='text-capitapzed'>{ing.ingredient_name}</span></p>
                                     </li>
                                 ))}
                             </ul>
@@ -220,7 +220,8 @@ export const RecipeDetails = () => {
                         <div className="col-12">
                             <ul className="list-group list-group-flush">
                                 {stepsArray.map((step, i) => (
-                                    <li key={i} className="list-group-item py-3 text-light text-center text-lg-start steps_bg border_steps text_ing_steps">
+                                    <li key={i} className="list-group-item py-3 text-light text-center 
+                                    text-lg-start steps_bg border_steps text_ing_steps fs-4">
                                         {step.trim()}
                                     </li>
                                 ))}

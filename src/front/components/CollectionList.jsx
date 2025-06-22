@@ -16,19 +16,7 @@ export const CollectionList = () =>{
     const { store, dispatch } = useGlobalReducer();
     const [collection, setCollection] = useState([]);
 
-    const getUserCollection = async () => collectionServices.getUserCollections().then(data => {
-
-        if (!store.user?.id) return alert("Log in to save or remove recipes");
-
-        //We update the store to match the backend DB
-        dispatch({ type: 'get_user_collection', payload: data.data });
-
-        return data.data;
-        
-    })
-
-    console.log(store.collections?.recipe_id);
-    
+    const recipe_id = store.collections?.recipe_id
 
     useEffect(() => {
         if (store.user?.id) {
@@ -36,9 +24,23 @@ export const CollectionList = () =>{
         }
     }, [store.user?.id]);
 
-    const handleDelete = async (recipe_id) => {
+    const getUserCollection = async () => collectionServices.getUserCollections().then(data => {
 
-        const data = await collectionServices.removeFromCollection(recipe_id);
+        if (!store.user?.id) return alert("Log in to save or remove recipes");
+
+        //We update the store to match the backend DB
+        dispatch({ type: 'get_user_collection', payload: data.data });
+        console.log(data.data);
+        
+        return data.data;
+        
+    })
+
+    console.log(store.token);
+
+    const handleDelete = async (el) => {
+
+        const data = await collectionServices.removeFromCollection(el.recipe_id);
 
         if (data.success) {
 
@@ -50,7 +52,7 @@ export const CollectionList = () =>{
             setCollection(collectionList);
 
             //update store.collections
-            dispatch({ type: 'update_collections', payload: newList });
+            dispatch({ type: 'update_collections', payload: collectionList });
 
             console.log("Recipe was removed from collection: ", data);
             
@@ -77,12 +79,12 @@ export const CollectionList = () =>{
             {store.collections && store.collections.length > 0 ? (
                     store.collections.map((el) => (
                         <li key={el.recipe_id} className="d-flex">
-                            <button className="dropdown-item m-1" type="button" style={{ textTransform: 'capitalize' }}>
+                            <button className="dropdown-item m-1 collection_btn_list text-capitalize" type="button">
                                 {el.recipe_title}
                             </button>
                             <button 
                                 type="button" 
-                                className="btn-close m-2" 
+                                className="btn-close m-4" 
                                 aria-label="Close"
                                 onClick={() => handleDelete(el)}
                             ></button>
