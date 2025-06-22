@@ -11,7 +11,8 @@ import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import { TopSection } from "../components/TopSection.jsx";
 import { RecipeScroller } from '../components/RecipeScroller.jsx';
 import { BottomSection } from '../components/BottomSection.jsx';
-import { RecipeCard } from "../components/RecipeCard.jsx";
+
+
 
 export const Home = () => {
 
