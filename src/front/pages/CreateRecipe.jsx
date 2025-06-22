@@ -13,6 +13,7 @@ export const CreateRecipe = () => {
 
     const initialRecipeState = {
         title: "",
+        username: "",
         description: "",
         servings: 1,
         difficulty_type: "",
@@ -25,66 +26,122 @@ export const CreateRecipe = () => {
     };
 
     const [recipeData, setRecipeData] = useState(initialRecipeState);
-    const [mainRecipeImage, setMainRecipeImage] = useState('https://picsum.photos/200/300');
+    const [mainRecipeImage, setMainRecipeImage] = useState("https://picsum.photos/200/300");
     const fileInputRef = useRef(null);
     const [showImageModal, setShowImageModal] = useState(false);
     const [tempImageUrl, setTempImageUrl] = useState("");
 
     useEffect(() => {
-        // Usar store.receipt en lugar de store.recipe
-        if (id && store.receipt) {
-            const f = store.receipt;
+        // if recipe already in store, use it
+        if (id && store.recipe) {
+            const f = store.recipe;
+            let parsedStepsFromStore = [];
+            try {
+                // Confirmamos que f.steps es un string que contiene un array de strings JSON.
+                if (typeof f.steps === 'string') {
+                    // JSON.parse() convierte "[\"Paso 1\", \"Paso 2\"]" a ["Paso 1", "Paso 2"]
+                    const tempSteps = JSON.parse(f.steps);
+                    // Si el parseo resulta en un array de strings, mapeamos para crear objetos { id, text }
+                    if (Array.isArray(tempSteps)) {
+                        parsedStepsFromStore = tempSteps.map((text, index) => ({ id: index + 1, text: text }));
+                    }
+                } else if (Array.isArray(f.steps)) {
+                    // Si por alguna razón ya es un array de objetos (ej. [{text: "Paso 1"}]), lo mapeamos
+                    parsedStepsFromStore = f.steps.map((s, index) => ({ id: s.id || (index + 1), text: s.text || s.description || '' }));
+                }
+            } catch (e) {
+                console.error("Error al parsear los pasos desde store.recipe:", e);
+                parsedStepsFromStore = []; // En caso de error, un array vacío para evitar que se rompa
+            }
             setRecipeData({
-                ...initialRecipeState,
                 title: f.title || "",
+                username: f.username || "",
                 description: f.description || "",
                 servings: f.portions || 1,
                 difficulty_type: f.difficulty_type || "",
                 prep_time: f.prep_time || 0,
                 allergens: f.allergens || [],
-                ingredient: f.ingredient?.map(ing => ({ id: ing.id, name: ing.name || "", quantity: ing.quantity?.toString() || "", unit: ing.unit || "" })) || [],
-                steps: f.steps?.map(s => ({ id: s.id, text: s.text || s.description })) || [],
+                ingredient: f.ingredient?.map(ing => ({
+                    id: ing.id,
+                    name: ing.name || "",
+                    quantity: ing.quantity?.toString() || "",
+                    unit: ing.unit || ""
+                })) || [],
+                steps: parsedStepsFromStore || [],
                 status: f.status || "draft",
                 image_url: f.media?.[0]?.url || initialRecipeState.image_url
             });
             setMainRecipeImage(f.media?.[0]?.url || initialRecipeState.image_url);
             return;
         }
-        // Si no está en store, fetch del backend
+
+        // otherwise fetch from API
         if (!id) return;
-        const fetchRecipe = async () => {
+
+        (async () => {
             try {
                 const res = await recipeServices.getOneRecipe(id);
-                if (res.success && res.recipe) {
-                    dispatch({ type: 'get_one_recipe', payload: res.recipe });
-                    const f = res.recipe;
+                if (res) {
+                    const f = res;
+                    // dispatch to store
+                    dispatch({ type: 'get_one_recipe', payload: f });
+                    // autofill form
+                    let parsedStepsFromAPI = [];
+                    try {
+                        // Confirmamos que f.steps es un string que contiene un array de strings JSON.
+                        if (typeof f.steps === 'string') {
+                            // JSON.parse() convierte "[\"Paso 1\", \"Paso 2\"]" a ["Paso 1", "Paso 2"]
+                            const tempSteps = JSON.parse(f.steps);
+                            // Si el parseo resulta en un array de strings, mapeamos para crear objetos { id, text }
+                            if (Array.isArray(tempSteps)) {
+                                parsedStepsFromAPI = tempSteps.map((text, index) => ({ id: index + 1, text: text }));
+                            }
+                        } else if (Array.isArray(f.steps)) {
+                            // Si por alguna razón ya es un array de objetos, lo mapeamos
+                            parsedStepsFromAPI = f.steps.map((s, index) => ({ id: s.id || (index + 1), text: s.text || s.description || '' }));
+                        }
+                    } catch (e) {
+                        console.error("Error al parsear los pasos desde la API:", e);
+                        parsedStepsFromAPI = []; // En caso de error, un array vacío
+                    }
+
                     setRecipeData({
-                        ...initialRecipeState,
                         title: f.title || "",
+                        username: f.username || "",
                         description: f.description || "",
                         servings: f.portions || 1,
                         difficulty_type: f.difficulty_type || "",
                         prep_time: f.prep_time || 0,
                         allergens: f.allergens || [],
-                        ingredient: f.ingredient?.map(ing => ({ id: ing.id, name: ing.name || "", quantity: ing.quantity?.toString() || "", unit: ing.unit || "" })) || [],
-                        steps: f.steps?.map(s => ({ id: s.id, text: s.text || s.description })) || [],
+                        ingredient: f.ingredient?.map(ing => ({
+                            id: ing.id,
+                            name: ing.name || "",
+                            quantity: ing.quantity?.toString() || "",
+                            unit: ing.unit || ""
+                        })) || [],
+                        steps: parsedStepsFromAPI || [],
                         status: f.status || "draft",
                         image_url: f.media?.[0]?.url || initialRecipeState.image_url
                     });
                     setMainRecipeImage(f.media?.[0]?.url || initialRecipeState.image_url);
                 }
             } catch (err) {
-                console.error("Error loading recipe:", err);
-                navigate('/recipes/new');
+                console.error('Error loading recipe:', err);
+                // navigate('/recipes/new');
             }
-        };
-        fetchRecipe();
-    }, [id, store.receipt, dispatch, navigate]);
+        })();
+    }, [id, store.recipe, recipeData, dispatch, navigate]);
 
     const handleChange = e => {
         const { name, value } = e.target;
-        setRecipeData(prev => ({ ...prev, [name]: (name === 'servings' || name === 'prep_time') ? parseInt(value, 10) || 0 : value }));
+        setRecipeData(prev => ({
+            ...prev,
+            [name]: (name === 'servings' || name === 'prep_time')
+                ? parseInt(value, 10) || 0
+                : value
+        }));
     };
+
 
     const toggleImageModal = () => {
         setTempImageUrl(showImageModal ? "" : mainRecipeImage.startsWith('http') ? mainRecipeImage : "");
@@ -156,7 +213,7 @@ export const CreateRecipe = () => {
             description: recipeData.description,
             difficulty_type: recipeData.difficulty_type,
             prep_time: parseInt(recipeData.prep_time, 10),
-            portions: parseInt(recipeData.servings, 10),   
+            portions: parseInt(recipeData.servings, 10),
             ingredient: cleanedIngredients,
             steps: JSON.stringify(cleanedSteps),
             status: submitStatus,
@@ -192,14 +249,12 @@ export const CreateRecipe = () => {
         }
     };
 
-console.log("ANTES DEL RETURN, recipeDAta " + JSON.stringify(store.receipt))
-
     return (
         <div className="rct-create-recipe-wrapper">
             <div className="rct-create-recipe-container container-fluid">
                 <div className="row g-0">
                     <div className="col-12 col-md-3 rct-left-sidebar">
-                        
+
                         <div className="d-flex align-items-start rct-sidebar-content">
                             <TurnHome />
                             <LinksMenu />

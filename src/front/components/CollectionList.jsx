@@ -28,7 +28,6 @@ export const CollectionList = () =>{
         
     })
 
-    console.log(store.collections?.recipe_id);
     
 
     useEffect(() => {
@@ -46,14 +45,12 @@ export const CollectionList = () =>{
             //Fetch again updated list
             const collectionList = await collectionServices.getUserCollections();
 
-            console.log(collectionList);
             
             setCollection(collectionList);
 
             //update store.collections
             dispatch({ type: 'update_collections', payload: newList });
 
-            console.log("Recipe was removed from collection: ", data);
             
         } else {
             console.error("Error from service:", data.error);
@@ -61,7 +58,6 @@ export const CollectionList = () =>{
         
     }
 
-    console.log(store.collections);
     
 
     return(
