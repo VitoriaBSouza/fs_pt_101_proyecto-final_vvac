@@ -46,6 +46,8 @@ export const NutricionalTable = () =>{
         sodium: 0 
     };
 
+    console.log(store.recipe);
+    
 
     return(
 

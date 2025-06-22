@@ -10,7 +10,6 @@ import { useState, useEffect, useRef } from "react";
 export const Profile = () => {
     const navigate = useNavigate();
     const { dispatch, store } = useGlobalReducer();
-
     const [formData, setFormData] = useState({
         username: "",
         email: "",
@@ -215,7 +214,7 @@ export const Profile = () => {
                 window.alert("Your account has been deleted");
                 navigate("/");
             } else {
-                window.alert("Failed to delete account: " + (resultado.error || "Unknown error"));
+                window.alert("Failed to delete account: " + (result.error || "Unknown error"));
             }
         } catch (error) {
             console.error("Error in handleDeleteAccount:", error);
