@@ -244,7 +244,7 @@ export const RecipeDetails = () => {
                     <div className="scroll-container d-flex p-3">
 
                         {/* maping over RecipeCards to create cards based on the data */}
-                        {getRandomItems(store.recipes, 15).map((el) => (
+                        {getRandomItems(store.recipes, 10).map((el) => (
                             <RecipeCard
                                 key={el.id}
                                 id={el.id}
