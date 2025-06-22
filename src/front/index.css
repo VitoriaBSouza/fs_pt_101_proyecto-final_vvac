@@ -86,6 +86,99 @@ table {
   background-size: 50px 50px;
 }
 
+
+/*recipescroll in landingPage*/
+
+.home_img{
+  max-width: 100rem;
+  height: 500px;
+  overflow: hidden;
+}
+
+.top_div{
+  min-width: 10rem;
+  max-width: 40rem;
+  max-height: 400px;
+  min-height: 300px;
+}
+
+/*top section*/
+
+.row_home_top{
+  padding: 30px;
+  background-color: #9C1C26;
+}
+.container_home{
+  background-color: #9C1C26;
+}
+
+.row_home_scroll{
+  background-color: #f6f2f2;
+}
+
+.home_card_scroll{
+	object-fit: cover;
+  width: 43rem;
+  height: 250px;
+  background-color: #C1454B;
+}
+
+.home_cards_bg {
+  min-width: 25rem;
+  border-radius: 0.8rem;
+  border: 1px solid #C1454B;
+  overflow: hidden;
+  background-color: #C1454B;
+  padding: 0.2rem;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+}
+
+
+
+.title_Recipe_Scroller {
+  margin-bottom: 1rem;
+  font-size: 3rem;
+  color: white;
+}
+
+.recipe_scroller_container {
+  display: flex;
+  overflow-x: auto;
+  gap: 2rem;
+  padding-bottom: 1rem;
+  scroll-snap-type: x mandatory;
+}
+
+ .card_row_scroll {
+  min-width: 20px;
+  margin: 0px;
+  flex-shrink: 0;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  padding: 1rem;
+  scroll-snap-align: start;
+  text-align: center;
+  
+} 
+
+.details-btn {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: #ca3e49;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.details-btn:hover {
+  background-color: #ca3e49;
+  border-color: #000000;
+  border-width: 1px;
+}
+
 /* From here is recipe details CSS classes */
 .recipe_card_bg1 {
   background-color: #f4ebdf;

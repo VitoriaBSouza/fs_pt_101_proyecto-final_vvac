@@ -88,7 +88,7 @@ with app.app_context():
         Media(
             recipe_id=recipe.id,
             type_media=MediaType.IMAGE,
-            url="https://loremflickr.com/400/400/food"
+            url="https://picsum.photos/200/300"
         ) for recipe in recipes
     ]
     db.session.add_all(medias)
