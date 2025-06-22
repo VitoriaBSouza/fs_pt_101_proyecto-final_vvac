@@ -1,11 +1,14 @@
 from werkzeug.security import generate_password_hash
 from random import randint, choice, uniform
-from api.models import User, Recipe, Ingredient, RecipeIngredient, Comment, Media, Collection, RecipeScore, ShoppingListItem, UserStatus, DifficultyType, MediaType
+from api.models import (
+    User, Recipe, Ingredient, RecipeIngredient, Comment, Media,
+    Collection, RecipeScore, ShoppingListItem, UserStatus, DifficultyType, MediaType
+)
+from app import app, db
+import os
 from dotenv import load_dotenv
 
 load_dotenv()
-from app import app, db
-print("Using DB URI:", app.config['SQLALCHEMY_DATABASE_URI'])
 
 with app.app_context():
     # Reset DB

@@ -20,27 +20,37 @@ export const CreateRecipe = () => {
         allergens: [], // New field
         difficulty_type: "", // New field, maps to 'difficulty_type' in backend JSON
         prep_time: "",
-        ingredient: [{ id: 1, text: "" }],
+        ingredient: [{ id: 1, name: "", quantity: "", unit: "" }],
         steps: [{ id: 1, text: "", time: "" }],
         status: "draft"
     };
 
-        // Función de utilidad para convertir string de tiempo (ej. "1h 30m") a minutos
+    // Función de utilidad para convertir string de tiempo (ej. "1h 30m", "1 hora 30", "45 min") a minutos
     const parseTime = (timeString) => {
         if (!timeString) return 0;
 
         let totalMinutes = 0;
-        const hoursMatch = timeString.match(/(\d+)\s*h/i); // Busca Xh o X h
-        const minutesMatch = timeString.match(/(\d+)\s*min/i); // Busca Xmin o X min
-        const minutesOnlyMatch = timeString.match(/^(\d+)\s*m$/i); // Busca solo Xm
+        const lowerCaseString = timeString.toLowerCase(); // Convertir a minúsculas para facilitar la búsqueda
 
+        // Buscar horas (ej. "1h", "2 horas", "3 hora")
+        const hoursMatch = lowerCaseString.match(/(\d+)\s*(h|horas?)/);
         if (hoursMatch) {
             totalMinutes += parseInt(hoursMatch[1]) * 60;
         }
-        if (minutesMatch) {
-            totalMinutes += parseInt(minutesMatch[1]);
-        } else if (minutesOnlyMatch && !hoursMatch) { // Si no hay horas, y solo hay "Xm"
-            totalMinutes += parseInt(minutesOnlyMatch[1]);
+
+        // Buscar minutos (ej. "30min", "45 m", "30")
+        const minutesWithUnitMatch = lowerCaseString.match(/(\d+)\s*(min|m)/);
+        if (minutesWithUnitMatch) {
+            totalMinutes += parseInt(minutesWithUnitMatch[1]);
+        } else {
+            const numbersOnly = lowerCaseString.match(/(\d+)/g);
+            if (numbersOnly) {
+                if (hoursMatch && numbersOnly.length > 1) {
+                    totalMinutes += parseInt(numbersOnly[1]);
+                } else if (!hoursMatch && numbersOnly.length === 1) { // Si no minutos
+                    totalMinutes += parseInt(numbersOnly[0]);
+                }
+            }
         }
         return totalMinutes;
     };
@@ -60,10 +70,10 @@ export const CreateRecipe = () => {
         return result.trim();
     };
 
-    const difficultyOptions = ["Easy", "Medium", "Hard"]; // Options for difficulty dropdown
+    const difficultyOptions = ["Easy", "Moderate", "Hard"]; // Options for difficulty dropdown
 
     const [recipeData, setRecipeData] = useState(initialRecipeState);
-    const [mainRecipeImage, setMainRecipeImage] = useState('https://via.placeholder.com/200x200?text=Attach+dish+photo');
+    const [mainRecipeImage, setMainRecipeImage] = useState('https://picsum.photos/200/300');
     const fileInputRef = useRef(null);
     const [showImageModal, setShowImageModal] = useState(false);
     const [tempImageUrl, setTempImageUrl] = useState("");
@@ -76,56 +86,71 @@ export const CreateRecipe = () => {
                     const response = await recipeServices.getOneRecipe(id);
                     if (response.success && response.recipe) {
                         const fetchedRecipe = response.recipe;
+
+                        const parsedIngredients = fetchedRecipe.ingredient.map((ing) => {
+                            // Ahora sabemos que el backend envía 'name', 'quantity' y 'unit' por separado
+                            return {
+                                id: ing.id,
+                                name: ing.name || "",       // El nombre del ingrediente
+                                quantity: ing.quantity || "", // La cantidad numérica
+                                unit: ing.unit || ""         // La unidad viene del backend
+                            };
+                        });
+
+                        const imageUrlToDisplay = fetchedRecipe.media && fetchedRecipe.media.length > 0
+                            ? fetchedRecipe.media[0].url
+                            : PLACEHOLDER_IMAGE_URL;
+
                         setRecipeData({
                             title: fetchedRecipe.title || "",
                             id: fetchedRecipe.id || null,
                             username: fetchedRecipe.username || "",
                             description: fetchedRecipe.description || "",
-                            image_url: fetchedRecipe.image_url || "",
-                            servings: fetchedRecipe.portions || 1, // Map 'portions' from backend to 'servings'
-                            allergens: fetchedRecipe.allergens || [], // Load allergens
-                            difficulty_type: fetchedRecipe.difficulty_type || "", // Load difficulty
-                            prep_time: fetchedRecipe.prep_time || "",
-                            ingredient: fetchedRecipe.ingredient.map(ing => ({ id: ing.id, text: ing.text || ing.name })),
+                            image_url: fetchedRecipe.media && fetchedRecipe.media.length > 0 ? fetchedRecipe.media[0].url : PLACEHOLDER_IMAGE_URL,
+                            servings: fetchedRecipe.portions || 1,
+                            allergens: fetchedRecipe.allergens || [],
+                            difficulty_type: fetchedRecipe.difficulty_type || "",
+                            prep_time: fetchedRecipe.prep_time ? formatMinutesToHumanReadable(fetchedRecipe.prep_time) : "",
+                            ingredient: parsedIngredients, // <-- Usa los ingredientes parseados
                             steps: fetchedRecipe.steps.map(step => ({ id: step.id, text: step.text || step.description, time: step.time || "" })),
                             status: fetchedRecipe.status || "draft"
                         });
-                        setMainRecipeImage(fetchedRecipe.image_url || 'https://via.placeholder.com/200x200?text=Attach+dish+photo');
+                        setMainRecipeImage(fetchedRecipe.media && fetchedRecipe.media.length > 0 ? fetchedRecipe.media[0].url : PLACEHOLDER_IMAGE_URL);
                     } else {
-                        console.error("Error fetching recipe:", response.error || "Recipe not found.");
-                        window.alert("Could not load recipe for editing.");
+                        console.error("Error al cargar receta:", response.error || "Receta no encontrada.");
+                        window.alert("No se pudo cargar la receta para editar.");
                         navigate('/create-recipe');
                     }
                 } catch (error) {
-                    console.error("Error fetching recipe by ID:", error);
-                    window.alert("An error occurred while loading the recipe.");
+                    console.error("Error al obtener receta por ID:", error);
+                    window.alert("Ocurrió un error al cargar la receta.");
                     navigate('/create-recipe');
                 }
             } else {
                 setRecipeData(initialRecipeState);
-                setMainRecipeImage('https://via.placeholder.com/200x200?text=Attach+dish+photo');
+                setMainRecipeImage(PLACEHOLDER_IMAGE_URL);
             }
         };
 
         fetchRecipe();
     }, [id, store.user, navigate]);
 
-        useEffect(() => {
-        const totalStepsMinutes = recipeData.steps.reduce((sum, step) => {
-            return sum + parseTime(step.time);
-        }, 0);
+    // useEffect(() => {
+    //     const totalStepsMinutes = recipeData.steps.reduce((sum, step) => {
+    //         return sum + parseTime(step.time);
+    //     }, 0);
 
-        // Formatear el total de minutos a un string legible
-        const formattedTotalTime = formatMinutesToHumanReadable(totalStepsMinutes);
+    //     // Formatear el total de minutos a un string legible
+    //     const formattedTotalTime = formatMinutesToHumanReadable(totalStepsMinutes);
 
-        // Actualizar el estado de prep_time si ha cambiado
-        if (formattedTotalTime !== recipeData.prep_time) {
-            setRecipeData(prevData => ({
-                ...prevData,
-                prep_time: formattedTotalTime
-            }));
-        }
-    }, [recipeData.steps]);
+    //     // Actualizar el estado de prep_time si ha cambiado
+    //     if (formattedTotalTime !== recipeData.prep_time) {
+    //         setRecipeData(prevData => ({
+    //             ...prevData,
+    //             prep_time: formattedTotalTime
+    //         }));
+    //     }
+    // }, [recipeData.steps]);
 
     const handleChange = (e) => {
         setRecipeData({
@@ -195,11 +220,11 @@ export const CreateRecipe = () => {
         }
     };
 
-    const handleIngredientChange = (ingId, value) => {
+    const handleIngredientChange = (ingId, field, value) => {
         setRecipeData(prevData => ({
             ...prevData,
             ingredient: prevData.ingredient.map(ing =>
-                ing.id === ingId ? { ...ing, text: value } : ing
+                ing.id === ingId ? { ...ing, [field]: value } : ing
             )
         }));
     };
@@ -210,7 +235,7 @@ export const CreateRecipe = () => {
             : 1;
         setRecipeData(prevData => ({
             ...prevData,
-            ingredient: [...prevData.ingredient, { id: newId, text: "" }]
+            ingredient: [...prevData.ingredient, { id: newId, name: "", quantity: "", unit: "" }]
         }));
     };
 
@@ -247,22 +272,54 @@ export const CreateRecipe = () => {
         }));
     };
 
+    const PLACEHOLDER_IMAGE_URL = 'https://picsum.photos/200/300';
+
     const handleSubmit = async (e, submitStatus) => {
         e.preventDefault();
 
-        const cleanedIngredients = recipeData.ingredient.filter(ing => ing.text.trim() !== "");
+        const cleanedIngredients = recipeData.ingredient
+            .filter(ing => ing.name.trim() !== "") // Solo incluye ingredientes con un nombre
+            .map(ing => ({
+                id: ing.id,
+                name: ing.name.trim(),
+                quantity: ing.quantity ? parseFloat(ing.quantity) : 0,
+                unit: ing.unit.trim()
+            }));
+
         const cleanedSteps = recipeData.steps.filter(step => step.text.trim() !== "");
+        const stepsToSerialize = recipeData.steps.filter(step => step.text.trim() !== "");
+        const serializedSteps = JSON.stringify(stepsToSerialize);
+
+
+        const totalPrepTimeInMinutes = cleanedSteps?.reduce((sum, step) => {
+            return sum + parseTime(step.time);
+        }, 0);
+        let media_to_send = [];
+
+        // Solo envía 'media' si la URL de la imagen NO es la de por defecto
+        if (recipeData.image_url && recipeData.image_url !== PLACEHOLDER_IMAGE_URL) {
+            media_to_send = [{
+                url: recipeData.image_url,
+                type_media: "image" // Asume que "image" es el valor esperado por el backend
+            }];
+        }
 
         const dataToSend = {
             ...recipeData,
             portions: recipeData.servings || 1,
             ingredient: cleanedIngredients,
-            steps: cleanedSteps,
-            status: submitStatus
+            steps: serializedSteps,
+            status: submitStatus,
+            prep_time: totalPrepTimeInMinutes,
+            media: media_to_send
+
         };
 
-        // Remove the 'servings' key before sending to backend, as it's now 'portions'
+        // Remove keys before sending to backend
         delete dataToSend.servings;
+        delete dataToSend.username;
+        delete dataToSend.id;
+        delete dataToSend.image_url;
 
         try {
             let response;
@@ -294,7 +351,7 @@ export const CreateRecipe = () => {
                 window.location.reload();
             } else {
                 setRecipeData(initialRecipeState);
-                setMainRecipeImage('https://via.placeholder.com/200x200?text=Attach+dish+photo');
+                setMainRecipeImage('https://picsum.photos/200/300');
                 setTempImageUrl("");
                 setShowImageModal(false);
                 setCurrentAllergenInput("");
@@ -346,6 +403,7 @@ export const CreateRecipe = () => {
                                     type="text"
                                     className="form-control form-control-lg mb-2 rct-title-input"
                                     name="title"
+                                    required
                                     placeholder="Title: My favorite pumpkin cream"
                                     value={recipeData.title}
                                     onChange={handleChange}
@@ -354,17 +412,10 @@ export const CreateRecipe = () => {
                                     <img src={store.user?.photo_url || 'https://via.placeholder.com/30'} alt="Avatar" className="rct-author-avatar-small rounded-circle me-2" />
                                     <span className="fw-bold rct-author-username">{recipeData.username || "Unknown User"}</span>
                                 </div>
-                                <textarea
-                                    className="form-control mt-3 rct-description-textarea"
-                                    name="description"
-                                    rows="3"
-                                    placeholder="Share a little more about this dish. What or who inspired you to cook? What makes it special for you? What's your favorite way to cook?"
-                                    value={recipeData.description}
-                                    onChange={handleChange}
-                                ></textarea>
+                               
                             </div>
 
-                            {/* Servings, Allergens, Difficulty */}
+                            {/* Servings, Difficulty */}
                             <div className="rct-details-section w-100 mb-4 row g-3">
                                 {/* Servings Input */}
                                 <div className="col-12 col-md-4">
@@ -374,7 +425,7 @@ export const CreateRecipe = () => {
                                         className="form-control rct-servings-input"
                                         id="servingsInput"
                                         name="servings"
-                                        value={recipeData.servings}
+                                        value={recipeData.servings || ""}
                                         onChange={handleChange}
                                         placeholder="Ex: 4"
                                         min="1"
@@ -389,6 +440,7 @@ export const CreateRecipe = () => {
                                         className="form-select rct-difficulty-select"
                                         id="difficultySelect"
                                         name="difficulty_type"
+                                        required
                                         value={recipeData.difficulty_type}
                                         onChange={handleChange}
                                     >
@@ -398,28 +450,6 @@ export const CreateRecipe = () => {
                                         ))}
                                     </select>
                                 </div>
-
-                                {/* Allergens Input */}
-                                <div className="col-12 col-md-4">
-                                    <label htmlFor="allergenInput" className="form-label rct-form-label">Allergens</label>
-                                    <input
-                                        type="text"
-                                        className="form-control rct-allergen-input"
-                                        id="allergenInput"
-                                        placeholder="Type allergen and press Enter (Ex: Gluten)"
-                                        value={currentAllergenInput}
-                                        onChange={handleAllergenInputChange}
-                                        onKeyPress={addAllergen}
-                                    />
-                                    <div className="rct-allergen-tags-container mt-2">
-                                        {recipeData.allergens.map((allergen, index) => (
-                                            <span key={index} className="badge bg-secondary rct-allergen-tag me-2 mb-2">
-                                                {allergen}
-                                                <button type="button" className="btn-close btn-close-white ms-1" aria-label="Remove" onClick={() => removeAllergen(allergen)}></button>
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
                             </div>
 
 
@@ -427,23 +457,41 @@ export const CreateRecipe = () => {
                             <div className="rct-ingredient-section w-100 mb-4">
                                 <h3 className="mb-3 rct-section-title">Ingredients</h3>
                                 {recipeData.ingredient.map((ingredient) => (
-                                    <div key={ingredient.id} className="input-group mb-2 rct-ingredient-item">
+                                    <div key={ingredient.id} className="input-group mb-2 rct-ingredient-item d-flex align-items-center">
+                                        {/* Input para la Cantidad */}
+                                        <input
+                                            type="number" // Tipo numérico para la cantidad
+                                            className="form-control rct-ingredient-quantity"
+                                            placeholder="Cantidad"
+                                            value={ingredient.quantity}
+                                            onChange={(e) => handleIngredientChange(ingredient.id, 'quantity', e.target.value)}
+                                            min="0" // Permite cantidades no negativas
+                                        />
+                                        {/* Input para la Unidad */}
                                         <input
                                             type="text"
-                                            className="form-control rct-ingredient-input"
-                                            placeholder={`Ex: 250g flour`}
-                                            value={ingredient.text}
-                                            onChange={(e) => handleIngredientChange(ingredient.id, e.target.value)}
+                                            className="form-control rct-ingredient-unit ms-2" // Agregué 'ms-2' para un pequeño espacio
+                                            placeholder="Unidad (ej. g, ml, tazas)"
+                                            value={ingredient.unit}
+                                            onChange={(e) => handleIngredientChange(ingredient.id, 'unit', e.target.value)}
+                                        />
+                                        {/* Input para el Nombre del Ingrediente */}
+                                        <input
+                                            type="text"
+                                            className="form-control rct-ingredient-name ms-2" // Agregué 'ms-2' para un pequeño espacio
+                                            placeholder={`Ej: Harina de trigo`}
+                                            value={ingredient.name}
+                                            onChange={(e) => handleIngredientChange(ingredient.id, 'name', e.target.value)}
                                         />
                                         {recipeData.ingredient.length > 1 && (
-                                            <button className="btn btn-outline-danger rct-remove-item-btn" type="button" onClick={() => removeIngredient(ingredient.id)}>
+                                            <button className="btn btn-outline-danger rct-remove-item-btn ms-2" type="button" onClick={() => removeIngredient(ingredient.id)}>
                                                 <i className="fa-solid fa-minus"></i>
                                             </button>
                                         )}
                                     </div>
                                 ))}
                                 <button className="btn btn-outline-success mt-2 rct-add-ingredient-btn" onClick={addIngredient}>
-                                    <i className="fa-solid fa-plus"></i> Add Ingredient
+                                    <i className="fa-solid fa-plus"></i> Añadir Ingrediente
                                 </button>
                             </div>
 
@@ -466,6 +514,7 @@ export const CreateRecipe = () => {
                                                 type="text"
                                                 className="form-control rct-step-time-input w-50"
                                                 placeholder="Ex: 1h 30 min"
+                                                required
                                                 value={step.time}
                                                 onChange={(e) => handleStepChange(step.id, 'time', e.target.value)}
                                             />
@@ -474,6 +523,7 @@ export const CreateRecipe = () => {
                                             className="form-control mt-2 rct-step-description-textarea"
                                             rows="3"
                                             placeholder="Ex: Mix the eggs with milk until..."
+                                            required
                                             value={step.text}
                                             onChange={(e) => handleStepChange(step.id, 'text', e.target.value)}
                                         ></textarea>
