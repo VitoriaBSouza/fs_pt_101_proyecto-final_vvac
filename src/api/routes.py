@@ -1346,19 +1346,16 @@ def add_score(recipe_id):
 # Shopping List Endpoints
 # ====================================
 
-# GET list from authenticated user
-
-
+# GET: list from authenticated user
 @api.route('/user/shopping-list', methods=['GET'])
 @jwt_required()
 def get_shopping_list():
     user_id = get_jwt_identity()
-
     items = db.session.query(ShoppingListItem).filter_by(user_id=user_id).all()
     return jsonify([item.serialize() for item in items]), 200
 
 
-# POST: add recipes to shopping list
+# POST: add recipes to shopping list (by recipe_ids)
 @api.route('/user/shopping-list', methods=['POST'])
 @jwt_required()
 def add_to_shopping_list():
@@ -1376,14 +1373,63 @@ def add_to_shopping_list():
         return jsonify({"error": str(e)}), 500
 
 
-# DELETE ingredient from the list by ID
+# POST: add ingredients with quantity and unit to shopping list (sum if repeated)
+@api.route('/user/shopping-list/items', methods=['POST'])
+@jwt_required()
+def add_ingredients_to_shopping_list():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+    items = data.get("items", [])
+
+    if not items or not isinstance(items, list):
+        return jsonify({"error": "Please provide a list of ingredients"}), 400
+
+    updated_items = []
+
+    for item in items:
+        ingredient_name = item.get("ingredient_name")
+        total_quantity = item.get("total_quantity")
+        unit = item.get("unit")
+
+        if not all([ingredient_name, unit]) or total_quantity is None:
+            return jsonify({"error": "Each item must include ingredient_name, total_quantity, and unit"}), 400
+
+        # Check if ingredient already exists for the user with the same unit
+        existing_item = db.session.execute(
+            select(ShoppingListItem).where(
+                ShoppingListItem.user_id == user_id,
+                ShoppingListItem.ingredient_name == ingredient_name,
+                ShoppingListItem.unit == unit
+            )
+        ).scalar_one_or_none()
+
+        if existing_item:
+            existing_item.total_quantity += float(total_quantity)
+            updated_items.append(existing_item)
+        else:
+            new_item = ShoppingListItem(
+                user_id=user_id,
+                ingredient_name=ingredient_name,
+                total_quantity=total_quantity,
+                unit=unit
+            )
+            db.session.add(new_item)
+            updated_items.append(new_item)
+
+    db.session.commit()
+    return jsonify([item.serialize() for item in updated_items]), 201
+
+
+# DELETE: ingredient from the list by ID
 @api.route('/user/shopping-list/<int:item_id>', methods=['DELETE'])
 @jwt_required()
 def delete_shopping_item(item_id):
     user_id = get_jwt_identity()
 
-    stmt = select(ShoppingListItem).where(ShoppingListItem.id ==
-                                          item_id, ShoppingListItem.user_id == user_id)
+    stmt = select(ShoppingListItem).where(
+        ShoppingListItem.id == item_id,
+        ShoppingListItem.user_id == user_id
+    )
     item = db.session.execute(stmt).scalar_one_or_none()
 
     if not item:
@@ -1394,16 +1440,15 @@ def delete_shopping_item(item_id):
     return jsonify({"message": "Item deleted"}), 200
 
 
-# DELETE all list from user
+# DELETE: all items from user
 @api.route('/user/shopping-list', methods=['DELETE'])
 @jwt_required()
 def clear_shopping_list():
     user_id = get_jwt_identity()
-
-    deleted = db.session.query(ShoppingListItem).filter_by(
-        user_id=user_id).delete()
+    deleted = db.session.query(ShoppingListItem).filter_by(user_id=user_id).delete()
     db.session.commit()
     return jsonify({"message": f"{deleted} items deleted from shopping list"}), 200
+
 
 # =======================================
 # Meal Plan Endpoints

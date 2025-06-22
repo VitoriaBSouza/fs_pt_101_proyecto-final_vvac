@@ -271,8 +271,9 @@ class ShoppingListItem(db.Model):
             "ingredient_name": self.ingredient_name,
             "total_quantity": self.total_quantity,
             "unit": self.unit,
-            "created_at": self.created_at.isoformat() if self.created_at else None
+            "created_at": self.created_at.isoformat(timespec="seconds") if self.created_at else None
         }
+
 
 class MealType(enum.Enum):
     BREAKFAST = "breakfast"

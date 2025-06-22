@@ -127,7 +127,10 @@ export const ShareButton = ({ text, url, printRef, recipe_id }) => {
             className="btn border-0" 
             data-bs-toggle="modal" 
             data-bs-target="#staticBackdrop">
-                <FontAwesomeIcon icon={faSquareShareNodes} className="pe-3 buttons_recipe color_icons border-end border-secondary"/>
+                <FontAwesomeIcon 
+                icon={faSquareShareNodes} 
+                className="ms-4 fs-2 color_icons"
+                />
             </button>
 
             {/* Modal setting here */}
