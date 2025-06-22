@@ -33,7 +33,7 @@ export const CreateRecipe = () => {
 
     useEffect(() => {
         // if recipe already in store, use it
-        if (id && store.recipe) {
+        if (id && store.recipe && store.recipe.title != "") {
             const f = store.recipe;
             let parsedStepsFromStore = [];
             try {
@@ -130,7 +130,7 @@ export const CreateRecipe = () => {
                 // navigate('/recipes/new');
             }
         })();
-    }, [id, store.recipe, recipeData, dispatch, navigate]);
+    }, [id, store.recipe, dispatch, navigate]);
 
     const handleChange = e => {
         const { name, value } = e.target;
