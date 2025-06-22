@@ -436,6 +436,7 @@ def create_recipe():
             unit = ing["unit"]
 
             normalized_name = name.lower().strip()
+
             info = get_ingredient_info(normalized_name)
             ingredients_list.append(normalized_name)
 
@@ -593,6 +594,7 @@ def edit_recipe(recipe_id):
         db.session.flush()
 
         total_grams = 0
+        ingredients_list = []
 
         for ing in data["ingredient"]:
             name = ing["name"]
@@ -605,6 +607,7 @@ def edit_recipe(recipe_id):
             ingredient = db.session.execute(stmt).scalar_one_or_none()
 
             info = get_ingredient_info(normalized_name)
+            ingredients_list.append(normalized_name)
             
             # Convert to grams
             grams = convert_to_grams(name, unit, quantity)
@@ -655,6 +658,9 @@ def edit_recipe(recipe_id):
             db.session.add(recipe_ing)
         
         recipe.total_grams = total_grams
+
+        diet_label = get_diet_label_gemini(ingredients_list)
+        recipe.diet_label = diet_label
 
         # Media handling
         media_data = data.get("media")

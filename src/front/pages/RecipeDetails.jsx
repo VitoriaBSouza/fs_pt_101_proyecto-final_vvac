@@ -11,7 +11,6 @@ import recipeServices from "../services/recetea_API/recipeServices.js"
 import { Comments } from "../components/Comments.jsx";
 import { NutricionalTable } from "../components/NutricionalTable.jsx";
 import { RecipeCard } from "../components/RecipeCard.jsx";
-import { DietLabel } from "../components/dietLabel.jsx";
 
 //buttons
 import { LikeButton } from '../components/buttons/likeButton.jsx';
@@ -82,10 +81,6 @@ export const RecipeDetails = () => {
     return (
         <div className="container-fluid recipe_card_bg1" ref={printRef}>
             <div className="row recipe_card_bg2 my-4 p-4 mt-4">
-                <DietLabel 
-                recipe_id={id}
-                ingredients={store.recipe?.ingredients}
-                />
                 <div className="col-12 col-md-12 col-lg-7 col-xl-7 d-flex mt-2 my-4 justify-content-center">
 
                     {/* Recipe foto and like button overlayed */}
@@ -207,6 +202,9 @@ export const RecipeDetails = () => {
                             <p className="ms-auto text_published align-self-end">Published on: {formattedDate}</p>
                         </div>
                     </div>
+                </div>
+                <div>
+                    {store.recipe?.diet_label}
                 </div>
             </div>
             <div className="row py-2">
