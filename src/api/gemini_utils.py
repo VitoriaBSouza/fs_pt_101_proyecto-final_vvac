@@ -1,134 +1,94 @@
-from dotenv import load_dotenv
+import google.generativeai as genai
 import os
+import re # Import regex for robust cleaning
 
-load_dotenv() 
-import requests
-from datetime import datetime, timezone
-from sqlalchemy import func
-from api.models import GeminiUsage, Recipe, db
+# Make sure GEMINI_API_KEY is loaded from your .env file
+# This assumes you have `python-dotenv` installed and are calling `load_dotenv()`
+# at the start of your application.
+from dotenv import load_dotenv
+load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
 if not GEMINI_API_KEY:
-    raise EnvironmentError("GEMINI_API_KEY not found in environment variables.")
+    raise ValueError("GEMINI_API_KEY not found in environment variables.")
 
-GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+genai.configure(api_key=GEMINI_API_KEY)
 
-MAX_DAILY_TOKENS = 400_000  # 400k tokens/day cap (approx. safe under free tier)
+# Define the model to use
+model = genai.GenerativeModel('gemini-pro')
 
+def get_diet_label_gemini(ingredients_list):
+    """
+    Classifies a list of ingredients into a single diet label using the Gemini API.
 
-def estimate_tokens(text):
-    # Approx 0.75 words/token
-    return int(len(text.split()) * 1.33)
+    Args:
+        ingredients_list (list): A list of strings, where each string is an ingredient name.
 
+    Returns:
+        str: The diet label (e.g., 'vegan', 'vegetarian', 'keto', 'normal'),
+             or 'normal' if an error occurs or no specific label applies.
+    """
+    if not ingredients_list:
+        return "normal" # No ingredients, can't classify
 
-def get_gemini_token_usage():
-    today = datetime.utcnow().date()
-    usage = db.session.query(GeminiUsage).filter_by(date=today).first()
-    return usage.tokens_used if usage else 0
+    # Convert the list of ingredients to a comma-separated string for the prompt
+    ingredients_text = ", ".join(ingredients_list)
 
-
-def update_gemini_token_usage(tokens_used):
-    today = datetime.utcnow().date()
-    usage = db.session.query(GeminiUsage).filter_by(date=today).first()
-    if not usage:
-        usage = GeminiUsage(date=today, tokens_used=0)
-        db.session.add(usage)
-    usage.tokens_used += tokens_used
-    db.session.commit()
-
-def track_gemini_usage(feature_name: str, user_id: int | None) -> None:
-    usage = db.session.query(GeminiUsage).filter_by(user_id=user_id, feature_name=feature_name).one_or_none()
-
-    if usage:
-        usage.usage_count += 1
-        usage.last_used = datetime.now(timezone.utc)
-    else:
-        usage = GeminiUsage(
-            user_id=user_id,
-            feature_name=feature_name,
-            usage_count=1,
-            last_used=func.now()
-        )
-        db.session.add(usage)
-    db.session.flush()
-
-
-def analyze_diet_type(recipe: Recipe):
-    if recipe.diet_label:
-        return recipe.diet_label
-
-    # Build a clear ingredient list text for Gemini
-    ingredient_lines = []
-    for ri in recipe.ingredients:
-        ingredient_lines.append(f"{ri.quantity} {ri.unit} {ri.ingredient.name}")
-    ingredients_text = "\n".join(ingredient_lines)
-
-    prompt = (
-        "Classify the diet of this recipe based on the ingredients only.\n"
-        "Respond using ONE word: vegan, vegetarian, keto, paleo, gluten-free, dairy-free, pescatarian, or normal.\n\n"
-        "Examples:\n"
-        "Ingredients: chickpeas, olive oil, spinach → vegan\n"
-        "Ingredients: salmon, dill, lemon → pescatarian\n"
-        "Ingredients: bacon, eggs, cheese → normal\n\n"
-        f"Ingredients:\n{ingredients_text}\n\n"
-        "Diet:"
-    )
-
-    tokens_needed = estimate_tokens(prompt)
-    if (get_gemini_token_usage() + tokens_needed) > MAX_DAILY_TOKENS:
-        return "Normal"  # fallback to Normal to avoid charges
-
-    ingredients_text = "\n".join(
-    f"{ri.quantity} {ri.unit} {ri.ingredient.name}" for ri in recipe.ingredients
-)
-
-    payload = {
-        "contents": [{
-            "parts": [{"text": prompt}]
-        }]
+    # Define the precise set of valid labels
+    valid_labels = {
+        "vegan", "vegetarian", "keto", "paleo", "gluten-free",
+        "dairy-free", "pescatarian", "normal"
     }
 
+    # The enhanced prompt for Gemini
+    prompt_message = f"""
+    Analyze the following list of raw ingredients and classify the dish into ONE single, most appropriate diet label from the allowed list.
 
-    response = requests.post(
-        f"{GEMINI_ENDPOINT}?key={GEMINI_API_KEY}",
-        json=payload
-    )
-    if not response.ok:
-        return "Normal"
+    **Allowed Diet Labels (Return ONLY ONE of these words, lowercase):**
+    {", ".join(sorted(valid_labels))}
 
-    result = response.json()
+    **Rules:**
+    1.  **Strict Ingredient Analysis:** Base the label *strictly* on the ingredients provided. Do NOT make assumptions about preparation methods, hidden ingredients (like oils not listed), or cross-contamination.
+    2.  **No Extraneous Text:** Return *only* the single diet label word. Do NOT include explanations, punctuation, or any other text.
+    3.  **Hierarchy/Specificity:** Prioritize the most restrictive label that applies. For example, if it's vegan, it's also vegetarian, but prefer 'vegan'.
+        * **Vegan:** Contains NO animal products (meat, poultry, fish, dairy, eggs, honey, gelatin, etc.).
+        * **Vegetarian:** Contains NO meat, poultry, or fish. May contain dairy, eggs, or honey.
+        * **Pescatarian:** Contains fish/seafood. May contain dairy, eggs. No other meat/poultry.
+        * **Keto:** High fat, adequate protein, very low carb. Look for common keto ingredients (e.g., meat, fish, eggs, high-fat dairy, low-carb vegetables, avocados, nuts, seeds). AVOID grains, sugars, high-carb fruits/vegetables, legumes.
+        * **Paleo:** Focuses on foods available to Stone Age humans. Look for lean meats, fish, fruits, vegetables, nuts, seeds. AVOID dairy, grains, legumes, processed foods, refined sugar, certain vegetable oils.
+        * **Gluten-Free:** Contains NO wheat, barley, rye, or derivatives.
+        * **Dairy-Free:** Contains NO dairy products (milk, cheese, yogurt, butter, whey, casein, lactose).
+        * **Normal:** If none of the above labels strictly apply, or if it contains ingredients that disqualify it from specific categories (e.g., a dish with both chicken and fish would be 'normal' from a "pescatarian" perspective, but might be "paleo" or simply "normal" if no other specific label applies). This is the default if no other label fits perfectly.
+
+    **Ingredients to Analyze:**
+    {ingredients_text}
+
+    **Your single word diet label:**
+    """
+    
     try:
-        message = result["candidates"][0]["content"]["parts"][0]["text"].lower()
-        if "vegan" in message:
-            diet_type = "Vegan"
-        elif "vegetarian" in message:
-            diet_type = "Vegetarian"
-        elif "keto" in message:
-            diet_type = "Keto"
-        elif "paleo" in message:
-            diet_type = "Paleo"
-        elif "gluten-free" in message or "gluten free" in message:
-            diet_type = "Gluten-Free"
-        elif "dairy-free" in message or "dairy free" in message:
-            diet_type = "Dairy-Free"
-        elif "pescatarian" in message:
-            diet_type = "Pescatarian"
+        # Using generate_content directly as it's often simpler for single-turn prompts
+        response = model.generate_content(prompt_message)
+        
+        # Access the text from the response
+        if response.candidates:
+            raw_label = response.candidates[0].content.parts[0].text.strip().lower()
+            
+            # Clean the label to ensure it's a single word and matches
+            # Use regex to find only alphabetic characters and hyphens, allowing for "gluten-free" or "dairy-free"
+            cleaned_label = re.sub(r'[^a-z-]', '', raw_label).strip()
+
+            if cleaned_label in valid_labels:
+                print(f"Gemini raw response: '{raw_label}' -> Cleaned label: '{cleaned_label}'")
+                return cleaned_label
+            else:
+                print(f"Gemini returned an invalid label: '{raw_label}'. Defaulting to 'normal'.")
+                return "normal"
         else:
-            diet_type = "Normal"
-    except (KeyError, IndexError):
-        diet_type = "Standard"
+            print(f"Gemini response had no candidates. Raw response: {response}")
+            return "normal"
 
-    recipe.diet_label = diet_type
-    return diet_type
-
-# Add to post and put method:
-# analyze_diet_type(new_recipe)
-
-# Add diet_type to Recipe table
-
-# Add table to track token and avoid charges
-# class GeminiUsage(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     date = db.Column(db.Date, default=datetime.utcnow().date, unique=True)
-#     tokens_used = db.Column(db.Integer, default=0)
+    except Exception as e:
+        print(f"Gemini API error during diet labeling: {e}")
+        # Optionally, print more detailed error info: print(response.prompt_feedback)
+        return "normal"

@@ -12,6 +12,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from api.email_utils import send_email, get_serializer
 from api.recipe_utils import convert_to_grams, get_ingredient_info, calculate_calories, calculate_carbs, calculate_fat, calculate_protein, calculate_salt, calculate_sodium, calculate_sugars, calculate_fiber
 from api.user_utils import generate_placeholder
+from api.gemini_utils import get_diet_label_gemini
 import json
 
 
@@ -427,6 +428,7 @@ def create_recipe():
         db.session.flush()
 
         total_grams = 0
+        ingredients_list = []
 
         for ing in data["ingredient"]:
             name = ing["name"]
@@ -435,6 +437,7 @@ def create_recipe():
 
             normalized_name = name.lower().strip()
             info = get_ingredient_info(normalized_name)
+            ingredients_list.append(normalized_name)
 
             if not info or not isinstance(info, dict):
                 return jsonify({"error": f"Failed to fetch ingredient info for '{name}'"}), 400
@@ -493,6 +496,9 @@ def create_recipe():
             db.session.add(recipe_ing)
 
         new_recipe.total_grams = total_grams
+
+        diet_label = get_diet_label_gemini(ingredients_list)
+        new_recipe.diet_label = diet_label
     
         # Check for media if they added image to the recipe
         media_data = data["media"]
@@ -507,6 +513,8 @@ def create_recipe():
             db.session.add(placeholder_media)
 
         db.session.commit()
+
+        print(f"Received diet label: {diet_label}")
 
         return jsonify({"success": True, "recipe_id": new_recipe.id}), 201
 

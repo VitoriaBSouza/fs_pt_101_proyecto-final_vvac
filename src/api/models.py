@@ -308,19 +308,4 @@ class MealPlanEntry(db.Model):
             "meal_type": self.meal_type.value,
             "date": self.date.date().isoformat()
         }
-    
-class GeminiUsage(db.Model):
-    __tablename__ = "gemini_usage"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    user_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("users.id"), nullable=True)
-    feature_name: Mapped[str] = mapped_column(String, nullable=False)
-    usage_count: Mapped[int] = mapped_column(Integer, default=1)
-    date: Mapped[datetime.date] = mapped_column(Date, server_default=func.current_date())
-    last_used: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    tokens_used: Mapped[int] = mapped_column(Integer, default=0, server_default=text("0"))
-
-    def increment_usage(self) -> None:
-        self.usage_count += 1
-        self.last_used = func.now()
 
