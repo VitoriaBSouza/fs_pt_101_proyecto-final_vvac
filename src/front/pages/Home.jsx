@@ -11,6 +11,7 @@ import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import { TopSection } from "../components/TopSection.jsx";
 import { RecipeScroller } from '../components/RecipeScroller.jsx';
 import { BottomSection } from '../components/BottomSection.jsx';
+import { RecipeCard } from "../components/RecipeCard.jsx";
 
 export const Home = () => {
 
@@ -45,27 +46,10 @@ export const Home = () => {
 	return (
 		<div className="container-fluid container_home">
 			<TopSection />
-			<div className="row bg-light">
-				<div className="col-12">
-					<h2 className="text-danger">Latest Recipes</h2>
-				</div>
-				<div className="col-12">
-					<div className="scroll-container d-flex">
-
-						{/* maping over RecipeCards to create cards based on the data */}
-						{
-
-							store.recipes?.map((el) => <RecipeScroller
-								key={el.id}
-								id={el.id}
-								name={el.title}
-								url={el.media?.[0]?.url}
-
-							/>)
-						}
-					</div>
-
-				</div>
+			<div className="row_home">
+				
+					<RecipeScroller />
+			
 			</div>
 			<BottomSection />
 		</div>
