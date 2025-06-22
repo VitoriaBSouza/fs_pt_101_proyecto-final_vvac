@@ -24,7 +24,6 @@ flask-cors = "*"
 torch = "*"
 tiktoken = "*"
 protobuf = "*"
-sentencepiece = "*"
 "google.generativeai" = "*"
 
 [requires]
