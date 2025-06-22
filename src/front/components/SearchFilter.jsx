@@ -1,3 +1,4 @@
+import React from "react";
 import { useNavigate} from "react-router-dom";
 import { useEffect } from "react";
 
@@ -37,7 +38,7 @@ export const SearchFilter = () => {
                     </Link>
                 </li>
                 <li>
-                    <Link to="/" className="filter-links">
+                    <Link to="/" className="filter-links"> 
                         <i className="fa-regular fa-user"></i>
                         <span>sin asignar</span>
                     </Link>
