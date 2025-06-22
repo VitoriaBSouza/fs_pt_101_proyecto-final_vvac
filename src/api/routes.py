@@ -10,8 +10,9 @@ from datetime import datetime, timezone
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from werkzeug.security import generate_password_hash, check_password_hash
 from api.email_utils import send_email, get_serializer
-from api.recipe_utils import convert_to_grams, get_ingredient_info, calculate_calories, calculate_carbs, calculate_fat, calculate_protein
+from api.recipe_utils import convert_to_grams, get_ingredient_info, calculate_calories, calculate_carbs, calculate_fat, calculate_protein, calculate_salt, calculate_sodium, calculate_sugars, calculate_fiber
 from api.user_utils import generate_placeholder
+from api.gemini_utils import get_diet_label_gemini
 import json
 
 
@@ -301,8 +302,6 @@ def reset_password(token):
 
 # From here all recipe related endpoints
 # GET all recipes(guests)
-
-
 @api.route('/recipes', methods=['GET'])
 def get_recipes():
 
@@ -311,9 +310,7 @@ def get_recipes():
 
     return jsonify([recipe.serialize() for recipe in recipes]), 200
 
-# GET a specific recipe(guests)
-
-
+#GET one recipe(guests)
 @api.route('/recipes/<int:recipe_id>', methods=['GET'])
 def get_recipe(recipe_id):
 
@@ -325,9 +322,8 @@ def get_recipe(recipe_id):
 
     return jsonify(recipe.serialize()), 200
 
+
 # GET all recipes created by an user(need to log in)
-
-
 @api.route('/user/recipes', methods=['GET'])
 @jwt_required()
 def get_user_recipes():
@@ -348,8 +344,6 @@ def get_user_recipes():
     return jsonify([recipe.serialize() for recipe in recipes]), 200
 
 # GET a specific recipe created by an user(need to log in)
-
-
 @api.route('/user/recipes/<int:recipe_id>', methods=['GET'])
 @jwt_required()
 def get_user_recipe(recipe_id):
@@ -383,13 +377,13 @@ def create_recipe():
 
         if not data["portions"] or data["portions"] < 1:
             data["portions"] = 1
-
+        
         if not data["steps"]:
             return jsonify({"error": "Please add all the steps and instructions needed to your recipe"}), 400
 
         if not data["ingredient"]:
             return jsonify({"error": "Please add all the igredients details to your recipe"}), 400
-
+        
         # Conditions to turn the string value into the enum value in our database
         difficulty_map = {
             "Easy": DifficultyType.EASY,
@@ -417,20 +411,24 @@ def create_recipe():
 
         steps_json = json.dumps(steps_list)
 
+        #default prep time to 15 if none or 0
+        prep_time = data.get("prep_time", 15) or 15
+
         # We add on frontend the control of blank space and lower cases
         new_recipe = Recipe(
             title=data["title"],
             author=user_id,
             difficulty_type=setLevel,
-            prep_time=data["prep_time"],
+            prep_time=prep_time,
             steps=steps_json,
             portions=data["portions"],
-            published=datetime.now(timezone.utc)
+            published=datetime.now(timezone.utc),
         )
         db.session.add(new_recipe)
         db.session.flush()
 
         total_grams = 0
+        ingredients_list = []
 
         for ing in data["ingredient"]:
             name = ing["name"]
@@ -438,7 +436,9 @@ def create_recipe():
             unit = ing["unit"]
 
             normalized_name = name.lower().strip()
+
             info = get_ingredient_info(normalized_name)
+            ingredients_list.append(normalized_name)
 
             if not info or not isinstance(info, dict):
                 return jsonify({"error": f"Failed to fetch ingredient info for '{name}'"}), 400
@@ -464,18 +464,19 @@ def create_recipe():
             if allergens_str and ingredient.allergens != allergens_str:
                 ingredient.allergens = allergens_str
 
-            calories = info["calories"] if info else None
-            fat = info["fat"] if info else None
-            saturated_fat = info["saturated_fat"] if info else None
-            carbs = info["carbs"] if info else None
-            sugars = info["sugars"] if info else None
-            fiber = info["fiber"] if info else None
-            protein = info["protein"] if info else None
-            salt = info["salt"] if info else None
-            sodium = info["sodium"] if info else None
-
+            #converts units to grams - we need to properly calculate nutricionl value
             grams = convert_to_grams(name, unit, quantity)
             total_grams += grams
+
+            calories = calculate_calories(grams, info["calories"])
+            fat = calculate_fat(grams, info["fat"])
+            saturated_fat = calculate_fat(grams, info["saturated_fat"])
+            carbs = calculate_carbs(grams, info["carbs"])
+            sugars = calculate_sugars(grams, info["sugars"])
+            fiber = calculate_fiber(grams, info["fiber"])
+            protein = calculate_protein(grams, info["protein"])
+            salt = calculate_salt(grams, info["salt"])
+            sodium = calculate_sodium(grams, info["sodium"])
 
             recipe_ing = RecipeIngredient(
                 recipe_id=new_recipe.id,
@@ -490,13 +491,16 @@ def create_recipe():
                 fiber=fiber,
                 protein=protein,
                 salt=salt,
-                sodium=sodium
+                sodium=sodium,
             )
             new_recipe.ingredients.append(recipe_ing)
             db.session.add(recipe_ing)
 
         new_recipe.total_grams = total_grams
 
+        diet_label = get_diet_label_gemini(ingredients_list)
+        new_recipe.diet_label = diet_label
+    
         # Check for media if they added image to the recipe
         media_data = data["media"]
 
@@ -507,8 +511,11 @@ def create_recipe():
                 type_media=MediaType.IMAGE,
                 url=PLACEHOLDER_IMAGE_URL
             )
-        db.session.add(placeholder_media)
+            db.session.add(placeholder_media)
+
         db.session.commit()
+
+        print(f"Received diet label: {diet_label}")
 
         return jsonify({"success": True, "recipe_id": new_recipe.id}), 201
 
@@ -516,8 +523,6 @@ def create_recipe():
         return jsonify({"error": str(e)}), 500
 
 # PUT a specific recipe created by the user(need to log in)
-
-
 @api.route('/user/recipes/<int:recipe_id>', methods=['PUT'])
 @jwt_required()
 def edit_recipe(recipe_id):
@@ -589,6 +594,7 @@ def edit_recipe(recipe_id):
         db.session.flush()
 
         total_grams = 0
+        ingredients_list = []
 
         for ing in data["ingredient"]:
             name = ing["name"]
@@ -601,15 +607,23 @@ def edit_recipe(recipe_id):
             ingredient = db.session.execute(stmt).scalar_one_or_none()
 
             info = get_ingredient_info(normalized_name)
-            calories = info["calories"] if info else 0
-            fat = info["fat"] if info else 0
-            saturated_fat = info["saturated_fat"] if info else 0
-            carbs = info["carbs"] if info else 0
-            sugars = info["sugars"] if info else 0
-            fiber = info["fiber"] if info else 0
-            protein = info["protein"] if info else 0
-            salt = info["salt"] if info else 0
-            sodium = info["sodium"] if info else 0
+            ingredients_list.append(normalized_name)
+            
+            # Convert to grams
+            grams = convert_to_grams(name, unit, quantity)
+            total_grams += grams
+
+            #calculate nutricion /100g
+            calories = calculate_calories(grams, info.get("calories", 0))
+            fat = calculate_fat(grams, info.get("fat", 0))
+            saturated_fat = calculate_fat(grams, info.get("saturated_fat", 0))
+            carbs = calculate_carbs(grams, info.get("carbs", 0))
+            sugars = calculate_carbs(grams, info.get("sugars", 0))
+            fiber = calculate_carbs(grams, info.get("fiber", 0))
+            protein = calculate_protein(grams, info.get("protein", 0))
+            salt = calculate_salt(grams, info.get("salt", 0))
+            sodium = calculate_sodium(grams, info.get("sodium", 0))
+            
             allergens = ",".join(info["allergens"]) if info and info.get(
                 "allergens") else ""
 
@@ -624,9 +638,6 @@ def edit_recipe(recipe_id):
             if allergens and ingredient.allergens != allergens:
                 ingredient.allergens = allergens
                 db.session.flush()
-
-            grams = convert_to_grams(name, unit, quantity)
-            total_grams += grams
 
             recipe_ing = RecipeIngredient(
                 recipe_id=recipe.id,
@@ -645,8 +656,11 @@ def edit_recipe(recipe_id):
             )
             recipe.ingredients.append(recipe_ing)
             db.session.add(recipe_ing)
-
+        
         recipe.total_grams = total_grams
+
+        diet_label = get_diet_label_gemini(ingredients_list)
+        recipe.diet_label = diet_label
 
         # Media handling
         media_data = data.get("media")
@@ -671,8 +685,6 @@ def edit_recipe(recipe_id):
         return jsonify({"error": str(e)}), 500
 
 # DELETE recipe created by user
-
-
 @api.route("/user/recipes/<int:recipe_id>", methods=["DELETE"])
 @jwt_required()
 def delete_one_recipe(recipe_id):
@@ -702,6 +714,52 @@ def delete_one_recipe(recipe_id):
     db.session.commit()
 
     return jsonify({"message": "Recipe has been deleted successfully"}), 200
+
+
+# DELETE all recipes created by user and all related data (for test)
+    
+@api.route("/user/recipes", methods=["DELETE"])
+@jwt_required()
+def delete_all_user_recipes():
+    user_id = get_jwt_identity()
+
+    # Get all recipe IDs created by the authenticated user
+    stmt = select(Recipe.id).where(Recipe.author == user_id)
+    recipe_ids = [row[0] for row in db.session.execute(stmt).all()]
+
+    if not recipe_ids:
+        return jsonify({"message": "No recipes found for this user"}), 404
+
+    # Delete all comments related to the user's recipes
+    delete_comments = delete(Comment).where(Comment.recipe_id.in_(recipe_ids))
+    db.session.execute(delete_comments)
+
+    # Delete all collection entries related to the user's recipes
+    delete_collections = delete(Collection).where(Collection.recipe_id.in_(recipe_ids))
+    db.session.execute(delete_collections)
+
+    # Delete all media entries related to the user's recipes
+    delete_media = delete(Media).where(Media.recipe_id.in_(recipe_ids))
+    db.session.execute(delete_media)
+
+    # Delete all recipe-ingredient associations for the user's recipes
+    delete_ingredients = delete(RecipeIngredient).where(
+        RecipeIngredient.recipe_id.in_(recipe_ids)
+    )
+    db.session.execute(delete_ingredients)
+
+    # Delete all meal plan entries that reference the user's recipes
+    delete_mealplans = delete(MealPlanEntry).where(MealPlanEntry.recipe_id.in_(recipe_ids))
+    db.session.execute(delete_mealplans)
+
+    # Finally, delete the recipes themselves
+    delete_recipes = delete(Recipe).where(Recipe.id.in_(recipe_ids))
+    db.session.execute(delete_recipes)
+
+    db.session.commit()
+
+    return jsonify({"message": f"Deleted {len(recipe_ids)} recipe(s) and all related data"}), 200
+
 
 # Recipe endpoints end here
 
