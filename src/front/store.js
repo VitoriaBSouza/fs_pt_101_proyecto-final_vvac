@@ -1,4 +1,5 @@
 export const initialStore = () => {
+  
   return {
     token: localStorage.getItem("token") || null,
     user: JSON.parse(localStorage.getItem("user") || "{}"),
@@ -176,12 +177,14 @@ export default function storeReducer(store, action = {}) {
         ...store,
         collections: action.payload || [],
       };
+    }
 
     case "update_collections": {
       return {
         ...store,
         collections: Array.isArray(action.payload) ? action.payload : [],
       };
+    }
 
     case "get_all_comments": {
       return {
@@ -195,12 +198,14 @@ export default function storeReducer(store, action = {}) {
         ...store,
         comment: [action.payload, ...store.comment],
       };
+    }
 
     case "edit_comment": {
       return {
         ...store,
         comment: [action.payload, ...store.comment],
       };
+    }
 
     case "delete_comment": {
       return {
@@ -209,7 +214,7 @@ export default function storeReducer(store, action = {}) {
           (comment) => comment.id !== action.payload
         ),
       };
-
+    }
     case "set_hello":
       return {
         ...store,
