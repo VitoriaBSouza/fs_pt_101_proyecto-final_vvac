@@ -20,44 +20,41 @@ import { MealPlanner } from "./pages/MealPlanner";
 import { Single } from "./pages/Single";
 import { Demo } from "./pages/Demo";
 import { CreateRecipe } from "./pages/CreateRecipe";
-
-
-
-
+import { SearchPage } from "./pages/SearchPage";
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
-    // CreateRoutesFromElements function allows you to build route elements declaratively.
-    // Create your routes here, if you want to keep the Navbar and Footer in all views, add your new routes inside the containing Route.
-    // Root, on the contrary, create a sister Route, if you have doubts, try it!
-    // Note: keep in mind that errorElement will be the default page when you don't get a route, customize that page to make your project more attractive.
-    // Note: The child paths of the Layout element replace the Outlet component with the elements contained in the "element" attribute of these child paths.
+        // CreateRoutesFromElements function allows you to build route elements declaratively.
+        // Create your routes here, if you want to keep the Navbar and Footer in all views, add your new routes inside the containing Route.
+        // Root, on the contrary, create a sister Route, if you have doubts, try it!
+        // Note: keep in mind that errorElement will be the default page when you don't get a route, customize that page to make your project more attractive.
+        // Note: The child paths of the Layout element replace the Outlet component with the elements contained in the "element" attribute of these child paths.
 
-      // Root Route: All navigation will start from here.
-      <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
+        // Root Route: All navigation will start from here.
+        <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
 
-        {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
-        <Route path= "/" element={<Home />} />
-        <Route path="/recipes/:id" element={<RecipeDetails />} />
-        <Route path="/login" element={<LogInPage />} />
-        <Route path="/signup" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswd />} />
-        <Route path="/change-password" element={<ChangePasswd />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/shopping-list" element={<ShoppingList />} />
-        <Route path="/your-collection" element={<CollectionFav />} />
-        <Route path="/meal-planner" element={<MealPlanner />} />
-        <Route path="/single/:theId" element={ <Single />} />  {/* Dynamic route for single items */}
-        <Route path="/recipes/new" element={<CreateRecipe />} />
-        <Route path="/recipes/:id/edit" element={<CreateRecipe />} />
-        <Route path="/demo" element={<Demo />} />
-        
-        
-      </Route>
+            {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
+            <Route path="/" element={<Home />} />
+            <Route path="/recipes/:id" element={<RecipeDetails />} />
+            <Route path="/login" element={<LogInPage />} />
+            <Route path="/signup" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswd />} />
+            <Route path="/change-password" element={<ChangePasswd />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/shopping-list" element={<ShoppingList />} />
+            <Route path="/your-collection" element={<CollectionFav />} />
+            <Route path="/meal-planner" element={<MealPlanner />} />
+            <Route path="/single/:theId" element={<Single />} />  {/* Dynamic route for single items */}
+            <Route path="/recipes/new" element={<CreateRecipe />} />
+            <Route path="/recipes/:id/edit" element={<CreateRecipe />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/demo" element={<Demo />} />
+
+        </Route>
     ),
     {
-      future: {
-        v7_relativeSplatPath: true,
-      },
+        future: {
+            v7_relativeSplatPath: true,
+        },
     }
 );
