@@ -276,7 +276,7 @@ export const Profile = () => {
                                                 id="username"
                                                 autoComplete="off"
                                                 onChange={handleChange}
-                                            // placeholder={formData?.username || "" } 
+                                            placeholder={formData?.username || "" } 
                                             />
                                         </div>
                                         <div className="mb-3">
@@ -287,7 +287,7 @@ export const Profile = () => {
                                                 id="Email1"
                                                 autoComplete="off"
                                                 onChange={handleChange}
-                                            // placeholder={formData?.email || "" } 
+                                            placeholder={formData?.email || "" } 
                                             />
                                             {store.user?.success && (
                                                 <div className="alert alert-info mt-2">
