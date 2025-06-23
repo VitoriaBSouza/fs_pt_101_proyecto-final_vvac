@@ -2405,3 +2405,34 @@ div.container_bottom_section {
   box-shadow: 0 0 0 0.25rem rgba(202, 62, 73, 0.25);
   border-color: #ca3e49;
 }
+
+
+/******************************************************************/
+/********************* Search Filter ******************************/
+/******************************************************************/
+
+/* Estilo similar al LinksMenu para SearchFilter */
+.filter-menu {
+  background-color: #c1454b;
+  border-radius: 8px;
+  padding: 1.5rem 1rem;
+  height: 100%;
+  color: white;
+}
+
+.filter-menu label,
+.filter-menu select,
+.filter-menu input,
+.filter-menu .badge {
+  color: #fff;
+}
+
+.filter-menu .form-control,
+.filter-menu .form-select {
+  background-color: #fff;
+  color: #000;
+}
+
+.filter-menu .list-group-item {
+  cursor: pointer;
+}
