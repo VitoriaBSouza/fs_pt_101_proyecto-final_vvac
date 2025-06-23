@@ -70,7 +70,7 @@ export const Search = () =>{
             <form onSubmit={handleSearch} className=" d-flex align-items-center p-1 rounded-pill 
             border-0 search_box_bg w-100">
                 <input 
-                className="form-control me-2 p-2 m-1 ms-1 search_input_bg border-0 rounded-pill" 
+                className="form-control me-2 p-2 m-1 ms-1 search_input_bg border-0 rounded-pill fs-5" 
                 value={search}
                 type="search" 
                 placeholder={`Search by ${filter}`}

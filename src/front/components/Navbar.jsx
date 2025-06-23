@@ -31,7 +31,7 @@ export const Navbar = () => {
               <CollectionList />
               <UserButton />
             </div>
-          ) : location.pathname === "/" ? (
+          ) : location.pathname === "/" || location.pathname === "/forgot-password" ? (
             <div className="d-flex">
               <Link to="/login" className="border-end border-2">
                 <button className="btn border-0 m-2 fs-5 fw-bold">Log In</button>

@@ -11,7 +11,7 @@ from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_requir
 from werkzeug.security import generate_password_hash, check_password_hash
 from api.email_utils import send_email, get_serializer
 from api.recipe_utils import convert_to_grams, get_ingredient_info, calculate_calories, calculate_carbs, calculate_fat, calculate_protein, calculate_salt, calculate_sodium, calculate_sugars, calculate_fiber
-from api.user_utils import generate_placeholder
+from api.user_utils import generate_placeholder, send_email, build_reset_url
 from api.gemini_utils import get_diet_label_gemini
 import json
 
@@ -238,7 +238,7 @@ def forgot_password():
         token = serializer.dumps(user.email, salt='password-reset')
 
         # Generates link to reset password
-        reset_url = url_for('api.reset_password', token=token, _external=True)
+        reset_url = build_reset_url(token)
 
         # Personalize email
         app_name = "Recetea"  # Customize this
@@ -265,7 +265,8 @@ def forgot_password():
             body=body
         )
 
-        return jsonify({"message": f"If that email exists, a reset link was sent."}), 200
+        return jsonify({"message": f"If that email exists, a reset link was sent.", 
+                        "success" : True, "token" : token, "user": {"email": user.email}}), 200
 
     except Exception as e:
         print(e)
@@ -277,9 +278,13 @@ def reset_password(token):
     try:
         serializer = get_serializer()
 
-        email = serializer.loads(token, salt='password-reset', max_age=3600)
-        data = request.json
-        new_password = data["password"]
+        try:
+            email = serializer.loads(token, salt='password-reset', max_age=3600)
+        except Exception as e:
+            return jsonify({"error": "Invalid or expired token"}), 400
+
+        data = request.get_json()
+        new_password = data.get("password")
 
         if not new_password:
             return jsonify({"error": "Add your new password"}), 400
@@ -293,10 +298,12 @@ def reset_password(token):
         user.updated_at = datetime.now(timezone.utc)
         db.session.commit()
 
-        return jsonify({"message": "Password updated successfully"}), 200
+        return jsonify({"message": "Password updated successfully", "success": True}), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print("Reset password error:", e)
+        return jsonify({"error": "Something went wrong"}), 500
+
 
 # End of user endpoints
 

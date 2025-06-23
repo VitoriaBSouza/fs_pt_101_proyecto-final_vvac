@@ -1,15 +1,14 @@
 import React from "react";
 
 //components
-import { Reset } from "../components/LogIn.jsx";
+import { ResetPasswd } from "../components/ResetPasswd.jsx";
 
 
-export const LogInPage = () => {
+export const ForgotPasswd = () => {
 
     return(
        <div className="container-fluid logIn_background p-4">
-            <h1 className="p-4 text-center logIn_title">Welcome Back to Recetea!</h1>
-            <LogIn />
+            <ResetPasswd />
         </div>
     )
 }

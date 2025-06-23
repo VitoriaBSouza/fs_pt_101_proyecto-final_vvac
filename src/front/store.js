@@ -64,6 +64,19 @@ export default function storeReducer(store, action = {}) {
         ...store,
       };
 
+    case "forgotPasswd":
+      return {
+        ...store,
+        token: action.payload.token,
+        user: action.payload.user.email
+
+      };
+
+    case "resetPasswd":
+      return {
+        ...store,
+      };
+
     case "updateUser":
       return {
         ...store,

@@ -7,37 +7,40 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 //services
 import userServices from "../services/recetea_API/userServices.js"
 
-export const ResetPasswd = () => {
+export const ChangePasswd = () => {
 
     const { store, dispatch } = useGlobalReducer();
     const navigate = useNavigate();
 
-    const [formData, setFormData] = useState({
-        email: "",
+    const [passwordData, setPasswordData] = useState({
+        password: "",
+        token: store.token
     })
 
+    const [repeatPasswd, setRepeatPasswd] = useState("")
+
     const handleChange = e => {
-        setFormData({
-            ...formData,
+        setPasswordData({
+            ...passwordData,
             [e.target.name]: e.target.value
         })
     }
 
-    const handleReset = async (e) => {
+    const handlePassword = async (e) => {
         e.preventDefault();
+
+        if(passwordData.password != repeatPasswd ){
+            window.alert("Your passwords do not match.")
+        }
+
         try {
-            const data = await userServices.forgotPassword(formData.email);
+            const data = await userServices.resetPassword(passwordData.token, passwordData.password);
 
             if (data.success) {
 
-                // Store token on store
-                localStorage.setItem("token", data.token);
-                console.log(data.token);
-
                 // Dispatch user data including token if needed
-                dispatch({ type: "forgotPasswd", payload: { token: data.token, user: data.user.email } });
-
-                navigate("/change-password")
+                dispatch({ type: "resetPasswd"});
+                navigate("/login");
 
             } else {
                 //we can set another page here or change to a banner
@@ -45,7 +48,7 @@ export const ResetPasswd = () => {
             }
 
         } catch (error) {
-            console.log("Reset password error:", error);
+            console.log("Change password error:", error);
             window.alert(error)
         }
     }
@@ -54,22 +57,30 @@ export const ResetPasswd = () => {
         <div className="row d-flex mb-4 mt-4">
             <div className="col-12 col-sm-8 col-md-6 col-lg-4 mx-auto">
                 <div className="card p-4 shadow recipe_card_bg1 mx-auto">
-                    <p className="mb-3 text-center text-danger fs-3 fw-bold">Forgot your password?</p>
-                    <form onSubmit={handleReset} className="mt-2">
-
-                        <p className="text-center fs-5 lh-1 mt-2 mb-4">
-                            Enter your email below to reset your password.
-                        </p>
+                    <p className="mb-3 text-center text-danger fs-2 fw-bold">Change your password</p>
+                    <form onSubmit={handlePassword} className="mt-2">
                         <div className="my-4 fs-4 pt-2">
                             <input
-                                type="email"
-                                value={formData.email}
-                                name="email"
+                                type="password"
+                                value={passwordData.password}
+                                name="password"
                                 onChange={handleChange}
                                 className="form-control fs-4"
-                                id="exampleInputEmail1"
-                                placeholder="Email"
-                                aria-describedby="emailHelp" />
+                                id="exampleInputPwd1"
+                                placeholder="New Password"
+                                aria-describedby="pwdHelp" />
+                        </div>
+
+                        <div className="my-4 fs-4 pt-2">
+                            <input
+                                type="password"
+                                value={repeatPasswd}
+                                name="repeatPasswd"
+                                onChange={(e) => setRepeatPasswd(e.target.value)}
+                                className="form-control fs-4"
+                                id="exampleInputPwd2"
+                                placeholder="Repeat your new password"
+                                aria-describedby="newPwdHelp" />
                         </div>
                         
                         <button type="submit" className="btn btn-danger my-4 fs-5">Submit</button>

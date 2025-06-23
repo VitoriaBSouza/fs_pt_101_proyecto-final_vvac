@@ -61,28 +61,28 @@ table {
 /* From here is LogIn CSS classes */
 
 .logIn_title {
-  color: #c1454b;
+  color: #a50c14;
   font-size: 3.5rem;
-  text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.516);
+  text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.416);
 }
 
 .logIn_background {
-  background-color: #f3e8d98b;
-  background-image: radial-gradient(#e6394764 5px, transparent 6px);
+  background-color: #f3e8d94a;
+  background-image: radial-gradient(#e639472f 5px, transparent 6px);
   background-size: 50px 50px;
 }
 
 /* From here is SignUp CSS classes */
 
 .sigUp_title {
-  color: #c1454b;
-  font-size: 3.5rem;
-  text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.516);
+  color: #a50c14;
+  font-size: 3rem;
+  text-shadow: 4px 4px 6px rgba(0, 0, 0, 0.363);
 }
 
 .sigUp_background {
-  background-color: #b30c1a18;
-  background-image: radial-gradient(#e0c19689 5px, transparent 6px);
+  background-color: #c1676e18;
+  background-image: radial-gradient(#e0c1965d 5px, transparent 6px);
   background-size: 50px 50px;
 }
 
