@@ -11,19 +11,36 @@ export const CreateRecipe = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
+    //----------------------------------
+    //PENDIENTE RECTIFICAR -- inicio
+    //----------------------------------
+
+
+    let contador = 1
+    const generateClientUniqueId = () => {
+        contador = contador + 1
+    return contador;
+};
+
     const initialRecipeState = {
         title: "",
         username: "",
-        description: "",
         servings: 1,
         difficulty_type: "",
         prep_time: 0,
         allergens: [],
-        ingredient: [{ id: 1, name: "", quantity: "", unit: "" }],
+    ingredient: [{ id: generateClientUniqueId(), name: "", quantity: "", unit: "" }],       //PENDIENTE RECTIFICAR
         steps: [{ id: 1, text: "" }],
         status: "draft",
         image_url: ""
     };
+
+
+    //----------------------------------
+    //PENDIENTE RECTIFICAR -- fin
+    //----------------------------------
+
+
 
     const [recipeData, setRecipeData] = useState(initialRecipeState);
     const [mainRecipeImage, setMainRecipeImage] = useState("https://picsum.photos/200/300");
@@ -47,23 +64,23 @@ export const CreateRecipe = () => {
                     }
                 } else if (Array.isArray(f.steps)) {
                     // Si por alguna razón ya es un array de objetos (ej. [{text: "Paso 1"}]), lo mapeamos
-                    parsedStepsFromStore = f.steps.map((s, index) => ({ id: s.id || (index + 1), text: s.text || s.description || '' }));
+                    parsedStepsFromStore = f.steps.map((s, index) => ({ id: s.id || (index + 1), text: s.text || '' }));
                 }
             } catch (e) {
                 console.error("Error al parsear los pasos desde store.recipe:", e);
                 parsedStepsFromStore = []; // En caso de error, un array vacío para evitar que se rompa
             }
+
             setRecipeData({
                 title: f.title || "",
                 username: f.username || "",
-                description: f.description || "",
                 servings: f.portions || 1,
                 difficulty_type: f.difficulty_type || "",
                 prep_time: f.prep_time || 0,
                 allergens: f.allergens || [],
-                ingredient: f.ingredient?.map(ing => ({
-                    id: ing.id,
-                    name: ing.name || "",
+                ingredient: f.ingredients?.map(ing => ({
+                    id: ing.ingredient_id,
+                    name: ing.ingredient_name || "",
                     quantity: ing.quantity?.toString() || "",
                     unit: ing.unit || ""
                 })) || [],
@@ -98,7 +115,7 @@ export const CreateRecipe = () => {
                             }
                         } else if (Array.isArray(f.steps)) {
                             // Si por alguna razón ya es un array de objetos, lo mapeamos
-                            parsedStepsFromAPI = f.steps.map((s, index) => ({ id: s.id || (index + 1), text: s.text || s.description || '' }));
+                            parsedStepsFromAPI = f.steps.map((s, index) => ({ id: s.id || (index + 1), text: s.text || '' }));
                         }
                     } catch (e) {
                         console.error("Error al parsear los pasos desde la API:", e);
@@ -108,14 +125,13 @@ export const CreateRecipe = () => {
                     setRecipeData({
                         title: f.title || "",
                         username: f.username || "",
-                        description: f.description || "",
                         servings: f.portions || 1,
                         difficulty_type: f.difficulty_type || "",
                         prep_time: f.prep_time || 0,
                         allergens: f.allergens || [],
-                        ingredient: f.ingredient?.map(ing => ({
-                            id: ing.id,
-                            name: ing.name || "",
+                        ingredient: f.ingredients?.map(ing => ({
+                            id: ing.ingredient_id,
+                            name: ing.ingredient_name || "",
                             quantity: ing.quantity?.toString() || "",
                             unit: ing.unit || ""
                         })) || [],
@@ -172,7 +188,7 @@ export const CreateRecipe = () => {
     const handleIngredientChange = (ingId, field, value) => {
         setRecipeData(prev => ({
             ...prev,
-            ingredient: prev.ingredient.map(ing => ing.id === ingId ? { ...ing, [field]: value } : ing)
+            ingredient: prev.ingredient.map(ing => ing.ingredient_id === ingId ? { ...ing, [field]: value } : ing)
         }));
     };
     const addIngredient = () => {
@@ -210,7 +226,6 @@ export const CreateRecipe = () => {
         const dataToSend = {
             ...recipeData,
             title: recipeData.title,
-            description: recipeData.description,
             difficulty_type: recipeData.difficulty_type,
             prep_time: parseInt(recipeData.prep_time, 10),
             portions: parseInt(recipeData.servings, 10),
@@ -248,7 +263,7 @@ export const CreateRecipe = () => {
             id ? window.location.reload() : setRecipeData(initialRecipeState);
         }
     };
-
+console.log("-->REcipeDAta: " + JSON.stringify(recipeData))
     return (
         <div className="rct-create-recipe-wrapper">
             <div className="rct-create-recipe-container container-fluid">
@@ -334,35 +349,38 @@ export const CreateRecipe = () => {
                             {/* Ingredients Section */}
                             <div className="rct-ingredient-section w-100 mb-4">
                                 <h3 className="mb-3 rct-section-title">Ingredients</h3>
-                                {recipeData.ingredient.map(ing => (
-                                    <div key={ing.id} className="input-group mb-2 rct-ingredient-item d-flex align-items-center">
+                                {recipeData.ingredient?.map((ing,index) => (
+                                    <div key={`${ing.ingredient_id}-${index}`} className="input-group mb-2 rct-ingredient-item d-flex align-items-center">
                                         <input
+                                        key={`${ing.ingredient_id}-1-${index}`}
                                             type="number"
                                             className="form-control rct-ingredient-quantity"
                                             placeholder="Cantidad"
                                             name="quantity"
                                             value={ing.quantity}
-                                            onChange={e => handleIngredientChange(ing.id, 'quantity', e.target.value)}
+                                            onChange={e => handleIngredientChange(ing.ingredient_id, 'quantity', e.target.value)}
                                             min="0"
                                         />
                                         <input
+                                        key={`${ing.ingredient_id}-2-${index}`}
                                             type="text"
                                             className="form-control rct-ingredient-unit ms-2"
                                             placeholder="Unidad"
                                             name="unit"
                                             value={ing.unit}
-                                            onChange={e => handleIngredientChange(ing.id, 'unit', e.target.value)}
+                                            onChange={e => handleIngredientChange(ing.ingredient_id, 'unit', e.target.value)}
                                         />
                                         <input
+                                        key={`${ing.ingredient_id}-3-${index}`}
                                             type="text"
                                             className="form-control rct-ingredient-name ms-2"
                                             placeholder="Ej: Harina de trigo"
                                             name="name"
                                             value={ing.name}
-                                            onChange={e => handleIngredientChange(ing.id, 'name', e.target.value)}
+                                            onChange={e => handleIngredientChange(ing.ingredient_id, 'name', e.target.value)}
                                         />
                                         {recipeData.ingredient.length > 1 && (
-                                            <button className="btn btn-outline-danger rct-remove-item-btn ms-2" type="button" onClick={() => removeIngredient(ing.id)}>
+                                            <button className="btn btn-outline-danger rct-remove-item-btn ms-2" type="button" onClick={() => removeIngredient(ing.ingredient_id)}>
                                                 <i className="fa-solid fa-minus"></i>
                                             </button>
                                         )}
