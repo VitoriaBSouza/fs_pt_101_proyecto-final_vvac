@@ -83,7 +83,8 @@ export const CollectionButton = (props) =>{
         }
     };
 
-    const isAdded = store.collections?.some(item => item.recipe_id === Number(props.recipe_id));
+    const isAdded = Array.isArray(store.collections) && store.collections.some(item => item.recipe_id === Number(props.recipe_id));
+
     console.log(isAdded);
     
     //will reload only if user logs in or out from account
@@ -108,9 +109,9 @@ export const CollectionButton = (props) =>{
                 className="btn border-0"
                 onClick={() => isAdded ? removeFromCollection() : addToCollection()}>
                     {isAdded ? 
-                        <FontAwesomeIcon icon={faBook} className="pe-3 buttons_recipe color_icons border-end border-secondary" />
+                        <FontAwesomeIcon icon={faBook} className="ms-4 fs-2 color_icons"/>
                         :
-                        <FontAwesomeIcon icon={faBookMedical} className="pe-3 buttons_recipe color_icons border-end border-secondary" />
+                        <FontAwesomeIcon icon={faBookMedical} className="ms-4 fs-2 color_icons" />
                     }
                 </button>
 
@@ -119,7 +120,10 @@ export const CollectionButton = (props) =>{
                 <PopOver>
                     <button type="button" 
                     className="btn border-0">
-                        <FontAwesomeIcon icon={faBook} className="pe-3 buttons_recipe color_icons border-end border-secondary"/>
+                        <FontAwesomeIcon 
+                        icon={faBook} 
+                        className="ms-4 fs-2 color_icons"
+                        />
                     </button>
                 </PopOver>
             }

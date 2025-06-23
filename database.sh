@@ -8,7 +8,7 @@ creating_migration ()
 migrate_upgrade () 
 {
   pipenv run migrate
-  pipenv run upgrade
+  pipenv run migrate
 }
 
 dir=$(pwd)

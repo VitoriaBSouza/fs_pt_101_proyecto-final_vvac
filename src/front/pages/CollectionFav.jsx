@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { TurnHome } from "../components/buttons/TurnHome";
 import { LinksMenu } from "../components/LinksMenu";
 import { RightMenu } from "../components/RightMenu";
-import { RecipeCard } from "../components/RecipeCard"; // Ensure this path is correct
+import { CollectionCard } from "../components/CollectionCard"; // Ensure this path is correct
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import recipeServices from "../services/recetea_API/recipeServices.js";
 import collectionServices from "../services/recetea_API/collectionServices.js";
@@ -100,7 +100,7 @@ export const CollectionFav = () => {
             const recipeDetails = await recipeServices.getOneRecipe(id);
             const originalItem = uniqueRecipesMap.get(id); // Get original type/saved_at info
 
-            // Return a normalized object for RecipeCard
+            // Return a normalized object for CollectionCard
             return {
               id: recipeDetails.id,
               imageUrl: recipeDetails.media?.[0]?.url || "",
@@ -180,7 +180,7 @@ export const CollectionFav = () => {
     return (
       <div className="cards-grid d-flex flex-wrap justify-content-center">
         {data.map((recipe, idx) => (
-          <RecipeCard
+          <CollectionCard
             key={`${recipe.id}-${idx}`}
             id={recipe.id}
             imageUrl={recipe.imageUrl}

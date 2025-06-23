@@ -1,4 +1,5 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 //hooks
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
@@ -11,11 +12,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBookBookmark } from '@fortawesome/free-solid-svg-icons'
 
 
-export const CollectionList = () =>{
+export const CollectionList = () => {
 
     const { store, dispatch } = useGlobalReducer();
-    const [collection, setCollection] = useState([]);
-    const recipe_id = store.collections?.recipe_id
+    const navigate = useNavigate();
 
     const getUserCollection = async () => collectionServices.getUserCollections().then(data => {
 
@@ -23,12 +23,12 @@ export const CollectionList = () =>{
 
         //We update the store to match the backend DB
         dispatch({ type: 'get_user_collection', payload: data.data });
+        console.log(data.data);
 
         return data.data;
-        
+
     })
 
-    console.log(store.collections?.recipe_id);
     
 
     useEffect(() => {
@@ -37,53 +37,57 @@ export const CollectionList = () =>{
         }
     }, [store.user?.id]);
 
-    const handleDelete = async (recipe_id) => {
+    const handleDelete = async (el) => {
 
-        const data = await collectionServices.removeFromCollection(recipe_id);
+        const data = await collectionServices.removeFromCollection(el.recipe_id);
 
         if (data.success) {
 
-            //Fetch again updated list
-            const collectionList = await collectionServices.getUserCollections();
+            const updatedCollections = store.collections.filter(
+                item => item.recipe_id !== el.recipe_id
+            );
 
-            console.log(collectionList);
             
             setCollection(collectionList);
 
             //update store.collections
-            dispatch({ type: 'update_collections', payload: newList });
+            dispatch({ type: 'update_collections', payload: updatedCollections });
 
-            console.log("Recipe was removed from collection: ", data);
             
         } else {
             console.error("Error from service:", data.error);
         }
-        
+
     }
 
-    console.log(store.collections);
-    
+    useEffect(() => {
+        if (store.user?.id) {
+            getUserCollection()
+        }
+    }, [store.user?.id]);
 
-    return(
+    return (
         <div className="btn-group border-0 ms-3 ms-auto">
-            <button type="button" 
-            className="btn rounded-circle nav_collection_btn border-0" 
-            aria-expanded="false"
-            data-bs-toggle="dropdown">
-                <FontAwesomeIcon icon={faBookBookmark} className="fs-1"/>
+            <button type="button"
+                className="btn rounded-circle nav_collection_btn border-0"
+                aria-expanded="false"
+                data-bs-toggle="dropdown">
+                <FontAwesomeIcon icon={faBookBookmark} className="icon_nav_collection" />
             </button>
-            <ul className="dropdown-menu dropdown-menu-end">
+            <ul className="dropdown-menu dropdown-menu-end nav_drop">
                 {/* important to use condition to either show list or a span/comment with no items added */}
                 {/* we will only map if there is items on the list */}
-            {store.collections && store.collections.length > 0 ? (
-                    store.collections.map((el, i) => (
+                {store.collections && store.collections.length > 0 ? (
+                    store.collections.map((el) => (
                         <li key={el.recipe_id} className="d-flex">
-                            <button className="dropdown-item m-1" type="button" style={{ textTransform: 'capitalize' }}>
+                            <button className="dropdown-item m-1 collection_btn_list text-capitalize" 
+                            type="button"
+                            onClick={() => navigate("/recipes/" + el.recipe_id)}>
                                 {el.recipe_title}
                             </button>
-                            <button 
-                                type="button" 
-                                className="btn-close m-2" 
+                            <button
+                                type="button"
+                                className="btn-close m-4"
                                 aria-label="Close"
                                 onClick={() => handleDelete(el)}
                             ></button>
@@ -94,9 +98,9 @@ export const CollectionList = () =>{
                         <button className="dropdown-item m-1" type="button" disabled>Your collection list is empty</button>
                     </li>
                 )}
-                
+
             </ul>
         </div>
-        
+
     )
 }

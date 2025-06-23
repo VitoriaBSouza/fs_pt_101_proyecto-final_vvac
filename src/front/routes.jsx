@@ -9,6 +9,8 @@ import {
 import { Layout } from "./pages/Layout";
 import { Home } from "./pages/Home";
 import { LogInPage } from "./pages/LogInPage";
+import { ForgotPasswd } from "./pages/ForgotPasswd";
+import { ChangePasswd } from "./pages/ChangePasswd";
 import { RegisterPage } from "./pages/RegisterPage";
 import { RecipeDetails } from "./pages/RecipeDetails";
 import { Profile } from "./pages/Profile";
@@ -41,6 +43,8 @@ export const router = createBrowserRouter(
         <Route path="/recipes/:id" element={<RecipeDetails />} />
         <Route path="/login" element={<LogInPage />} />
         <Route path="/signup" element={<RegisterPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswd />} />
+        <Route path="/change-password" element={<ChangePasswd />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/shopping-list" element={<ShoppingList />} />
         <Route path="/your-collection" element={<CollectionFav />} />

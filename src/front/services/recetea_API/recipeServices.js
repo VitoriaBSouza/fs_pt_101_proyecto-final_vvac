@@ -84,7 +84,6 @@ recipeServices.getOneUserRecipe = async (id) => {
 
 // POST a new recipe (need to log in)
 recipeServices.createRecipe = async (recipeData) => {
-    console.log("------>createRecipe - Services: " + JSON.stringify(recipeData))
     try {
         const resp = await fetch(url + "/api/user/recipes", {
         method: 'POST',
@@ -107,6 +106,7 @@ recipeServices.createRecipe = async (recipeData) => {
 // PUT to edit an existing recipe (need to log in and be the author of the recipe)
 recipeServices.editRecipe = async (id, recipeData) => {
     try {
+    console.log("------>editRecipe - Services: " + JSON.stringify(recipeData))
         const resp = await fetch(url + "/api/user/recipes/" + id, {
         method: 'PUT',
         headers: authHeaders(),
