@@ -128,7 +128,7 @@ userServices.forgotPassword = async (email) => {
         "Content-Type": "application/json",
       },
       //email field is required
-      body: JSON.stringify(email),
+      body: JSON.stringify({email}),
     });
 
     const data = await resp.json();
@@ -150,13 +150,13 @@ userServices.forgotPassword = async (email) => {
 userServices.resetPassword = async (token, new_password) => {
   try {
     //token will be sent as part on the reset password URL, we will have to extract from it
-    const resp = await fetch(url + "/api/reset-password" + token, {
+    const resp = await fetch(url + "/api/reset-password/" + token, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       //Field password is required
-      body: JSON.stringify(new_password),
+      body: JSON.stringify({ password: new_password }),
     });
 
     const data = await resp.json();

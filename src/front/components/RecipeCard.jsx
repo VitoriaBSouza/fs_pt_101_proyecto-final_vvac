@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 
 //hooks
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
@@ -23,12 +22,8 @@ export const RecipeCard = (props) => {
         getOneRecipe();
     };
 
-    useEffect(() => {
-        window.scrollTo(0, 0);
-    }, [props.recipe_id]);
-
-    const name = props.name || props.title || "Untitled";
-    const url = props.url || props.imageUrl || "https://via.placeholder.com/300x200?text=No+Image";
+    const name = props.name || props.title;
+    const url = props.url || props.imageUrl;
 
     return (
         <div className="m-2 recipes_cards_bg border" onClick={handleClick}>
@@ -36,7 +31,7 @@ export const RecipeCard = (props) => {
                 <img src={url} className="img-fluid card-img recipes_card_img border-0" alt="recipe_img" />
                 <div className="card-img-overlay p-0 d-flex align-items-end">
                     <div className="w-100 bg-opacity-50 text-center title_suggestion_card m-3">
-                        <p className="card-title text-light fs-3 p-3">{props.title}</p>
+                        <p className="card-title text-light fs-3 p-3">{name}</p>
                     </div>
                 </div>
             </div>

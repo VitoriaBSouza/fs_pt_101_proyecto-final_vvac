@@ -42,7 +42,7 @@ export const Search = () =>{
                 });
             } else if (filter === 'Diets') {
                 result = store.recipes?.filter((value) => {
-                    return value.category?.toLowerCase().includes(searchWord);
+                    return value.diet_label?.toLowerCase().includes(searchWord);
                 });
             }
             setFilteredData(result);
@@ -66,11 +66,11 @@ export const Search = () =>{
     return(
         
         // OnBlur will make when we click out of search bar to lose focus and clear data to close results
-        <div className="ms-0 ms-md-4 position-relative mx-auto searchBar">
+        <div className="mx-auto position-relative searchBar">
             <form onSubmit={handleSearch} className=" d-flex align-items-center p-1 rounded-pill 
             border-0 search_box_bg w-100">
                 <input 
-                className="form-control me-2 p-2 m-1 ms-1 search_input_bg border-0 rounded-pill" 
+                className="form-control me-2 p-2 m-1 ms-1 search_input_bg border-0 rounded-pill fs-5" 
                 value={search}
                 type="search" 
                 placeholder={`Search by ${filter}`}
@@ -88,8 +88,8 @@ export const Search = () =>{
                     id="filterDropdown" 
                     data-bs-toggle="dropdown" 
                     aria-expanded="false">
-                        <FontAwesomeIcon icon={faFilter} />
-                        <span className="ms-1 text-capitalize">{filter}</span>
+                        <FontAwesomeIcon icon={faFilter} className="me-1" />
+                        <span className="ms-1 text-capitalize fs-5 m-1">{filter}</span>
                     </button>
 
                     <ul className="dropdown-menu" aria-labelledby="filterDropdown">

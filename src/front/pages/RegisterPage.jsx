@@ -7,7 +7,9 @@ export const RegisterPage = () =>{
 
     return(
         <div className="container-fluid sigUp_background p-4">
-            <h1 className="p-4 text-center sigUp_title">Welcome to Recetea!</h1>
+            <h3 className="p-4 text-center fw-bold lh-1 mt-4 sigUp_title">
+                Welcome to Recetea!
+            </h3>
             <SignUp />
         </div>
     );
