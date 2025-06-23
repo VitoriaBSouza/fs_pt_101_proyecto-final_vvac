@@ -196,15 +196,6 @@
             "markers": "python_version >= '3.6'",
             "version": "==1.6.1"
         },
-        "flask-cors": {
-            "hashes": [
-                "sha256:c7b2cbfb1a31aa0d2e5341eea03a6805349f7a61647daee1a15c46bbe981494c",
-                "sha256:d81bcb31f07b0985be7f48406247e9243aced229b7747219160a0559edd678db"
-            ],
-            "index": "pypi",
-            "markers": "python_version >= '3.9' and python_version < '4.0'",
-            "version": "==6.0.1"
-        },
         "flask-jwt-extended": {
             "hashes": [
                 "sha256:52f35bf0985354d7fb7b876e2eb0e0b141aaff865a22ff6cc33d9a18aa987978",
@@ -289,13 +280,6 @@
                 "sha256:b65a0a2123300dd71281a7bf6e64d65a0759287df52729bdd1ae2e47dc311a3d"
             ],
             "version": "==0.2.0"
-        },
-        "google.generativeai": {
-            "hashes": [
-                "sha256:22b420817fb263f8ed520b33285f45976d5b21e904da32b80d4fd20c055123a2"
-            ],
-            "markers": "python_version >= '3.9'",
-            "version": "==0.8.5"
         },
         "googleapis-common-protos": {
             "hashes": [
@@ -1261,6 +1245,7 @@
                 "sha256:54b78bf3716d19a65be4fceccc0d1d7b89e608834989dfae50ea87564639213e",
                 "sha256:60723ce945c19328679790e3282cc758aa4a6040e4bb330f53d30fa546d44746"
             ],
+            "index": "pypi",
             "markers": "python_version >= '3.9'",
             "version": "==3.1.3"
         },

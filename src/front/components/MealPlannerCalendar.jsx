@@ -9,6 +9,8 @@ import startOfWeek from "date-fns/startOfWeek";
 import getDay from "date-fns/getDay";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import mealPlanServices from "../services/recetea_API/mealplan";
+import recipeServices from "../services/recetea_API/recipeServices";
+import collectionServices from "../services/recetea_API/collectionServices";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import "../index.css";
 
@@ -22,6 +24,20 @@ const localizer = dateFnsLocalizer({
 
 const calendarViews = [Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA];
 
+const mealTypeColors = {
+  breakfast: "#ffe6cc",
+  morning_snack: "#e6f2ff",
+  brunch: "#e6ffe6",
+  lunch: "#fff2cc",
+  afternoon_snack: "#e6e6ff",
+  dinner: "#ffe6e6",
+  supper: "#f0e6ff",
+  snack: "#ccffe6",
+  pre_workout: "#e0f7fa",
+  post_workout: "#f1f8e9",
+  other: "#f5f5f5"
+};
+
 const mapEntriesToEvents = (entries) => {
   return entries.map((entry) => {
     const datetime = new Date(entry.date);
@@ -29,6 +45,7 @@ const mapEntriesToEvents = (entries) => {
     const end = new Date(datetime);
     start.setHours(12);
     end.setHours(13);
+    const bgColor = mealTypeColors[entry.meal_type?.toLowerCase()] || "#fff3f4";
     return {
       title: `${entry.recipe_title} (${entry.meal_type})`,
       start,
@@ -39,6 +56,7 @@ const mapEntriesToEvents = (entries) => {
         recipe_id: entry.recipe_id,
         meal_type: entry.meal_type,
       },
+      backgroundColor: bgColor
     };
   });
 };
@@ -52,6 +70,8 @@ export const MealPlannerCalendar = () => {
   const [formData, setFormData] = useState({ recipe_id: "", meal_type: "", time: "12:00" });
   const [editingEvent, setEditingEvent] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [allOptions, setAllOptions] = useState([]);
+  const [currentView, setCurrentView] = useState(Views.MONTH);
   const { store, dispatch } = useGlobalReducer();
   const navigate = useNavigate();
 
@@ -68,9 +88,36 @@ export const MealPlannerCalendar = () => {
     }
   }, []);
 
+  const loadRecipeOptions = useCallback(async () => {
+    try {
+      const [collectionsRespRaw, userRecipesResp, mealEntries] = await Promise.all([
+        collectionServices.getUserCollections(),
+        recipeServices.getAllUserRecipes(),
+        mealPlanServices.getAllEntries(),
+      ]);
+
+      const collectionsResp = collectionsRespRaw.success && Array.isArray(collectionsRespRaw.collections)
+        ? collectionsRespRaw.collections
+        : [];
+
+      const optionsMap = new Map();
+
+      collectionsResp.forEach((item) => optionsMap.set(item.recipe_id, item.recipe_title));
+      userRecipesResp.forEach((r) => optionsMap.set(r.id, r.title));
+      mealEntries.forEach((entry) => optionsMap.set(entry.recipe_id, entry.recipe_title));
+
+      const finalOptions = Array.from(optionsMap.entries()).map(([id, title]) => ({ id, title }));
+
+      setAllOptions(finalOptions);
+    } catch (err) {
+      console.error("Error loading recipe options:", err);
+    }
+  }, []);
+
   useEffect(() => {
     loadMealPlanEntries();
-  }, [loadMealPlanEntries]);
+    loadRecipeOptions();
+  }, [loadMealPlanEntries, loadRecipeOptions]);
 
   useEffect(() => {
     if (store.selectedCalendarRecipe) {
@@ -164,167 +211,168 @@ export const MealPlannerCalendar = () => {
     setCurrentDate(updatedDate);
   };
 
+  const handleViewChange = (view) => {
+    setCurrentView(view);
+  };
+
   const monthOptions = Array.from({ length: 12 }, (_, i) =>
     new Date(0, i).toLocaleString("default", { month: "long" })
   );
 
   const yearOptions = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i);
 
-  return (
-    <div className="container my-5">
-      <div className="card shadow border-0 bg-white rounded-4">
-        <div className="card-body px-5 py-4">
-          <h2 className="text-center text-danger-emphasis fw-bold mb-4 display-6">Meal Plan</h2>
-
-          <div className="d-flex justify-content-center gap-3 mb-4">
-            <div className="dropdown">
-              <button className="btn btn-outline-danger dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                {monthOptions[currentDate.getMonth()]}
-              </button>
-              <ul className="dropdown-menu">
-                {monthOptions.map((month, index) => (
-                  <li key={index}>
-                    <button className="dropdown-item" onClick={() => handleMonthChange({ target: { value: index } })}>
-                      {month}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="dropdown">
-              <button className="btn btn-outline-danger dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                {currentDate.getFullYear()}
-              </button>
-              <ul className="dropdown-menu">
-                {yearOptions.map((year) => (
-                  <li key={year}>
-                    <button className="dropdown-item" onClick={() => handleYearChange({ target: { value: year } })}>
-                      {year}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {loading ? (
-            <div className="text-center py-5">
-              <div className="spinner-border text-danger" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-            </div>
-          ) : error ? (
-            <div className="alert alert-danger text-center" role="alert">
-              {error}
-            </div>
-          ) : (
-            <div className="calendar-wrapper calendar-theme p-4 rounded">
-              <Calendar
-                localizer={localizer}
-                events={events}
-                startAccessor="start"
-                endAccessor="end"
-                views={calendarViews}
-                defaultView={Views.MONTH}
-                date={currentDate}
-                onNavigate={setCurrentDate}
-                style={{ height: 700 }}
-                onSelectEvent={handleSelectEvent}
-                onSelectSlot={handleSelectSlot}
-                selectable
-                popup
-                toolbar={true}
-              />
-            </div>
-          )}
-        </div>
+  const CustomToolbar = ({ label }) => (
+    <div className="rbc-toolbar custom-toolbar d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mb-3">
+      <div className="d-flex gap-2">
+        <select value={currentDate.getMonth()} onChange={handleMonthChange} className="form-select">
+          {monthOptions.map((month, i) => (
+            <option key={i} value={i}>{month}</option>
+          ))}
+        </select>
+        <select value={currentDate.getFullYear()} onChange={handleYearChange} className="form-select">
+          {yearOptions.map((year) => (
+            <option key={year} value={year}>{year}</option>
+          ))}
+        </select>
       </div>
+      <div className="btn-group">
+        {calendarViews.map(view => (
+          <button
+            key={view}
+            type="button"
+            className={`btn btn-outline-light ${currentView === view ? 'rbc-active' : ''}`}
+            onClick={() => handleViewChange(view)}
+          >
+            {view.charAt(0).toUpperCase() + view.slice(1).toLowerCase()}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+
+  const eventPropGetter = (event) => {
+    return {
+      style: {
+        backgroundColor: event.backgroundColor,
+        color: "#ca3e49",
+        borderLeft: "4px solid #ca3e49",
+        borderRadius: "0.375rem",
+        padding: "4px 8px",
+        fontWeight: 600,
+        fontSize: "0.85rem",
+      }
+    };
+  };
+
+  return (
+    <div className="container mt-4">
+      <div className="d-flex justify-content-center align-items-center mb-3">
+        <h3 className="text-light bg-danger rounded px-4 py-2 shadow">Meal Planner Calendar</h3>
+      </div>
+
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p className="text-danger">{error}</p>
+      ) : (
+        <div className="calendar-wrapper calendar-theme">
+          <Calendar
+            localizer={localizer}
+            events={events}
+            startAccessor="start"
+            endAccessor="end"
+            views={calendarViews}
+            view={currentView}
+            onView={handleViewChange}
+            style={{ height: 600 }}
+            selectable
+            onSelectSlot={handleSelectSlot}
+            onSelectEvent={handleSelectEvent}
+            date={currentDate}
+            onNavigate={setCurrentDate}
+            components={{ toolbar: CustomToolbar }}
+            eventPropGetter={eventPropGetter}
+          />
+        </div>
+      )}
 
       {modalVisible && (
         <div className="modal d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
           <div className="modal-dialog modal-dialog-centered" role="document">
-            <div className="modal-content border-0 shadow-lg rounded-4">
+            <form className="modal-content border-0 shadow-lg rounded-4" onSubmit={handleModalSubmit}>
               <div className="modal-header bg-danger text-white">
-                <h5 className="modal-title fw-semibold">
-                  {editingEvent ? "Edit Meal Plan Entry" : "Add Meal Plan Entry"}
-                </h5>
+                <h5 className="modal-title fw-semibold">{editingEvent ? "Edit" : "Add"} Meal Plan Entry</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={() => setModalVisible(false)}></button>
               </div>
-              <form onSubmit={handleModalSubmit} className="needs-validation p-3">
+              <div className="modal-body p-3">
                 <div className="mb-3">
                   <label className="form-label fw-semibold">Recipe</label>
                   <select
-                    className="form-select border-1 border-secondary shadow-sm"
                     name="recipe_id"
+                    className="form-select border-1 border-secondary shadow-sm"
                     value={formData.recipe_id}
                     onChange={handleModalChange}
                     required
                   >
                     <option value="">Select a recipe</option>
-                    {store.collections &&
-                      store.collections.map((item) => (
-                        <option key={item.recipe_id} value={item.recipe_id}>
-                          {item.recipe_title}
-                        </option>
-                      ))}
-                    {store.selectedCalendarRecipe &&
-                      !store.collections.some((item) => item.recipe_id === store.selectedCalendarRecipe.id) && (
-                        <option value={store.selectedCalendarRecipe.id}>
-                          {store.selectedCalendarRecipe.title}
-                        </option>
-                      )}
+                    {allOptions.map((opt) => (
+                      <option key={opt.id} value={opt.id}>{opt.title}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="mb-3">
                   <label className="form-label fw-semibold">Meal Type</label>
                   <select
-                    className="form-select border-1 border-secondary shadow-sm"
                     name="meal_type"
+                    className="form-select border-1 border-secondary shadow-sm"
                     value={formData.meal_type}
                     onChange={handleModalChange}
                     required
                   >
-                    <option value="">Select one</option>
-                    <option value="breakfast">Breakfast</option>
-                    <option value="morning_snack">Morning Snack</option>
-                    <option value="brunch">Brunch</option>
-                    <option value="lunch">Lunch</option>
-                    <option value="afternoon_snack">Afternoon Snack</option>
-                    <option value="dinner">Dinner</option>
-                    <option value="supper">Supper</option>
-                    <option value="snack">Snack</option>
-                    <option value="pre_workout">Pre-workout</option>
-                    <option value="post_workout">Post-workout</option>
-                    <option value="other">Other</option>
+                    <option value="">Select meal type</option>
+                    {Object.values({
+                      BREAKFAST: "Breakfast",
+                      MORNING_SNACK: "Morning Snack",
+                      BRUNCH: "Brunch",
+                      LUNCH: "Lunch",
+                      AFTERNOON_SNACK: "Afternoon Snack",
+                      DINNER: "Dinner",
+                      SUPPER: "Supper",
+                      SNACK: "Snack",
+                      PRE_WORKOUT: "Pre-workout",
+                      POST_WORKOUT: "Post-workout",
+                      OTHER: "Other",
+                    }).map((type, idx) => (
+                      <option key={idx} value={type.toLowerCase().replace(/ /g, '_')}>{type}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="mb-3">
                   <label className="form-label fw-semibold">Time</label>
                   <input
                     type="time"
-                    className="form-control border-1 border-secondary shadow-sm"
                     name="time"
+                    className="form-control border-1 border-secondary shadow-sm"
                     value={formData.time}
                     onChange={handleModalChange}
                     required
                   />
                 </div>
-                <div className="modal-footer border-0 pt-3">
-                  {editingEvent && (
-                    <button type="button" className="btn btn-outline-danger me-auto" onClick={handleDelete}>
-                      Delete
-                    </button>
-                  )}
-                  <button type="submit" className="btn btn-danger px-4">
-                    Save
+              </div>
+              <div className="modal-footer border-0 pt-3">
+                {editingEvent && (
+                  <button type="button" className="btn btn-danger me-auto px-4" onClick={handleDelete}>
+                    Delete
                   </button>
-                  <button type="button" className="btn btn-outline-secondary px-4" onClick={() => setModalVisible(false)}>
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
+                )}
+                <button type="submit" className="btn btn-danger px-4">
+                  Save
+                </button>
+                <button type="button" className="btn btn-outline-secondary px-4" onClick={() => setModalVisible(false)}>
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

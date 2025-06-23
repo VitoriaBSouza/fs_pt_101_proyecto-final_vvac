@@ -55,10 +55,10 @@ export const LogIn = () => {
     }    
 
     return (
-        <div className="row d-flex mb-4">
-            <div className="col-12 col-sm-8 col-md-6 col-lg-4 mx-auto">
+        <div className="row d-flex mb-4 mt-4">
+            <div className="col-12 col-sm-8 col-md-6 col-lg-5 mx-auto">
                 <div className="card p-4 shadow recipe_card_bg1 mx-auto">
-                    <h3 className="mb-3 text-center text-danger">Let's cook Chef!</h3>
+                    <h3 className="mb-3 text-center text-danger fs-1 fw-bold">Let's cook Chef!</h3>
                     <form onSubmit={handleSubmit} className="mt-2">
                         <div className="mb-4 fs-4">
                             <label htmlFor="exampleInputEmail1" className="form-label mb-2">Email</label>
@@ -81,21 +81,23 @@ export const LogIn = () => {
                             className="form-control fs-4" 
                             id="exampleInputPassword1"/>
                         </div>
-                        <button type="submit" className="btn btn-danger mt-2 fs-5">Log In</button>
+                        <button type="submit" className="btn btn-danger mt-2 fs-5 mb-4">Log In</button>
 
-                        <h4 className="mb-0 mt-3 text-end fs-6">
+                        <h4 className="mb-0 mt-3 text-end fs-5">
                             {/* Need to add link to forgot password page*/}
-                            Forgot your password?
+                            <Link to="/forgot-password" className="text-decoration-none">
+                                <span className="text-danger fw-bold"> Forgot your password?</span>
+                            </Link>
                         </h4>
 
-                        <p className="mb-0 mt-3 text-end fs-6">
-                            Are you not registered yet?
+                        <div className="mb-0 mt-1 text-end fs-5 d-sm-flex">
+                           <p className="p-0 m-0 me-sm-2 ms-auto"> Are you not registered yet?</p>
                             {/* Need to add link to sign up page */}
                             <Link to="/signup" className="text-decoration-none">
                                 <span className="text-danger fw-bold"> Sign Up here!</span>
                             </Link>
                             
-                        </p>
+                        </div>
                     </form>
                 </div>
             </div>
