@@ -29,7 +29,13 @@ export const CollectionList = () => {
 
     })
 
-    console.log(store.token);
+    
+
+    useEffect(() => {
+        if (store.user?.id) {
+            getUserCollection()
+        }
+    }, [store.user?.id]);
 
     const handleDelete = async (el) => {
 
@@ -41,13 +47,13 @@ export const CollectionList = () => {
                 item => item.recipe_id !== el.recipe_id
             );
 
-            console.log(updatedCollections);
+            
+            setCollection(collectionList);
 
             //update store.collections
             dispatch({ type: 'update_collections', payload: updatedCollections });
 
-            console.log("Recipe was removed from collection: ", data);
-
+            
         } else {
             console.error("Error from service:", data.error);
         }
