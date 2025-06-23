@@ -283,7 +283,14 @@ table {
 }
 
 .row_bg_suggestions {
+  min-width: 25rem;
+  border-radius: 0.8rem;
+  border: 1px solid #c1454b;
+  overflow: hidden;
   background-color: #c1454b;
+  padding: 0.2rem;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+  
 }
 
 .recipes_cards_bg {
@@ -1334,12 +1341,12 @@ input[type="search"]::-webkit-search-cancel-button {
 
 /*recipescroll in landingPage*/
 
-.row_bg_suggestions {
+/* .row_bg_suggestions {
   max-width: 100rem;
   height: 15rem;
   overflow: hidden;
   
-}
+} */
 
 
 .top_div {
@@ -1356,22 +1363,6 @@ input[type="search"]::-webkit-search-cancel-button {
 .container_home {
   background-color: #c1454b;
 }
-
-
-
-
-
-/* .row_bg_suggestions {
-  min-width: 25rem;
-  border-radius: 0.8rem;
-  border: 1px solid #c1454b;
-  overflow: hidden;
-  background-color: #c1454b;
-  padding: 0.2rem;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
-  
-} */
-
 
 /*Bottom section CSS scroll*/
 
