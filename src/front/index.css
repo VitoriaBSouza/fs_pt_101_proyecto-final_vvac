@@ -1266,11 +1266,11 @@ input[type="search"]::-webkit-search-cancel-button {
 
 /* landingPage*/
 
-.home_img{
+/* .home_img{
   max-width: 100rem;
   height: 31.25rem;
   overflow: hidden;
-}
+} */
 
 
 
@@ -1294,7 +1294,7 @@ input[type="search"]::-webkit-search-cancel-button {
   line-height:1;
   font-size: 3rem;
   color:  #eff0ea;
-  padding-bottom: 1rem;
+  padding-bottom: 1rem; 
 }
 
 
@@ -1340,13 +1340,6 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 /*recipescroll in landingPage*/
-
-/* .row_bg_suggestions {
-  max-width: 100rem;
-  height: 15rem;
-  overflow: hidden;
-  
-} */
 
 
 .top_div {
