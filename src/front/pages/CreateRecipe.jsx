@@ -29,7 +29,7 @@ export const CreateRecipe = () => {
         difficulty_type: "",
         prep_time: 0,
         allergens: [],
-    ingredient: [{ id: generateClientUniqueId(), name: "", quantity: "", unit: "" }],       //PENDIENTE RECTIFICAR
+        ingredient: [{ id: generateClientUniqueId(), name: "", quantity: "", unit: "" }],       //PENDIENTE RECTIFICAR
         steps: [{ id: 1, text: "" }],
         status: "draft",
         image_url: ""

@@ -32,7 +32,7 @@ export const BottomSection = () => {
             <p className='text-center fw-bold'>Recipes without wheat, barley, or rye.</p>
           </div>
         </div>
-        <div class="card card_scroll_bottom h-100 shadow-sm" style={{ border: "2px solid #ca3e49" }}>
+        <div className="card card_scroll_bottom h-100 shadow-sm" style={{ border: "2px solid #ca3e49" }}>
           <img
             src="src/front/assets/img/Proteic.jpg"
             alt="img"
@@ -47,8 +47,8 @@ export const BottomSection = () => {
       </div>
 
 
-      <div class="scroll-bottom-row">
-        <div class=" card card_scroll_bottom h-100 shadow-sm" style={{ border: "2px solid #ca3e49" }}>
+      <div className="scroll-bottom-row">
+        <div className=" card card_scroll_bottom h-100 shadow-sm" style={{ border: "2px solid #ca3e49" }}>
           <img
             src="src/front/assets/img/low-calorie.jpg"
             alt="img"
@@ -60,7 +60,7 @@ export const BottomSection = () => {
             <p className='text-center fw-bold'> Light recipes to help you stay in shape.</p>
           </div>
         </div>
-        <div class="card card_scroll_bottom h-100 shadow-sm" style={{ border: "2px solid #ca3e49" }}>
+        <div className="card card_scroll_bottom h-100 shadow-sm" style={{ border: "2px solid #ca3e49" }}>
           <img
             src="src/front/assets/img/FastRecipes.jpg"
             alt="img"
@@ -72,7 +72,7 @@ export const BottomSection = () => {
             <p className='text-center fw-bold'>Quick meals ready in 30 minutes or less.</p>
           </div>
         </div>
-        <div class="card card_scroll_bottom h-100 shadow-sm" style={{ border: "2px solid #ca3e49" }}>
+        <div className="card card_scroll_bottom h-100 shadow-sm" style={{ border: "2px solid #ca3e49" }}>
           <img
             src="src/front/assets/img/CheatMeals.jpg"
             alt="img"
