@@ -121,7 +121,7 @@ export const Search = () => {
                         return (
                             <Link key={value.id}
                                 to={"/recipes/" + value.id}
-                                className="dataItem active text-decoration-none"
+                                className="dataItem active text-decoration-none fs-5"
                                 onClick={() => clearInput}
                             >
                                 <p className="ms-3">{value.title} </p>
