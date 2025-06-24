@@ -11,6 +11,7 @@ import recipeServices from "../services/recetea_API/recipeServices.js"
 import { Comments } from "../components/Comments.jsx";
 import { NutricionalTable } from "../components/NutricionalTable.jsx";
 import { RecipeCard } from "../components/RecipeCard.jsx";
+import { UserRecipeCard } from "../components/UserRecipeCard.jsx";
 
 //buttons
 import { LikeButton } from '../components/buttons/likeButton.jsx';

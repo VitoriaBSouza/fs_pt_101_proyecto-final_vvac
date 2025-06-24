@@ -11,8 +11,6 @@ export const RecipeCard = (props) => {
     const navigate = useNavigate();
     const { store, dispatch } = useGlobalReducer();
 
-    //Hay que limitar a mostrar 10-15 random cards
-
     const getOneRecipe = async () => recipeServices.getOneRecipe(props.id).then(data => {
         dispatch({ type: 'get_one_recipe', payload: data });
     });

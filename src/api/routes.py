@@ -346,7 +346,7 @@ def get_user_recipes():
     recipes = db.session.execute(stmt_recipe).scalars().all()
 
     if not recipes:
-        return jsonify({"message": "You haven't created any recipes yet."}), 200
+        return jsonify({"message": "You haven't created any recipes yet.", "success": True}), 200
 
     return jsonify([recipe.serialize() for recipe in recipes]), 200
 
@@ -692,40 +692,48 @@ def edit_recipe(recipe_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# DELETE recipe created by user
 @api.route("/user/recipes/<int:recipe_id>", methods=["DELETE"])
 @jwt_required()
 def delete_one_recipe(recipe_id):
-
     user_id = get_jwt_identity()
 
-    stmt = select(Recipe).where(
-        Recipe.id == recipe_id, Recipe.author == user_id)
+    # Verifica que la receta existe y es del usuario
+    stmt = select(Recipe).where(Recipe.id == recipe_id, Recipe.author == user_id)
     recipe = db.session.execute(stmt).scalar_one_or_none()
 
     if recipe is None:
         return jsonify({"error": "Recipe not found"}), 404
 
-    # Delte media from recipe
+    # Borra media relacionada
     delete_recipe_media = delete(Media).where(Media.recipe_id == recipe_id)
     db.session.execute(delete_recipe_media)
 
-    # Delete recipe from asociation table
-    delete_recipe_ingredients = delete(RecipeIngredient).where(
-        RecipeIngredient.recipe_id == recipe_id)
+    # Borra relaciones ingredientes
+    delete_recipe_ingredients = delete(RecipeIngredient).where(RecipeIngredient.recipe_id == recipe_id)
     db.session.execute(delete_recipe_ingredients)
 
-    # Delete the recipe itself
-    delete_recipe = delete(Recipe).where(Recipe.id == recipe_id)
+    delete_scores = delete(RecipeScore).where(RecipeScore.recipe_id == recipe_id)
+    db.session.execute(delete_scores)
+
+    delete_collections = delete(Collection).where(Collection.recipe_id == recipe_id)
+    db.session.execute(delete_collections)
+
+    # Borra comentarios relacionados a la receta
+    delete_comments = delete(Comment).where(Comment.recipe_id == recipe_id)
+    db.session.execute(delete_comments)
+
+
+    # Borra receta (solo una vez)
+    delete_recipe = delete(Recipe).where(Recipe.id == recipe_id, Recipe.author == user_id)
     db.session.execute(delete_recipe)
 
     db.session.commit()
 
-    return jsonify({"message": "Recipe has been deleted successfully"}), 200
+    return jsonify({"message": "Recipe has been deleted successfully", "success": True}), 200
+
 
 
 # DELETE all recipes created by user and all related data (for test)
-    
 @api.route("/user/recipes", methods=["DELETE"])
 @jwt_required()
 def delete_all_user_recipes():
@@ -1211,7 +1219,7 @@ def get_user_collections():
     return jsonify({ 
         "data": [c.serialize() for c in collection],  
         "exists": bool(collection),
-        "success": True }), 200
+        "success": True }), 200 
 
 # POST to save a recipe to a user's collection
 @api.route('/user/collection/recipes/<int:recipe_id>', methods=['POST'])

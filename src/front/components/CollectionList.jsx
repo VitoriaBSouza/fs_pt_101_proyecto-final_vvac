@@ -27,8 +27,6 @@ export const CollectionList = () => {
 
     })
 
-    
-
     useEffect(() => {
         if (store.user?.id) {
             getUserCollection()
@@ -44,9 +42,6 @@ export const CollectionList = () => {
             const updatedCollections = store.collections.filter(
                 item => item.recipe_id !== el.recipe_id
             );
-
-            
-            setCollection(updatedCollections);
 
             //update store.collections
             dispatch({ type: 'update_collections', payload: updatedCollections });
