@@ -14,6 +14,7 @@ import { BottomSection } from '../components/BottomSection.jsx';
 
 
 
+
 export const Home = () => {
 
 	const { store, dispatch } = useGlobalReducer()
@@ -45,12 +46,12 @@ export const Home = () => {
 	}, [])
 
 	return (
-		<div className="container-fluid container_home">
+		<div className="container-fluid container_home p-0">
 			<TopSection />
 			<div className="row_home">
-				
-					<RecipeScroller />
-			
+
+				<RecipeScroller />
+
 			</div>
 			<BottomSection />
 		</div>

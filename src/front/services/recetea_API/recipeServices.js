@@ -5,139 +5,150 @@ const recipeServices = {};
 
 // Utility: Add JWT token
 const authHeaders = () => ({
-  'Authorization': 'Bearer ' + localStorage.getItem('token'),
-  'Content-Type': 'application/json'
+  Authorization: "Bearer " + localStorage.getItem("token"),
+  "Content-Type": "application/json",
 });
 
 // Get all recipes (guests)
 recipeServices.getAllRecipes = async () => {
-    try {
-        const resp = await fetch(url + "/api/recipes", {
-            method: 'GET',
-            // mode: 'cors',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+  try {
+    const resp = await fetch(url + "/api/recipes", {
+      method: "GET",
+      // mode: 'cors',
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-        const data = await resp.json();
-        if (!resp.ok) throw new Error(data.error || data.message);
-        return data;
-    } catch (error) {
-        console.error("Error fetching all recipes:", error);
-        return error;
-    }
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || data.message);
+    return data;
+  } catch (error) {
+    console.error("Error fetching all recipes:", error);
+    return error;
+  }
 };
 
 // Get a specific recipe by ID (guests)
 recipeServices.getOneRecipe = async (id) => {
-    try {
-        const resp = await fetch(url + "/api/recipes/" + id, {
-            method: 'GET',
-        });
+  try {
+    const resp = await fetch(url + "/api/recipes/" + id, {
+      method: "GET",
+    });
 
-        const data = await resp.json();
-        if (!resp.ok) throw new Error(data.error || data.message);
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || data.message);
 
-        return data;
-
-    } catch (error) {
-        console.error("Error fetching recipe:" + id, error);
-        return error;
-    }
+    return data;
+  } catch (error) {
+    console.error("Error fetching recipe:" + id, error);
+    return error;
+  }
 };
 
 //For mis recetas option
 //Get all recipes (need to log in)
 recipeServices.getAllUserRecipes = async () => {
-    try {
-        const resp = await fetch(url + "/api/user/recipes", {
-        method: 'GET',
-        headers: authHeaders()
-        });
+  try {
+    const resp = await fetch(url + "/api/user/recipes", {
+      method: "GET",
+      headers: authHeaders(),
+    });
 
-        const data = await resp.json();
-        if (!resp.ok) throw new Error(data.error || data.message);
-        return data;
-    } catch (error) {
-        console.error("Error fetching user recipes:", error);
-        return error;
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      return {
+        success: false,
+        error: data.error || data.message || "Unknown error",
+      };
     }
-}
+
+    return { success: true, recipes: data }; // ← asegura estructura uniforme
+  } catch (error) {
+    console.error("Error fetching user recipes:", error);
+    return { success: false, error: error.message || "Network error" };
+  }
+};
 
 // GET a specific recipe (need to log in)
 recipeServices.getOneUserRecipe = async (id) => {
-    try {
-        const resp = await fetch(url + "/api/user/recipes/" + id, {
-        method: 'GET',
-        headers: authHeaders()
-        });
+  try {
+    const resp = await fetch(url + "/api/user/recipes/" + id, {
+      method: "GET",
+      headers: authHeaders(),
+    });
 
-        const data = await resp.json();
-        if (!resp.ok) throw new Error(data.error);
-        return data;
-    } catch (error) {
-        console.error("Error fetching recipe:", error);
-        return error;
-    }
-}
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error);
+    return data;
+  } catch (error) {
+    console.error("Error fetching recipe:", error);
+    return error;
+  }
+};
 
 // POST a new recipe (need to log in)
 recipeServices.createRecipe = async (recipeData) => {
-    try {
-        const resp = await fetch(url + "/api/user/recipes", {
-        method: 'POST',
-        headers: authHeaders(),
-        //Need to have title, difficulty_type, steps and ingredients. Prep_time is optional.
-        //The author and username fields will be filled automatically as well publised field.
-        //The ingredients require quantity, name and unit fields filled. If does not exist on the dabatase will be added.
-        body: JSON.stringify(recipeData)
-        });
+  try {
+    const resp = await fetch(url + "/api/user/recipes", {
+      method: "POST",
+      headers: authHeaders(),
+      //Need to have title, difficulty_type, steps and ingredients. Prep_time is optional.
+      //The author and username fields will be filled automatically as well publised field.
+      //The ingredients require quantity, name and unit fields filled. If does not exist on the dabatase will be added.
+      body: JSON.stringify(recipeData),
+    });
 
-        const data = await resp.json();
-        if (!resp.ok) throw new Error(data.error);
-        return data;
-    } catch (error) {
-        console.error("Error creating recipe:", error);
-        return error;
-    }
-}
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error);
+
+    console.log(data);
+
+    return data;
+  } catch (error) {
+    console.error("Error creating recipe:", error);
+    return error;
+  }
+};
 
 // PUT to edit an existing recipe (need to log in and be the author of the recipe)
 recipeServices.editRecipe = async (id, recipeData) => {
-    try {
-    console.log("------>editRecipe - Services: " + JSON.stringify(recipeData))
-        const resp = await fetch(url + "/api/user/recipes/" + id, {
-        method: 'PUT',
-        headers: authHeaders(),
-        //Same as the post body.
-        body: JSON.stringify(recipeData)
-        });
+  try {
+    const resp = await fetch(url + "/api/user/recipes/" + id, {
+      method: "PUT",
+      headers: authHeaders(),
+      //Same as the post body.
+      body: JSON.stringify(recipeData),
+    });
 
-        const data = await resp.json();
-        if (!resp.ok) throw new Error(data.error);
-        return data;
-    } catch (error) {
-        console.error("Error editing recipe:", error);
-        return error;
-    }
-}
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error);
+    return data;
+  } catch (error) {
+    console.error("Error editing recipe:", error);
+    return error;
+  }
+};
 
-  // DELETE a recipe created by the user (need to log in and be the author of the recipe)
+// DELETE a recipe created by the user (need to log in and be the author of the recipe)
 recipeServices.deleteRecipe = async (id) => {
-    try {
-      const resp = await fetch(url + "/api/user/recipes/" + id, {
-        method: 'DELETE',
-        headers: authHeaders()
-      });
+  try {
+    const resp = await fetch(url + "/api/user/recipes/" + id, {
+      method: "DELETE",
+      headers: authHeaders(),
+    });
 
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(data.error);
-      return data;
-    } catch (error) {
-      console.error("Error deleting recipe:", error);
-      return error;
-    }
-}
+    console.log("Delete status:", resp.status);
+    const data = await resp.json();
+    console.log("Delete response data:", data);
+
+    if (!resp.ok) throw new Error(data.error);
+    return data;
+  } catch (error) {
+    console.error("Error deleting recipe:", error);
+    return error;
+  }
+};
 
 export default recipeServices;

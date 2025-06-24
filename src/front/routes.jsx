@@ -15,11 +15,11 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { RecipeDetails } from "./pages/RecipeDetails";
 import { Profile } from "./pages/Profile";
 import { ShoppingList } from "./pages/ShoppingList";
-import { CollectionFav } from "./pages/CollectionFav";
 import { MealPlanner } from "./pages/MealPlanner";
 import { Single } from "./pages/Single";
-import { Demo } from "./pages/Demo";
 import { CreateRecipe } from "./pages/CreateRecipe";
+import { EditRecipe } from "./pages/EditRecipe";
+import { MyRecipes } from "./pages/MyRecipes";
 import { SearchPage } from "./pages/SearchPage";
 
 export const router = createBrowserRouter(
@@ -39,17 +39,15 @@ export const router = createBrowserRouter(
             <Route path="/login" element={<LogInPage />} />
             <Route path="/signup" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswd />} />
-            <Route path="/change-password" element={<ChangePasswd />} />
+            <Route path="/reset-password/:token" element={<ChangePasswd />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/shopping-list" element={<ShoppingList />} />
-            <Route path="/your-collection" element={<CollectionFav />} />
+            <Route path="/your-collection" element={<MyRecipes />} />
             <Route path="/meal-planner" element={<MealPlanner />} />
             <Route path="/single/:theId" element={<Single />} />  {/* Dynamic route for single items */}
             <Route path="/recipes/new" element={<CreateRecipe />} />
-            <Route path="/recipes/:id/edit" element={<CreateRecipe />} />
+            <Route path="/recipes/edit/:id" element={<EditRecipe />} />
             <Route path="/search" element={<SearchPage />} />
-            <Route path="/demo" element={<Demo />} />
-
         </Route>
     ),
     {

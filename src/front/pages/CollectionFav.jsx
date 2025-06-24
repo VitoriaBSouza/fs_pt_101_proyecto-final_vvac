@@ -7,6 +7,7 @@ import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 import recipeServices from "../services/recetea_API/recipeServices.js";
 import collectionServices from "../services/recetea_API/collectionServices.js";
 import { useNavigate } from "react-router-dom";
+import { UserRecipeCard } from "../components/UserRecipeCard.jsx";
 
 export const CollectionFav = () => {
   const navigate = useNavigate();
@@ -178,19 +179,18 @@ export const CollectionFav = () => {
     if (!data.length) return <p>{noDataMessage}</p>;
 
     return (
-      <div className="cards-grid d-flex flex-wrap justify-content-center">
-        {data.map((recipe, idx) => (
-          <CollectionCard
-            key={`${recipe.id}-${idx}`}
-            id={recipe.id}
-            imageUrl={recipe.imageUrl}
-            title={recipe.title}
-            ingredientsList={recipe.ingredientsList}
-            authorName={recipe.authorName}
-            savedDate={recipe.savedDate || ''} 
-            onClick={() => navigate(`/recipes/${recipe.id}`)}
-          />
-        ))}
+      <div style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+        <div className="cards-grid d-flex flex-wrap justify-content-center">
+          {data.map((recipe) => (
+            <UserRecipeCard
+              key={recipe.id}
+              recipe_id={recipe.id}
+              url={recipe.imageUrl}
+              name={recipe.title}
+              published={recipe.published || ''}
+            />
+          ))}
+        </div>
       </div>
     );
   };
@@ -207,7 +207,7 @@ export const CollectionFav = () => {
               </div>
             </div>
 
-            <div className="col-12 col-md-6 main-column-content"> 
+            <div className="col-12 col-md-6 main-column-content">
               <div className="d-flex align-items-start flex-column mb-3 edit-perfil">
                 <h2 className="mb-3">Collection</h2>
                 <p>All, Your Recipes & Collections</p>
@@ -225,7 +225,7 @@ export const CollectionFav = () => {
                   ))}
                 </ul>
 
-                <div className="tab-content w-100"> 
+                <div className="tab-content w-100">
                   {activeTab === "all" && (
                     <div className="tab-pane active">
                       {renderCards(
@@ -260,7 +260,7 @@ export const CollectionFav = () => {
               </div>
             </div>
 
-            <div className="col-12 col-md-3 right-profile"> 
+            <div className="col-12 col-md-3 right-profile">
               <div className="d-grid row-gap-5 b-grids-right h-100">
                 <RightMenu />
               </div>

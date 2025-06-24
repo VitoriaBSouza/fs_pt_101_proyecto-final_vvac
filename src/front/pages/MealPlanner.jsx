@@ -7,28 +7,23 @@ import { MealPlannerCalendar } from "../components/MealPlannerCalendar";
 
 export const MealPlanner = () => {
   return (
- 
-        <div className="container text-center sidebar-left-profile">
-          <div className="row align-items-start">
-            {/* Left Sidebar */}
-            <div className="col-12 col-md-3">
-              <div className="d-flex align-items-start">
-                <TurnHome />
-                <LinksMenu />
-              </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="col-12 planner-page">
-              <MealPlannerCalendar />
-            </div>
-
-            {/* Right Sidebar */}
-            <div className="col-12 col-md-3">
-              <RightMenu />
-            </div>
-          </div>
+    <div className="container-fluid">
+      <div className="row flex-nowrap min-vh-100">
+        {/* Left Sidebar (same as SearchPage) */}
+        <div className="col-12 col-sm-3 col-md-2 p-2 d-flex flex-column">
+          <LinksMenu />
         </div>
 
+        {/* Main Content: Calendar (center, max space) */}
+        <div className="col-12 col-sm-6 col-md-8 p-2 d-flex flex-column">
+          <MealPlannerCalendar />
+        </div>
+
+        {/* Right Sidebar: occupies the minimum */}
+        <div className="col-12 col-sm-3 col-md-2 p-2 d-flex flex-column align-items-end">
+          <RightMenu />
+        </div>
+      </div>
+    </div>
   );
 };

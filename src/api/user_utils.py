@@ -21,7 +21,7 @@ def generate_placeholder(username):
     return f"https://ui-avatars.com/api/?name={first_letter}&background={bg_color}&color={text_color}"
 
 def build_reset_url(token: str) -> str:
-    frontend_base_url = os.environ['VITE_BACKEND_URL']
+    frontend_base_url = os.environ['VITE_FRONTEND_URL']
     reset_path = f"/reset-password/{token}"  # Cambia si tu ruta es diferente
     return urljoin(frontend_base_url, reset_path)
 

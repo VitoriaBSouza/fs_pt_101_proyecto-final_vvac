@@ -172,9 +172,10 @@ table {
   background-size: 50px 50px;
 }
 
-/*recipescroll in landingPage*/
 
-.home_img {
+/* recipescroll in landingPage */
+
+.home_img{
   max-width: 100%rem;
   overflow: hidden;
 }
@@ -189,6 +190,7 @@ table {
   width: 35%;
   min-width: 250px;
   max-width: 500px;
+  max-height: 250px;
   aspect-ratio: 4 / 3;
 
   display: flex;
@@ -229,6 +231,7 @@ table {
 }
 .container_home {
   background-color: #c1454b;
+  padding-bottom: 1rem;
 }
 
 .row_home_scroll {
@@ -266,17 +269,7 @@ table {
   scroll-snap-type: x mandatory;
 }
 
-.card_row_scroll {
-  min-width: 20px;
-  margin: 0px;
-  flex-shrink: 0;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 1rem;
-  scroll-snap-align: start;
-  text-align: center;
-}
+
 
 .details-btn {
   margin-top: 0.5rem;
@@ -390,7 +383,6 @@ table {
 /* End of recipe details CSS classes */
 
 /* Here starts the recipe card css */
-
 .recipes_card_img {
   object-fit: none;
   width: 100%;
@@ -564,74 +556,37 @@ table {
   background-color: #f8f8f8;
 }
 
-/* CSS left sidebar profile (Alice) */
+/************************************/
+/*********** Links Menu *************/
+/************************************/
 
-.sidebar-left-profile {
-  flex: 0 0 240px;
-}
-
-.links-menu {
+/* Customize the menu with a red background and card-like styling */
+.linksmenu {
   background-color: #c1454b;
   border-radius: 8px;
   padding: 1.5rem 1rem;
   height: 100%;
-}
-
-.links-menu ul {
-  list-style: none;
-}
-
-.links-menu li + li {
-  margin-top: 1rem;
-}
-
-.links-menu .menu-link {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
   color: white;
-  font-size: 1rem;
-  font-weight: 500;
-  padding: 0.65rem 1rem;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
 }
 
-.links-menu .menu-link i {
-  font-size: 1.2rem;
-  margin-right: 0.75rem;
-}
-
-.links-menu .menu-link:hover {
+/* Hover effect for links */
+.linksmenu a:hover {
   background-color: rgba(255, 255, 255, 0.15);
 }
 
-.links-menu .menu-link.active {
-  background-color: rgba(255, 255, 255, 0.3);
+/* Removal of default list styles */
+.linksmenu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
-.btn-circle {
-  width: 40px;
-  height: 40px;
-  border-radius: 20%;
-  background-color: #d4cbcb;
-  color: white;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  transition: background-color 0.3s;
+/* Spacing between list items */
+.linksmenu li + li {
+  margin-top: 1rem;
 }
 
-.back-button-container {
-  left: -1.5rem;
-  z-index: 1000;
-}
 
-.btn-circle:hover {
-  background-color: #c1454b;
-}
 
 /* CSS main profile (Alice) */
 
@@ -1400,7 +1355,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .scroll_cards_bg:hover {
-  transform: scale(1.05); /* Efecto zoom al pasar el mouse */
+  transform: scale(1.02); /* Efecto zoom al pasar el mouse */
 }
 
 .title_Recipe_Scroller {
@@ -1410,26 +1365,26 @@ input[type="search"]::-webkit-search-cancel-button {
   padding-bottom: 1rem;
 }
 
+ 
 .card_row_scroll {
-  width: 100%;
-  margin: 0 auto;
-  padding: 0.5rem 0.5rem;
-  padding-top: 1rem;
-  background-color: #f4ebdf;
-  border-radius: 1rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  width: 100%;   
+  margin: none;           
+  padding: 1rem 1rem; 
+  padding-top: 1rem;   
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05); 
   box-sizing: border-box;
 }
 
 /* Para pantallas pequeñas */
 @media (max-width: 576px) {
   .card_row_scroll {
-    padding: 1rem 0.5rem; /* Menos padding lateral en móviles */
+    padding: 0rem 0.5rem; /* Menos padding lateral en móviles */
   }
 }
 
+
 .scrollbar-custom::-webkit-scrollbar {
-  height: 8px;
+  height: 15px;
 }
 
 .scrollbar-custom::-webkit-scrollbar-track {
@@ -1442,18 +1397,16 @@ input[type="search"]::-webkit-search-cancel-button {
   border: 2px solid #f1f1f1;
 }
 
-.container_home {
-  background-color: #c1454b;
-  padding-top: 1rem;
-}
 
 /*Bottom section CSS scroll*/
 
 .container_bottom {
   background-color: #f4ebdf;
-  border-radius: 12px;
   padding-top: 0.75rem;
+  padding-bottom: 1rem;
   margin-bottom: 2rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem
 }
 
 .title_Recipe_bottom {
@@ -1463,8 +1416,8 @@ input[type="search"]::-webkit-search-cancel-button {
   padding-bottom: 1rem;
 }
 
-.card_bottom {
-  background-color: #eff0ea;
+.card_bottom{
+  background-color: #4a5a79a1;
 }
 
 .scroll-bottom-row {
@@ -1472,13 +1425,13 @@ input[type="search"]::-webkit-search-cancel-button {
   overflow-x: auto;
   gap: 3rem;
   padding: 1rem 1rem;
-  padding-bottom: 0.5rem;
+  padding-bottom: 1rem;
   margin-bottom: 1rem;
   scroll-snap-type: x mandatory;
 }
 
 .scroll-bottom-row::-webkit-scrollbar {
-  display: none; /* Oculta la barra de scroll en navegadores WebKit */
+  display: outside; /* Oculta la barra de scroll en navegadores WebKit */
 }
 
 .card_scroll_bottom {
@@ -1511,7 +1464,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .scroll-bottom-row::-webkit-scrollbar {
-  height: 8px; /* altura del scroll horizontal */
+  height: 15px; /* altura del scroll horizontal */
 }
 
 .scroll-bottom-row::-webkit-scrollbar-track {
@@ -1524,41 +1477,12 @@ input[type="search"]::-webkit-search-cancel-button {
   border: 2px solid #c1454b; /* opcional: borde para separación visual */
 }
 
-/* .recipe-scroller-container {
-  overflow-x: auto;
-  display: flex;
-  flex-wrap: nowrap; 
-  gap: 16px; 
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 16px;
-} */
 
-/* .title {
-  margin-bottom: 1rem;
-  font-size: 3rem;
-  color: white;
-} */
 
-/* .scroller {
-  display: flex;
-  overflow-x: auto;
-  gap: 2rem;
-  padding-bottom: 1rem;
-  scroll-snap-type: x mandatory;
-  scrollbar-color: red;
-} */
 
-/* .scroll_cards_bg {
-  min-width: 20px;
-  flex-shrink: 0;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  padding: 2rem;
-  scroll-snap-align: start;
-  text-align: center;
-} */
+
+
+
 
 /* .details-btn {
   margin-top: 0.5rem;
@@ -1580,12 +1504,53 @@ input[type="search"]::-webkit-search-cancel-button {
 /* Inicio CSS create recipe */
 
 /* General Styles for Recipe Creation/Editing Page */
+.recipes_card_user {
+  object-fit: none;
+  width: 100%;
+  height: 250px;
+  background-color: #fafafa;
+}
+
+.recipe-action-buttons {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
+  padding: 6px;
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+}
+
+.recipe-edit-buttons {
+  background-color: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  transition: color 0.2s ease;
+}
+
+.recipe-edit-buttons:hover {
+  color: #f8d146; /* Amarillo claro para buen contraste */
+}
+
+.recipe-delete-buttons {
+  background-color: transparent;
+  border: none;
+  color: #e7e6e6;
+  font-size: 1.2rem;
+  transition: color 0.2s ease;
+}
+
+.recipe-delete-buttons:hover {
+  color: #e45f3b;
+}
+
 .rct-create-recipe-wrapper {
   min-height: 100vh;
   background-color: #f8f9fa;
   padding: 20px 0;
   display: flex;
   flex-direction: column;
+  z-index: 1080;
 }
 
 .rct-create-recipe-container {
@@ -2484,6 +2449,28 @@ input[type="search"]::-webkit-search-cancel-button {
   border-color: #ca3e49;
 }
 
+/* Fix para que el gutter del calendario muestre bien la fecha en Week */
+.rbc-time-header-gutter {
+    min-width: 80px !important;
+    max-width: 95px;
+    text-align: center;
+    background: #c1454b;
+    color: #fff;
+    font-weight: bold;
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    font-size: 1.05em;
+    padding: 6px 0 6px 0 !important;
+    white-space: nowrap;
+}
+
+/* Mejora visual para headers de días */
+.rbc-header {
+    padding: 8px 0 8px 0 !important;
+    font-size: 1.08em;
+}
+
+
 /******************************************************************/
 /********************* Search Filter ******************************/
 /******************************************************************/
@@ -2513,3 +2500,104 @@ input[type="search"]::-webkit-search-cancel-button {
 .filter-menu .list-group-item {
   cursor: pointer;
 }
+
+.filter-menu .badge {
+  background-color: #ffffff;           /* White background */
+  color: #c1454b;                      /* Red text matching card */
+  font-weight: 500;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;                /* Pill shape */
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+
+.filter-menu .badge:hover {
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+  transform: scale(1.05);
+}
+
+/*********************************************************/
+/*************** Search View Pagination ******************/
+/*********************************************************/
+
+.searchview-pagination .page-link {
+  color: white;
+  background-color: #c1454b;
+  border-color: #c1454b;
+  transition: background-color 0.2s ease;
+}
+
+.searchview-pagination .page-item.active .page-link,
+.searchview-pagination .page-link:hover {
+  background-color: #a3363f;
+}
+
+.searchview-pagination .page-item.disabled .page-link {
+  background-color: #c1454b;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.searchview-pagination .page-link:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+
+
+/***********************************************/
+/************* SearchView recipes **************/
+/***********************************************/
+
+/* Custom recipe card styles for SearchView - match app palette */
+
+.searchview-recipecard {
+  background: #c1454b;
+  color: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(193, 69, 75, 0.09), 0 1.5px 5px rgba(0,0,0,0.03);
+  border: none;
+  transition: box-shadow 0.2s, transform 0.18s;
+  cursor: pointer;
+}
+.searchview-recipecard:hover {
+  box-shadow: 0 6px 24px rgba(193,69,75,0.18), 0 3px 10px rgba(0,0,0,0.08);
+  transform: translateY(-2px) scale(1.013);
+}
+.searchview-recipecard .card {
+  background: transparent;
+  border: none;
+  color: #fff;
+}
+.searchview-recipecard img {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.09);
+  border-radius: 8px;
+}
+.searchview-recipecard h5 {
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.searchview-recipecard .text-muted {
+  color: #fbe8e9 !important;
+}
+
+/* Like and info icons inside cards */
+.searchview-recipecard .d-flex.gap-3 span {
+  background: rgba(255,255,255,0.07);
+  color: #fff;
+  padding: 0.2em 0.7em;
+  border-radius: 16px;
+  font-size: 0.93em;
+  font-weight: 500;
+  line-height: 1.8;
+}
+
+/* footer css */
+
+
+
+
+.logo-footer {
+  width: 9rem;
+  height: 6rem;
+} 
