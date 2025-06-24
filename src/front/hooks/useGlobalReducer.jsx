@@ -29,7 +29,6 @@ export function StoreProvider({ children }) {
 
     const loadCollections = async () => {
         const result = await collectionServices.getUserCollections();
-        console.log("collections response", result)
 
         if (result.success) {
             const collections = result.data;  // Aquí están tus colecciones

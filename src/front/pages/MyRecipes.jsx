@@ -142,8 +142,8 @@ export const MyRecipes = () => {
                                                 style={{ maxHeight: "70vh", overflowY: "auto" }}
                                                 className="cards-grid d-flex flex-wrap justify-content-center"
                                             >
-                                                {store.user_recipes?.map((recipe) => {
-                                                    return (
+                                                {store.user_recipes && store.user_recipes.length > 0 ? (
+                                                    store.user_recipes.map((recipe) => (
                                                         <UserRecipeCard
                                                             key={"u-" + recipe.id}
                                                             recipe_id={recipe.id}
@@ -153,11 +153,14 @@ export const MyRecipes = () => {
                                                         >
                                                             <EditRecipeButtons
                                                                 recipe_id={recipe.id}
-                                                                loadUserRecipes = {loadUserRecipes}
+                                                                loadUserRecipes={loadUserRecipes}
                                                             />
                                                         </UserRecipeCard>
-                                                    )
-                                                })}
+                                                    ))
+                                                ) : (
+                                                    <p>You have no recipes on your list. Create a new recipe now!</p>
+                                                )}
+
                                             </div>
                                         </div>
                                     )}
@@ -174,9 +177,9 @@ export const MyRecipes = () => {
                                                         url={recipe.recipe_media?.[0]?.url}
                                                         name={recipe.recipe_title}
                                                         published={formatPublishedDate(recipe.published) || ""}>
-                                                        <DeleteCollectionBtn 
-                                                        recipe_id={recipe.recipe_id}
-                                                        loadUserCollections={loadUserCollections}/>
+                                                        <DeleteCollectionBtn
+                                                            recipe_id={recipe.recipe_id}
+                                                            loadUserCollections={loadUserCollections} />
                                                     </UserRecipeCard>
                                                 ))}
                                             </div>
