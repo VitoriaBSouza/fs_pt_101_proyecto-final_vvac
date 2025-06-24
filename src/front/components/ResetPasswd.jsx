@@ -29,23 +29,19 @@ export const ResetPasswd = () => {
             const data = await userServices.forgotPassword(formData.email);
 
             if (data.success) {
-
-                // Store token on store
-                localStorage.setItem("token", data.token);
-                console.log(data.token);
-
                 // Dispatch user data including token if needed
-                dispatch({ type: "forgotPasswd", payload: { token: data.token, user: data.user.email } });
+                dispatch({ type: "forgotPasswd", payload: data.user });
 
-                navigate("/change-password")
+                alert(data.message)
+                navigate("/")
 
             } else {
                 //we can set another page here or change to a banner
                 window.alert(data.error)
+                navigate("/forgot-password")
             }
 
         } catch (error) {
-            console.log("Reset password error:", error);
             window.alert(error)
         }
     }

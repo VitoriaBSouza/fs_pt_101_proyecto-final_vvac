@@ -22,7 +22,7 @@ export const Navbar = () => {
 
       <div className="container-fluid d-flex align-items-center w-100 d-lg-none justify-content-between">
         <Link to="/">
-          <img src={logo} alt="Logo" className="logo-navbar" />
+          <img src={logo} alt="Logo" className="logo-footer" />
         </Link>
 
         <div className="d-flex align-items-center">

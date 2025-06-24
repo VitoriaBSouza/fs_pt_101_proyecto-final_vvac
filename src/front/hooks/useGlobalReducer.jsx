@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 //services
 import recipeServices from "../services/recetea_API/recipeServices.js"
-// import collectionServices from "../services/recetea_API/collectionServices.js"
+import collectionServices from "../services/recetea_API/collectionServices.js"
 
 // Create a context to hold the global state of the application
 // We will call this global state the "store" to avoid confusion while using local states
@@ -20,23 +20,35 @@ export function StoreProvider({ children }) {
     const loadRecipes = async () => {
         try {
             const data = await recipeServices.getAllRecipes();
+            
             dispatch({ type: 'get_all_recipes', payload: data })
         } catch (error) {
             console.log(error);
         }
     }
 
-    // const loadCollections = async () => {
-    //     try {
-    //         const data = await collectionServices.getUserCollections();
-    //         dispatch({ type: 'get_user_collections', payload: data });
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    const loadCollections = async () => {
+        const result = await collectionServices.getUserCollections();
+
+        if (result.success) {
+            const collections = result.data;  // Aquí están tus colecciones
+            dispatch({ type: 'get_user_collection', payload: collections });
+        } else {
+            console.error(result.error);
+        }
+    }
+
+    const loadUserRecipes = async () => {
+        try {
+            const data = await recipeServices.getAllUserRecipes();
+            dispatch({ type: 'get_user_recipes', payload: data });
+        } catch (error) {
+            console.error("Error fetching user recipes:", error.message || error);
+        }
+    }
 
     // Load the page once only
-    useEffect (() => {
+    useEffect(() => {
         const token = localStorage.getItem("token");
         const user = localStorage.getItem("user");
 
@@ -46,7 +58,8 @@ export function StoreProvider({ children }) {
                 payload: { token, user: JSON.parse(user) },
             });
             loadRecipes()
-            //loadCollections()
+            loadCollections()
+            loadUserRecipes()
         }
     }, [])
 

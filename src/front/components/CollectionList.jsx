@@ -23,13 +23,10 @@ export const CollectionList = () => {
 
         //We update the store to match the backend DB
         dispatch({ type: 'get_user_collection', payload: data.data });
-        console.log(data.data);
 
         return data.data;
 
     })
-
-    
 
     useEffect(() => {
         if (store.user?.id) {
@@ -46,9 +43,6 @@ export const CollectionList = () => {
             const updatedCollections = store.collections.filter(
                 item => item.recipe_id !== el.recipe_id
             );
-
-            
-            setCollection(collectionList);
 
             //update store.collections
             dispatch({ type: 'update_collections', payload: updatedCollections });

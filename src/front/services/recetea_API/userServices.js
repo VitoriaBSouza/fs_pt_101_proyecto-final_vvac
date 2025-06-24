@@ -137,7 +137,6 @@ userServices.forgotPassword = async (email) => {
       return {error: data.error || "Could not reset password" };
     }
 
-    console.log("Forgot Password:", data);
     return data;
 
   } catch (error) {

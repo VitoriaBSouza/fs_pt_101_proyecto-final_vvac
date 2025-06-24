@@ -156,7 +156,7 @@ class Media(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     recipe_id: Mapped[int] = mapped_column(ForeignKey("recipes.id"))
     type_media: Mapped[MediaType] = mapped_column(Enum(MediaType), nullable=False)
-    url: Mapped[str] = mapped_column(String(255), nullable=False)
+    url: Mapped[str] = mapped_column(Text, nullable=False)
 
     #Relatioship with other tables
     recipe: Mapped["Recipe"] = relationship(back_populates="media")
