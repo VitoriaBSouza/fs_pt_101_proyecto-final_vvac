@@ -22,11 +22,25 @@ export const EditRecipe = () => {
 
     const difficultyOptions = ["Easy", "Moderate", "Hard"];
     const [images, setImages] = useState([]);
-    const recipeToEdit = store.recipes?.find(r => r.id === Number(id));
+
+    const recipeToEdit = Array.isArray(store.recipes) ? store.recipes.find(r => r.id === Number(id)) : undefined;
+
+    const [recipe, setRecipe] = useState({
+        title: "",
+        difficulty_type: "",
+        portions: 0,
+        prep_time: 0,
+        ingredients: [
+            { id: 0, name: "", quantity: 0, unit: "" }
+        ],
+        steps: [{ id: 0, description: "" }],
+        media: []
+    });
 
     useEffect(() => {
         if (recipeToEdit) {
             console.log("Recipe to edit:", recipeToEdit);
+
             setRecipe({
                 ...recipeToEdit,
                 ingredients: Array.isArray(recipeToEdit.ingredients)
@@ -47,18 +61,6 @@ export const EditRecipe = () => {
             setImages(recipeToEdit.media || []);
         }
     }, [recipeToEdit]);
-
-    const [recipe, setRecipe] = useState({
-        title: "",
-        difficulty_type: "",
-        portions: 0,
-        prep_time: 0,
-        ingredients: [
-            { id: 0, name: "", quantity: 0, unit: "" }
-        ],
-        steps: [{ id: 0, description: "" }],
-        media: []
-    });
 
     //handle changes of recipe details and converts to number the string 
     // of the portions and prep_time
@@ -145,10 +147,15 @@ export const EditRecipe = () => {
 
             // we will just delete the recipes the user want as well add if any new is found
             for (const img of images) {
+                console.log(images);
+
                 if (img.deleted && img.id) {
-                    await mediaServices.deleteMediaFromRecipe(img.id);
+                    await mediaServices.deleteMediaFromRecipe(recipe_id, img.id);
                 }
             }
+
+            const validImages = images.filter(img => !img.deleted);
+            console.log(validImages);
 
             // After media is deleted we edit recipe
             const response = await recipeServices.editRecipe(recipe_id, {
@@ -157,17 +164,19 @@ export const EditRecipe = () => {
             });
 
             // load new images be URL or base64 with the images
-            for (const img of images) {
-                if (!img.deleted && !img.id && img.url?.trim()) {
-                    await mediaServices.editRecipe(recipe_id, {
-                        type_media: "image",
-                        url: img.url.trim(),
-                    });
-                }
+            const newImages = validImages.filter(img => !img.id && img.url?.trim())
+                .map(img => ({ type_media: "image", url: img.url.trim() }));
+
+            if (newImages.length > 0) {
+                const added = await mediaServices.addMediaToRecipe(recipe_id, newImages);
+                console.log(added);
             }
 
+
+            const fullRecipe = await recipeServices.getOneUserRecipe(recipe_id);
+
             //call it here after media was added
-            dispatch({ type: "update_recipe", payload: response });
+            dispatch({ type: "update_recipe", payload: { recipe: fullRecipe, recipes: response } });
 
             //will got back to collection to see recipe added to user list of my recipes
             navigate("/your-collection");
@@ -192,7 +201,7 @@ export const EditRecipe = () => {
                     <div className="col-12 col-md-9 rct-main-content">
                         <form className="rct-recipe-form-area d-flex flex-column mb-3" onSubmit={handleSubmit}>
                             {/* Top bar */}
-                            <EditRecipe images={images} setImages={setImages} />
+                            <EditRecipeMedia images={images} setImages={setImages} />
 
                             <div className="rct-top-section row g-0 mb-4">
                                 <div className="col-12 col-md-6 d-flex justify-content-end mt-3 mt-md-0 ms-auto">

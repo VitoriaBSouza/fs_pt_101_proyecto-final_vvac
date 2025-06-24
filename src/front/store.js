@@ -121,11 +121,13 @@ export default function storeReducer(store, action = {}) {
     }
 
     case "update_recipe": {
-      const updated = action.payload;
+      const updatedRecipe = action.payload.recipe;
+      const allRecipes = action.payload.recipes;
       return {
         ...store,
-        recipe: action.payload,
-        recipes: store.recipes.map(recp => recp.id === updated.id ? updated : recp)
+        recipe: updatedRecipe || store.recipe,
+        recipes: allRecipes || (updatedRecipe ? 
+          store.recipes.map(r => r.id === updatedRecipe.id ? updatedRecipe : r) : store.recipes),
       };
     }
 

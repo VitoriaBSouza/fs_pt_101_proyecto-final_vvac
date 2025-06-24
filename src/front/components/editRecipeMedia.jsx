@@ -2,7 +2,12 @@ export const EditRecipeMedia = ({ images, setImages }) => {
 
     const updateImageUrl = (index, value) => {
         const updated = [...images];
-        updated[index] = { url: value.trim(), file: null, preview: value.trim() || "" };
+        updated[index] = {
+            ...updated[index],
+            url: value.trim(),
+            preview: value.trim() || "",
+            file: null,
+        };
         setImages(updated);
     };
 
@@ -34,9 +39,9 @@ export const EditRecipeMedia = ({ images, setImages }) => {
     const removeImage = (index) => {
         const updated = [...images];
         if (updated[index].id) {
-            updated[index].deleted = true; // marca como eliminada
+            updated[index].deleted = true;
         } else {
-            updated.splice(index, 1); // borra solo si es nueva
+            updated.splice(index, 1);
         }
         setImages(updated);
     };

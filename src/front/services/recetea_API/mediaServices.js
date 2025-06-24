@@ -42,7 +42,7 @@ mediaServices.addMediaToRecipe = async (recipe_id, mediaData) => {
 //Delete the media of the recipe (must be the author of said recipe)
 mediaServices.deleteMediaFromRecipe = async (recipe_id, media_id) => {
     try {
-      const resp = await fetch(url + "/user/recipes/" + recipe_id + "/media/" + media_id, {
+      const resp = await fetch(url + "/api/user/recipes/" + recipe_id + "/media/" + media_id, {
         method: 'DELETE',
         headers: authHeaders()
       });
