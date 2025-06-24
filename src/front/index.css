@@ -202,6 +202,7 @@ table {
 
 @media (max-width: 576px) {
   .top_intro_text {
+    position: static;
     width: 80%;
     aspect-ratio: auto; /* Evita desproporciones en móviles */
   }
@@ -390,7 +391,7 @@ table {
   background-color: #fafafa;
 }
 
-/* .row_bg_suggestions {
+.row_bg_suggestions {
   min-width: 25rem;
   border-radius: 0.8rem;
   border: 1px solid #c1454b;
@@ -399,7 +400,7 @@ table {
   padding: 0.2rem;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
   
-} */
+}
 
 .recipes_cards_bg {
   min-width: 20rem;
@@ -415,6 +416,22 @@ table {
   background-color: #4a5a79a1;
   height: 5rem;
   border-radius: 0.4rem;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+}
+
+.title_suggestion_card p {
+  margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 /* End of recipe cards CSS classes */
