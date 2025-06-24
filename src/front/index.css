@@ -90,26 +90,62 @@ table {
 /*recipescroll in landingPage*/
 
 .home_img{
-  max-width: 100rem;
-  height: 500px;
+  max-width: 100%rem;
   overflow: hidden;
 }
 
-.top_div{
-  min-width: 10rem;
-  max-width: 40rem;
-  max-height: 400px;
-  min-height: 300px;
+.top_intro_text {
+  background-color: rgba(0, 0, 0, 0.75); /* Fondo oscuro translúcido */
+  color: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+
+  /* Tamaño relativo y responsivo */
+  width: 35%;
+  min-width: 250px;
+  max-width: 500px;
+  aspect-ratio: 4 / 3;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3); /* sombra sutil */
+}
+
+@media (max-width: 576px) {
+  .top_intro_text {
+    width: 80%;
+    aspect-ratio: auto; /* Evita desproporciones en móviles */
+  }
+}
+
+
+.top_intro_text h1 {
+  font-size: 2.5rem; /* ajustable */
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+.top_intro_text h5 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 0.8rem;
+}
+
+.top_intro_text p {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
 }
 
 /*top section*/
 
 .row_home_top{
-  padding: 30px;
-  background-color: #9C1C26;
+  
+  background-color: #c1454b;
 }
 .container_home{
-  background-color: #9C1C26;
+  background-color: #c1454b;
 }
 
 .row_home_scroll{
@@ -282,7 +318,7 @@ table {
   background-color: #fafafa;
 }
 
-.row_bg_suggestions {
+/* .row_bg_suggestions {
   min-width: 25rem;
   border-radius: 0.8rem;
   border: 1px solid #c1454b;
@@ -291,7 +327,7 @@ table {
   padding: 0.2rem;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
   
-}
+} */
 
 .recipes_cards_bg {
   min-width: 20rem;
@@ -1266,23 +1302,27 @@ input[type="search"]::-webkit-search-cancel-button {
 
 /* landingPage*/
 
-.home_img{
+.top_home_img{
   max-width: 100rem;
   height: 31.25rem;
   overflow: hidden;
+  background-color: #c1454b;
 }
 
-
+/*recipescroll in landingPage*/
 
 
 .scroll_cards_bg {
-  width: 100%;
   min-width: 25rem;
   border-radius: 0.8rem;
-  border: 1px solid #000000;
-  background-color: #ffffff;
-  transition: transform 0.3s ease; /* Animación suave */
+  border: 1px solid #c1454b;
+  overflow: hidden;
+  background-color: #c1454b;
+  padding: 0.01rem;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
 }
+
+
 
 .scroll_cards_bg:hover {
   transform: scale(1.05); /* Efecto zoom al pasar el mouse */
@@ -1294,7 +1334,7 @@ input[type="search"]::-webkit-search-cancel-button {
   line-height:1;
   font-size: 3rem;
   color:  #eff0ea;
-  padding-bottom: 1rem;
+  padding-bottom: 1rem; 
 }
 
 
@@ -1304,7 +1344,7 @@ input[type="search"]::-webkit-search-cancel-button {
   margin: 0 auto;           
   padding: 0.5rem 0.5rem; 
   padding-top: 1rem;    
-  background-color: #eff0ea; 
+  background-color: #f4ebdf; 
   border-radius: 1rem;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05); 
   box-sizing: border-box;
@@ -1333,35 +1373,10 @@ input[type="search"]::-webkit-search-cancel-button {
   border: 2px solid #f1f1f1;
 }
 
-/* Firefox */
-.scrollbar-custom {
-  scrollbar-width: thin;
-  scrollbar-color: #C1454B #f1f1f1;
-}
 
-/*recipescroll in landingPage*/
-
-/* .row_bg_suggestions {
-  max-width: 100rem;
-  height: 15rem;
-  overflow: hidden;
-  
-} */
-
-
-.top_div {
-  min-width: 10rem;
-  max-width: 40rem;
-  max-height: 400px;
-  min-height: 300px;
-}
-
-.row_home_top {
-  padding: 2rem;
-  background-color: #c1454b;
-}
 .container_home {
   background-color: #c1454b;
+  padding-top: 1rem ;
 }
 
 /*Bottom section CSS scroll*/
@@ -1406,18 +1421,29 @@ input[type="search"]::-webkit-search-cancel-button {
   scroll-snap-align: start;
 }
 
-@media (min-width: 48rem) {
+/* Para pantallas grandes (1352px o más) */
+@media (min-width: 1352px) {
   .scroll-bottom-row {
     overflow-x: visible;
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-wrap: nowrap; /* ¡NO se salten de fila! */
+    justify-content: center; /* Centrado */
   }
+}
+
+/* Para pantallas pequeñas (menos de 1352px) */
+@media (max-width: 1351px) {
+  .scroll-bottom-row {
+    overflow-x: auto; /* Scroll horizontal activado */
+    flex-wrap: nowrap; /* ¡NO se salten de fila! */
+    justify-content: flex-start; /* Empiezan desde la izquierda */
+  }
+}
 
  .card-scroll-bottom {
     flex: 1 1 calc(33.333% - 1rem);
     max-width: calc(33.333% - 1rem);
   }
-} 
+
 
 .scroll-bottom-row::-webkit-scrollbar {
   height: 8px; /* altura del scroll horizontal */
@@ -1433,11 +1459,7 @@ input[type="search"]::-webkit-search-cancel-button {
   border: 2px solid #c1454b; /* opcional: borde para separación visual */
 }
 
-/*Firefox*/
-.scroll-bottom-row {
-  scrollbar-width: thin;
-  scrollbar-color: #c1454b #f1f1f1;
-}
+
 
 
 
@@ -1468,7 +1490,7 @@ input[type="search"]::-webkit-search-cancel-button {
   scrollbar-color: red;
 } */
 
-/* .card {
+/* .scroll_cards_bg {
   min-width: 20px;
   flex-shrink: 0;
   background: #ffffff;
@@ -1649,11 +1671,11 @@ input[type="search"]::-webkit-search-cancel-button {
 
 /* Bottom section*/
 
-div.container_bottom_section {
+/* div.container_bottom_section {
   display: flex;
-  padding: 3rem;
+  padding: 1rem;
   background-color: #b47e58;
-}
+} */
 
 /* Title and Author Section */
 .rct-recipe-header-section {
@@ -2445,4 +2467,35 @@ div.container_bottom_section {
 .modal .form-select:focus {
   box-shadow: 0 0 0 0.25rem rgba(202, 62, 73, 0.25);
   border-color: #ca3e49;
+}
+
+
+/******************************************************************/
+/********************* Search Filter ******************************/
+/******************************************************************/
+
+/* Estilo similar al LinksMenu para SearchFilter */
+.filter-menu {
+  background-color: #c1454b;
+  border-radius: 8px;
+  padding: 1.5rem 1rem;
+  height: 100%;
+  color: white;
+}
+
+.filter-menu label,
+.filter-menu select,
+.filter-menu input,
+.filter-menu .badge {
+  color: #fff;
+}
+
+.filter-menu .form-control,
+.filter-menu .form-select {
+  background-color: #fff;
+  color: #000;
+}
+
+.filter-menu .list-group-item {
+  cursor: pointer;
 }
