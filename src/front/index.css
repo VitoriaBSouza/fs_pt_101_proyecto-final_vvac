@@ -1346,7 +1346,7 @@ input[type="search"]::-webkit-search-cancel-button {
 /*recipescroll in landingPage*/
 
 .scroll_cards_bg {
-  min-width: 25rem;
+  min-width: 24rem;
   border-radius: 0.8rem;
   border: 1px solid #c1454b;
   overflow: hidden;
@@ -1418,7 +1418,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .card_bottom{
-  background-color: #4a5a79a1;
+  background-color: #ffffff;
 }
 
 .scroll-bottom-row {
@@ -1438,6 +1438,7 @@ input[type="search"]::-webkit-search-cancel-button {
 .card_scroll_bottom {
   flex: 0 0 auto;
   width: 25rem;
+  padding: 1rem;
   scroll-snap-align: start;
 }
 
