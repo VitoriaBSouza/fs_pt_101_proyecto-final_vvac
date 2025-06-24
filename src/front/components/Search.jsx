@@ -92,21 +92,24 @@ export const Search = () => {
                             <span className="ms-1 text-capitalize fs-5 m-1">{filter}</span>
                         </button>
 
-                        <ul className="dropdown-menu" aria-labelledby="filterDropdown">
-                            <li className="m-2">
-                                <button className="dropdown-item" onClick={() => setFilter('Title')}>Title</button>
-                            </li>
-                            <li className="m-2">
-                                <button className="dropdown-item" onClick={() => setFilter('Allergens')}>Allergens</button>
-                            </li>
-                            <li className="m-2">
-                                <button className="dropdown-item" onClick={() => setFilter('Diets')}>Diets</button>
-                            </li>
-                        </ul>
-                    </div>
-                    :
-                    null}
-
+                    <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="filterDropdown">
+                        <li className="m-2">
+                            <button className="dropdown-item fs-5" onClick={() => setFilter('Title')}>Title</button>
+                        </li>
+                        <li className="m-2">
+                            <button className="dropdown-item fs-5" onClick={() => setFilter('Allergens')}>Allergens</button>
+                        </li>
+                        <li className="m-2">
+                            <button className="dropdown-item fs-5" onClick={() => setFilter('Diets')}>Diets</button>
+                        </li>
+                        <li className="m-2">
+                            <button className="dropdown-item text-danger fs-5" onClick={() => navigate('/search')}>Advance Search</button>
+                        </li>
+                    </ul>
+                </div>
+                :
+                null}
+                
             </form>
 
             {/* Results from search: will check if there is any match to show mapped data */}

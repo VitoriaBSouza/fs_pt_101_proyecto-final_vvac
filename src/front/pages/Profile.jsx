@@ -1,7 +1,6 @@
 import { TurnHome } from "../components/buttons/TurnHome";
 import { LinksMenu } from "../components/LinksMenu";
 
-// import { Link } from "react-router-dom"; // Link no se usa, se puede quitar si no hay rutas internas explícitas
 import useGlobalReducer from "../hooks/useGlobalReducer";
 import { RightMenu } from "../components/RightMenu";
 import { useNavigate } from "react-router-dom";
@@ -88,14 +87,6 @@ export const Profile = () => {
         fileInputRef.current.click();
     };
 
-    // const handleSaveUrlImage = async (e) => {
-    //     e.preventDefault();
-    //     if (tempImageUrl) {
-    //         SetProfileImage(tempImageUrl);
-    //         await handleProfileUpdate({ photo_url: tempImageUrl }); // update photo only
-    //         toggleUrlModal();
-    //     }
-    // };
 
     // Función para guardar la URL escrita en el modal
     const handleSaveUrlImage = async (e) => {
@@ -243,14 +234,38 @@ export const Profile = () => {
             <div className="main-row-all vh-100">
                 <div className="profile-container">
                     <div className="container text-center sidebar-left-profile">
-                        <div className="row align-items-start g-0">
+                        <div className="row align-items-stretch g-0">
                             {/* COLUMNA IZQUIERDA */}
                             <div className="col-12 col-md-3">
-                                <div className="d-flex align-items-start">
-                                    <TurnHome />
-                                    <LinksMenu />
+                                {/* ——— TOGGLE (solo en xs y sm) ——— */}
+                                <button
+                                    className="btn btn-outline-secondary d-md-none mb-3"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#sidebarMenu"
+                                    aria-controls="sidebarMenu"
+                                    aria-expanded="false"
+                                    aria-label="Toggle navigation"
+                                >
+                                    <i className="fa fa-bars"></i>
+                                </button>
+
+                                {/* ——— SIDEBAR: colapsa en xs/sm, siempre abierto en md+ ——— */}
+                                <div className="collapse d-md-block" id="sidebarMenu">
+                                    <div className="d-flex flex-column flex-lg-row align-items-start gap-3 p-3">
+                                        {/* TurnHome solo visible en pantallas lg+ */}
+                                        <div className="d-none d-lg-block">
+                                            <TurnHome />
+                                        </div>
+
+                                        {/* LinksMenu siempre visible */}
+                                        <LinksMenu />
+                                    </div>
                                 </div>
                             </div>
+
+
+
 
                             {/* COLUMNA PRINCIPAL */}
                             <div className="col-6 main-column-content">
@@ -277,7 +292,7 @@ export const Profile = () => {
                                                 id="username"
                                                 autoComplete="off"
                                                 onChange={handleChange}
-                                            placeholder={formData?.username || "" } 
+                                                placeholder={formData?.username || ""}
                                             />
                                         </div>
                                         <div className="mb-3">
@@ -288,7 +303,7 @@ export const Profile = () => {
                                                 id="Email1"
                                                 autoComplete="off"
                                                 onChange={handleChange}
-                                            placeholder={formData?.email || "" } 
+                                                placeholder={formData?.email || ""}
                                             />
                                             {store.user?.success && (
                                                 <div className="alert alert-info mt-2">
@@ -324,12 +339,12 @@ export const Profile = () => {
                             </div>
 
                             {/* COLUMNA DERECHA */}
-                            <div className="col-3 right-profile">
-                                <div className="d-grid row-gap-5 b-grids-right h-100">
+                            <div className="col-3 right-profile ps-3">
+                                <div className="d-grid row-gap-2 b-grids-right h-100">
                                     <RightMenu />
                                     <div className="align-self-end">
                                         {/* Botón para abrir el modal de borrado de cuenta */}
-                                        <button type="button" className="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modalDeleteAccount">Delete account</button>
+                                        <button type="button" className="btn btn-secondary p-2 mt-2" data-bs-toggle="modal" data-bs-target="#modalDeleteAccount">Delete account</button>
                                     </div>
                                 </div>
                             </div>
