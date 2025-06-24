@@ -1,5 +1,4 @@
 export const initialStore = () => {
-  
   return {
     token: localStorage.getItem("token") || null,
     user: JSON.parse(localStorage.getItem("user") || "{}"),
@@ -10,6 +9,7 @@ export const initialStore = () => {
     shoppingList: [],
     comments: [],
     comment: [],
+    user_recipes: [],
     message: null,
     todos: [
       {
@@ -60,8 +60,7 @@ export default function storeReducer(store, action = {}) {
       return {
         ...store,
         token: action.payload.token,
-        user: action.payload.user.email
-
+        user: action.payload.user.email,
       };
 
     case "resetPasswd":
@@ -113,6 +112,44 @@ export default function storeReducer(store, action = {}) {
       };
     }
 
+    case "get_user_recipes":
+      return {
+        ...store,
+        user_recipes: Array.isArray(action.payload) ? action.payload : [],
+      };
+
+    case "create_recipe": {
+      return {
+        ...store,
+        recipes: action.payload,
+      };
+    }
+
+    case "update_recipe": {
+      const updatedRecipe = action.payload.recipe;
+      const allRecipes = action.payload.recipes;
+      return {
+        ...store,
+        recipe: updatedRecipe || store.recipe,
+        recipes:
+          allRecipes ||
+          (updatedRecipe
+            ? store.recipes.map((r) =>
+                r.id === updatedRecipe.id ? updatedRecipe : r
+              )
+            : store.recipes),
+      };
+    }
+
+    case "delete_recipe": {
+      return {
+        ...store,
+        user_recipes: store.user_recipes.filter(
+          (recipe) => recipe.id !== action.payload.id
+        ),
+      };
+    }
+
     case "like": {
       const { recipe_id, user_id } = action.payload;
       const newScoreEntry = {
@@ -159,17 +196,18 @@ export default function storeReducer(store, action = {}) {
         shoppingList: [],
       };
 
-    case 'get_shopping_list':
+    case "get_shopping_list":
       return {
         ...store,
         shoppingList: Array.isArray(action.payload)
-          ? action.payload.filter(item =>
-              item &&
-              typeof item.ingredient_name === "string" &&
-              typeof item.total_quantity === "number" &&
-              typeof item.unit === "string"
+          ? action.payload.filter(
+              (item) =>
+                item &&
+                typeof item.ingredient_name === "string" &&
+                typeof item.total_quantity === "number" &&
+                typeof item.unit === "string"
             )
-          : []
+          : [],
       };
 
     case "get_user_collection": {
@@ -228,7 +266,7 @@ export default function storeReducer(store, action = {}) {
         collections: [...store.collections, action.payload],
       };
 
-    case 'remove_from_collection':
+    case "remove_from_collection":
       return {
         ...store,
         collections: store.collections.filter((id) => id !== action.payload),
@@ -256,6 +294,6 @@ export default function storeReducer(store, action = {}) {
       };
 
     default:
-      throw Error('Unknown action.');
+      throw Error("Unknown action.");
   }
 }

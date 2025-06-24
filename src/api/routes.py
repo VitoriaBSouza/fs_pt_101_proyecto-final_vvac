@@ -346,7 +346,7 @@ def get_user_recipes():
     recipes = db.session.execute(stmt_recipe).scalars().all()
 
     if not recipes:
-        return jsonify({"message": "You haven't created any recipes yet."}), 200
+        return jsonify({"message": "You haven't created any recipes yet.", "success": True}), 200
 
     return jsonify([recipe.serialize() for recipe in recipes]), 200
 
@@ -388,7 +388,7 @@ def create_recipe():
         if not data["steps"]:
             return jsonify({"error": "Please add all the steps and instructions needed to your recipe"}), 400
 
-        if not data["ingredient"]:
+        if not data["ingredients"]:
             return jsonify({"error": "Please add all the igredients details to your recipe"}), 400
         
         # Conditions to turn the string value into the enum value in our database
@@ -437,7 +437,7 @@ def create_recipe():
         total_grams = 0
         ingredients_list = []
 
-        for ing in data["ingredient"]:
+        for ing in data["ingredients"]:
             name = ing["name"]
             quantity = ing["quantity"]
             unit = ing["unit"]
@@ -523,6 +523,7 @@ def create_recipe():
         db.session.commit()
 
         print(f"Received diet label: {diet_label}")
+        print(f"Recipe created: ID={new_recipe.id}, title={new_recipe.title}")
 
         return jsonify({"success": True, "recipe_id": new_recipe.id}), 201
 
@@ -552,7 +553,7 @@ def edit_recipe(recipe_id):
         if not data["steps"]:
             return jsonify({"error": "Please add all the steps and instructions needed to your recipe"}), 400
 
-        if not data["ingredient"]:
+        if not data["ingredients"]:
             return jsonify({"error": "Please add all the igredients details to your recipe"}), 400
 
         # Conditions to turn the string value into the enum value in our database
@@ -603,7 +604,7 @@ def edit_recipe(recipe_id):
         total_grams = 0
         ingredients_list = []
 
-        for ing in data["ingredient"]:
+        for ing in data["ingredients"]:
             name = ing["name"]
             quantity = ing["quantity"]
             unit = ing["unit"]
@@ -691,40 +692,48 @@ def edit_recipe(recipe_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# DELETE recipe created by user
 @api.route("/user/recipes/<int:recipe_id>", methods=["DELETE"])
 @jwt_required()
 def delete_one_recipe(recipe_id):
-
     user_id = get_jwt_identity()
 
-    stmt = select(Recipe).where(
-        Recipe.id == recipe_id, Recipe.author == user_id)
+    # Verifica que la receta existe y es del usuario
+    stmt = select(Recipe).where(Recipe.id == recipe_id, Recipe.author == user_id)
     recipe = db.session.execute(stmt).scalar_one_or_none()
 
     if recipe is None:
         return jsonify({"error": "Recipe not found"}), 404
 
-    # Delte media from recipe
+    # Borra media relacionada
     delete_recipe_media = delete(Media).where(Media.recipe_id == recipe_id)
     db.session.execute(delete_recipe_media)
 
-    # Delete recipe from asociation table
-    delete_recipe_ingredients = delete(RecipeIngredient).where(
-        RecipeIngredient.recipe_id == recipe_id)
+    # Borra relaciones ingredientes
+    delete_recipe_ingredients = delete(RecipeIngredient).where(RecipeIngredient.recipe_id == recipe_id)
     db.session.execute(delete_recipe_ingredients)
 
-    # Delete the recipe itself
-    delete_recipe = delete(Recipe).where(Recipe.id == recipe_id)
+    delete_scores = delete(RecipeScore).where(RecipeScore.recipe_id == recipe_id)
+    db.session.execute(delete_scores)
+
+    delete_collections = delete(Collection).where(Collection.recipe_id == recipe_id)
+    db.session.execute(delete_collections)
+
+    # Borra comentarios relacionados a la receta
+    delete_comments = delete(Comment).where(Comment.recipe_id == recipe_id)
+    db.session.execute(delete_comments)
+
+
+    # Borra receta (solo una vez)
+    delete_recipe = delete(Recipe).where(Recipe.id == recipe_id, Recipe.author == user_id)
     db.session.execute(delete_recipe)
 
     db.session.commit()
 
-    return jsonify({"message": "Recipe has been deleted successfully"}), 200
+    return jsonify({"message": "Recipe has been deleted successfully", "success": True}), 200
+
 
 
 # DELETE all recipes created by user and all related data (for test)
-    
 @api.route("/user/recipes", methods=["DELETE"])
 @jwt_required()
 def delete_all_user_recipes():
@@ -797,9 +806,6 @@ def get_media_by_id(media_id):
 
     return jsonify(media.serialize()), 200
 
-# POST new media item
-
-
 @api.route('/user/recipes/<int:recipe_id>/media', methods=['POST'])
 @jwt_required()
 def add_media(recipe_id):
@@ -809,53 +815,58 @@ def add_media(recipe_id):
     try:
         data = request.json
 
-        # Only allow to add if the recipe belongs to user
+        media_items = data if isinstance(data, list) else [data]
+
+        # Verifica que la receta pertenezca al usuario
         stmt = select(Recipe).where(
             Recipe.id == recipe_id, Recipe.author == user_id)
         recipe = db.session.execute(stmt).scalar_one_or_none()
 
         if recipe is None:
-            return jsonify({"error":  "Recipe not found or not owned by user"}), 404
+            return jsonify({"error": "Recipe not found or not owned by user"}), 404
 
-        # Ensure required fields are present
-        if not data["type_media"] or not data["url"]:
-            return jsonify({"error": "Missing data. Failed to upload media."}), 400
+        placeholder_url = PLACEHOLDER_IMAGE_URL
 
-        # Convert the type_medi to match the enum in MediaTupe database
-        if data["type_media"].lower() == "image":
-            media_type = MediaType.IMAGE
-
-        else:
-            return jsonify({"error": "Invalid media type"}), 400
-
-        placeholder_url = PLACEHOLDER_IMAGE_URL  # Replace with actual placeholder URL
-
-        existing_placeholder = db.session.execute(
+        existing_placeholders = db.session.execute(
             select(Media).where(
                 Media.recipe_id == recipe_id,
                 Media.type_media == MediaType.IMAGE,
                 Media.url == placeholder_url
             )
-        ).scalar_one_or_none()
+        ).scalars().all()
 
-        if existing_placeholder:
-            db.session.delete(existing_placeholder)
+        if existing_placeholders:
+            for placeholder in existing_placeholders:
+                db.session.delete(placeholder)
 
-        new_media = Media(
-            recipe_id=recipe_id,
-            type_media=media_type,
-            url=data["url"]
-        )
-
-        db.session.add(new_media)
         db.session.commit()
-        return jsonify(new_media.serialize()), 201
+
+        new_media_list = []
+
+        for item in media_items:
+            if not item.get("type_media") or not item.get("url"):
+                return jsonify({"error": "Missing data. Failed to upload media."}), 400
+
+            if item["type_media"].lower() == "image":
+                media_type = MediaType.IMAGE
+            else:
+                return jsonify({"error": "Invalid media type"}), 400
+
+            new_media = Media(
+                recipe_id=recipe_id,
+                type_media=media_type,
+                url=item["url"]
+            )
+            db.session.add(new_media)
+            new_media_list.append(new_media)
+
+        db.session.commit()
+
+        return jsonify([m.serialize() for m in new_media_list]), 201
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-# DELETE a media item
 @api.route('/user/recipes/<int:recipe_id>/media/<int:media_id>', methods=['DELETE'])
 @jwt_required()
 def delete_media(recipe_id, media_id):
@@ -869,40 +880,20 @@ def delete_media(recipe_id, media_id):
     if recipe is None:
         return jsonify({"error": "Recipe not found"}), 404
 
-    media_stmt = select(Media).where(Media.recipe_id ==
-                                     recipe_id, Media.id == media_id)
+    media_stmt = select(Media).where(Media.recipe_id == recipe_id, Media.id == media_id)
     media = db.session.execute(media_stmt).scalar_one_or_none()
 
     if not media:
         return jsonify({"error": "Media not found"}), 404
 
-    # Will only allow to delete the media of said recipe
-    # The recipe only alows to edit if owned by the user
     if media.recipe_id != recipe_id:
         return jsonify({"error": "Media does not belong to this recipe"}), 403
 
     db.session.delete(media)
-    db.session.flush()
-
-    # Check if there is any media related to the recipe left
-    remaining_media_stmt = select(Media).where(
-        Media.recipe_id == recipe_id)  # ← Fix: Check all remaining media
-    remaining_media = db.session.execute(
-        remaining_media_stmt).scalars().first()
-
-    # If none we add a placeholder image
-    if not remaining_media:
-        placeholder_media = Media(
-            recipe_id=recipe_id,
-            type_media=MediaType.IMAGE,
-            url=PLACEHOLDER_IMAGE_URL
-        )
-
-        db.session.add(placeholder_media)
-
     db.session.commit()
 
-    return jsonify({"message": "Image deleted. Upload a new image."}), 200
+    return jsonify({"message": "Image deleted."}), 200
+
 
 # =================================================================
 # Comment endpoints
@@ -1228,7 +1219,7 @@ def get_user_collections():
     return jsonify({ 
         "data": [c.serialize() for c in collection],  
         "exists": bool(collection),
-        "success": True }), 200
+        "success": True }), 200 
 
 # POST to save a recipe to a user's collection
 @api.route('/user/collection/recipes/<int:recipe_id>', methods=['POST'])

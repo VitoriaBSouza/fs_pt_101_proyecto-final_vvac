@@ -1471,12 +1471,53 @@ input[type="search"]::-webkit-search-cancel-button {
 /* Inicio CSS create recipe */
 
 /* General Styles for Recipe Creation/Editing Page */
+.recipes_card_user {
+  object-fit: none;
+  width: 100%;
+  height: 250px;
+  background-color: #fafafa;
+}
+
+.recipe-action-buttons {
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
+  padding: 6px;
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+}
+
+.recipe-edit-buttons {
+  background-color: transparent;
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  transition: color 0.2s ease;
+}
+
+.recipe-edit-buttons:hover {
+  color: #f8d146; /* Amarillo claro para buen contraste */
+}
+
+.recipe-delete-buttons {
+  background-color: transparent;
+  border: none;
+  color: #e7e6e6;
+  font-size: 1.2rem;
+  transition: color 0.2s ease;
+}
+
+.recipe-delete-buttons:hover {
+  color: #e45f3b;
+}
+
 .rct-create-recipe-wrapper {
   min-height: 100vh;
   background-color: #f8f9fa;
   padding: 20px 0;
   display: flex;
   flex-direction: column;
+  z-index: 1080;
 }
 
 .rct-create-recipe-container {
