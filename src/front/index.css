@@ -115,6 +115,7 @@ table {
 
 @media (max-width: 576px) {
   .top_intro_text {
+    position: static;
     width: 80%;
     aspect-ratio: auto; /* Evita desproporciones en móviles */
   }
