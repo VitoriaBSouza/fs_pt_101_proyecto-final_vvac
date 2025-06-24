@@ -3,30 +3,107 @@
    License: none (public domain)
 */
 
-html, body, div, span, applet, object, iframe,
-h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-a, abbr, acronym, address, big, cite, code,
-del, dfn, em, img, ins, kbd, q, s, samp,
-small, strike, strong, sub, sup, tt, var,
-b, u, i, center,
-dl, dt, dd, ol, ul, li,
-fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed, 
-figure, figcaption, footer, header, hgroup, 
-menu, nav, output, ruby, section, summary,
-time, mark, audio, video {
-	margin: 0;
-	padding: 0;
-	border: 0;
-	font-size: 100%;
-	font: inherit;
-	vertical-align: baseline;
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
 }
 /* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure, 
-footer, header, hgroup, menu, nav, section {
-	display: block;
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
 }
 /* This is to check errors on the frontend uncomment to use it */
 /* * {
@@ -39,18 +116,27 @@ html, body {
 /* If you uncomment above, comment this body class */
 body {
   line-height: 2;
-  font-family: 'Nunito', sans-serif;
+  font-family: "Nunito", sans-serif;
 }
-h1, h2, h3, h4, h5 {
-  font-family: 'Inter', sans-serif;
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: "Inter", sans-serif;
 }
-ol, ul {
+ol,
+ul {
   list-style: none;
 }
-blockquote,q {
+blockquote,
+q {
   quotes: none;
 }
-blockquote:before, blockquote:after, q:before, q:after {
+blockquote:before,
+blockquote:after,
+q:before,
+q:after {
   content: "";
   content: none;
 }
@@ -121,7 +207,6 @@ table {
   }
 }
 
-
 .top_intro_text h1 {
   font-size: 2.5rem; /* ajustable */
   line-height: 1.2;
@@ -141,32 +226,31 @@ table {
 
 /*top section*/
 
-.row_home_top{
-  
+.row_home_top {
   background-color: #c1454b;
 }
-.container_home{
+.container_home {
   background-color: #c1454b;
   padding-bottom: 1rem;
 }
 
-.row_home_scroll{
+.row_home_scroll {
   background-color: #f6f2f2;
 }
 
-.home_card_scroll{
-	object-fit: cover;
+.home_card_scroll {
+  object-fit: cover;
   width: 43rem;
   height: 250px;
-  background-color: #C1454B;
+  background-color: #c1454b;
 }
 
 .home_cards_bg {
   min-width: 25rem;
   border-radius: 0.8rem;
-  border: 1px solid #C1454B;
+  border: 1px solid #c1454b;
   overflow: hidden;
-  background-color: #C1454B;
+  background-color: #c1454b;
   padding: 0.2rem;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
 }
@@ -196,9 +280,8 @@ table {
   border-radius: 6px;
   cursor: pointer;
   width: 100%;
-} */
-
-.details-btn:hover {
+}
+*/ .details-btn:hover {
   background-color: #ca3e49;
   border-color: #000000;
   border-width: 1px;
@@ -280,7 +363,7 @@ table {
   color: #e4a10fcd;
 }
 
-.diet_label{
+.diet_label {
   background-color: #e4a10fa6;
 }
 
@@ -432,7 +515,7 @@ table {
 .text_box {
   min-height: 1rem;
   max-height: 9rem;
-  min-width:  5rem;
+  min-width: 5rem;
 }
 
 .comments_container {
@@ -624,8 +707,9 @@ table {
 
 /* CSS right-column (buttons) --> (Alice) */
 .right-profile {
-  height: 700px;
-  grid-template-columns: 1fr;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  row-gap: 1rem;
 }
 
 .b-grids-right {
@@ -1181,7 +1265,7 @@ table {
 }
 
 .collection_btn_list {
-  max-width: 180px;      
+  max-width: 180px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis; /*keep recipe title on one line and ... at the end*/
@@ -1189,13 +1273,12 @@ table {
   vertical-align: middle;
 }
 
-
-.icon_nav_collection{
+.icon_nav_collection {
   min-width: 3rem;
   min-height: 3rem;
 }
 
-.nav_drop{
+.nav_drop {
   z-index: 1080;
 }
 
@@ -1250,11 +1333,9 @@ input[type="search"]::-webkit-search-cancel-button {
   display: none;
 }
 
-
-
 /* landingPage*/
 
-.top_home_img{
+.top_home_img {
   max-width: 100rem;
   height: 31.25rem;
   overflow: hidden;
@@ -1262,7 +1343,6 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 /*recipescroll in landingPage*/
-
 
 .scroll_cards_bg {
   min-width: 25rem;
@@ -1274,19 +1354,15 @@ input[type="search"]::-webkit-search-cancel-button {
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
 }
 
-
-
 .scroll_cards_bg:hover {
   transform: scale(1.02); /* Efecto zoom al pasar el mouse */
 }
 
-
-
 .title_Recipe_Scroller {
-  line-height:1;
+  line-height: 1;
   font-size: 3rem;
-  color:  #eff0ea;
-  padding-bottom: 1rem; 
+  color: #eff0ea;
+  padding-bottom: 1rem;
 }
 
  
@@ -1316,16 +1392,15 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb {
-  background-color: #C1454B;
+  background-color: #c1454b;
   border-radius: 10px;
   border: 2px solid #f1f1f1;
 }
 
 
-
 /*Bottom section CSS scroll*/
 
-.container_bottom{
+.container_bottom {
   background-color: #f4ebdf;
   padding-top: 0.75rem;
   padding-bottom: 1rem;
@@ -1334,8 +1409,8 @@ input[type="search"]::-webkit-search-cancel-button {
   padding-right: 0.5rem
 }
 
-.title_Recipe_bottom{
-  line-height:1;
+.title_Recipe_bottom {
+  line-height: 1;
   font-size: 3rem;
   padding-top: 1rem;
   padding-bottom: 1rem;
@@ -1345,8 +1420,7 @@ input[type="search"]::-webkit-search-cancel-button {
   background-color: #4a5a79a1;
 }
 
-
-.scroll-bottom-row{
+.scroll-bottom-row {
   display: flex;
   overflow-x: auto;
   gap: 3rem;
@@ -1360,7 +1434,7 @@ input[type="search"]::-webkit-search-cancel-button {
   display: outside; /* Oculta la barra de scroll en navegadores WebKit */
 }
 
-.card_scroll_bottom{
+.card_scroll_bottom {
   flex: 0 0 auto;
   width: 25rem;
   scroll-snap-align: start;
@@ -1384,11 +1458,10 @@ input[type="search"]::-webkit-search-cancel-button {
   }
 }
 
- .card-scroll-bottom {
-    flex: 1 1 calc(33.333% - 1rem);
-    max-width: calc(33.333% - 1rem);
-  }
-
+.card-scroll-bottom {
+  flex: 1 1 calc(33.333% - 1rem);
+  max-width: calc(33.333% - 1rem);
+}
 
 .scroll-bottom-row::-webkit-scrollbar {
   height: 15px; /* altura del scroll horizontal */
@@ -1814,7 +1887,6 @@ input[type="search"]::-webkit-search-cancel-button {
   display: block;
 }
 
-
 .rct-hidden-file-input {
   display: none;
 }
@@ -2239,7 +2311,6 @@ input[type="search"]::-webkit-search-cancel-button {
   display: block;
 }
 
-
 .rct-hidden-file-input {
   display: none;
 }
@@ -2247,7 +2318,6 @@ input[type="search"]::-webkit-search-cancel-button {
 .rct-modal-footer {
   border-top: 1px solid #eee;
 }
-
 
 /* Media Queries for Responsiveness */
 @media (max-width: 767.98px) {
