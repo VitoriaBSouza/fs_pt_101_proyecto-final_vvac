@@ -29,7 +29,7 @@ export const RecipeScroller = () => {
   }, []);
 
   return (
-    <div className="card_row_scroll my-5">
+    <div className="card_row_scroll my-4">
       <h2 className="title_Recipe_Scroller text-center fw-bold mb-0 text-dark">Some random recipes!!</h2>
       <div
         className="d-flex overflow-auto gap-3 pb-2 scrollbar-custom"
@@ -44,7 +44,7 @@ export const RecipeScroller = () => {
             <RecipeCard 
               id={recipe.id} 
               url={recipe.img} 
-              name={recipe.name} 
+              name={recipe.id} 
             />
           </div>
         ))}
