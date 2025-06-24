@@ -29,10 +29,10 @@ export const RecipeScroller = () => {
   }, []);
 
   return (
-    <div className="card_row_scroll my-4">
+    <div className="card_row_scroll bg-light ">
       <h2 className="title_Recipe_Scroller text-center fw-bold mb-0 text-dark">Some random recipes!!</h2>
       <div
-        className="d-flex overflow-auto gap-3 pb-2 scrollbar-custom"
+        className="d-flex overflow-auto gap-5 pb-2 pt-2 scrollbar-custom"
         style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
       >
         {recipes.map(recipe => (
@@ -41,10 +41,11 @@ export const RecipeScroller = () => {
             style={{ width: '250px', scrollSnapAlign: 'start', cursor: 'pointer' }}
             key={recipe.id}
           >
-            <RecipeCard 
-              id={recipe.id} 
-              url={recipe.img} 
-              name={recipe.id} 
+            <RecipeCard
+              key={recipe.id}
+              id={recipe.id}
+              url={recipe.media?.[0]?.url}
+              title={recipe.title}
             />
           </div>
         ))}

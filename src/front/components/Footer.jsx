@@ -1,11 +1,26 @@
-export const Footer = () => (
-	<footer className="footer mt-auto py-3 text-center">
-		<p>
-			Check the <a target="_blank" href="https://4geeks.com/docs/start/react-flask-template">template documentation</a> <i className="fa-solid fa-file"></i> for help.
-		</p>
-		<p>
-			Made with <i className="fa fa-heart text-danger" /> by{" "}
-			<a href="http://www.4geeksacademy.com">4Geeks Academy</a>
-		</p>
-	</footer>
-);
+import React from 'react';
+import logo from "../assets/img/recetea-logo.png"; 
+
+ export const Footer = () => {
+  return (
+    <footer className="container-fluid  bg-light text-dark mt-0 pt-0 pb-2">
+      <div className="row align-items-center">
+        <div className="col-md-6 d-flex align-items-center">
+          <img src={logo} alt="Logo" className='logo-footer' />
+        </div>
+      </div>
+
+      <hr className="border-secondary my-2" />
+
+      <div className="row align-items-center">
+        <div className="col-md-6 d-flex align-items-center">
+          <p className="footer_contact fs-3">Contact Us: receteaapi@gmail.com</p>
+        </div>
+      </div>
+
+      <div className="text-center pe-4">
+        <p className="rights_reserved fs-5 fw-bold">&copy; 2025 Recetea - All rights reserved</p>
+      </div>
+    </footer>
+  );
+};
