@@ -1,7 +1,6 @@
 import { TurnHome } from "../components/buttons/TurnHome";
 import { LinksMenu } from "../components/LinksMenu";
 
-// import { Link } from "react-router-dom"; // Link no se usa, se puede quitar si no hay rutas internas explícitas
 import useGlobalReducer from "../hooks/useGlobalReducer";
 import { RightMenu } from "../components/RightMenu";
 import { useNavigate } from "react-router-dom";
@@ -88,14 +87,6 @@ export const Profile = () => {
         fileInputRef.current.click();
     };
 
-    // const handleSaveUrlImage = async (e) => {
-    //     e.preventDefault();
-    //     if (tempImageUrl) {
-    //         SetProfileImage(tempImageUrl);
-    //         await handleProfileUpdate({ photo_url: tempImageUrl }); // update photo only
-    //         toggleUrlModal();
-    //     }
-    // };
 
     // Función para guardar la URL escrita en el modal
     const handleSaveUrlImage = async (e) => {
@@ -246,11 +237,28 @@ export const Profile = () => {
                         <div className="row align-items-start g-0">
                             {/* COLUMNA IZQUIERDA */}
                             <div className="col-12 col-md-3">
-                                <div className="d-flex align-items-start">
-                                    <TurnHome />
-                                    <LinksMenu />
+                                {/* botón hamburguesa en <768px y <992px */}
+                                <button
+                                    className="btn btn-outline-secondary d-md-none mb-3"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#sidebarMenu"
+                                    aria-controls="sidebarMenu"
+                                    aria-expanded="false"
+                                    aria-label="Toggle navigation"
+                                >
+                                    <i className="fa fa-bars"></i>
+                                </button>
+
+                                {/* menú colapsable en móviles y siempre visible en md+ */}
+                                <div className="collapse d-md-block" id="sidebarMenu">
+                                    <div className="d-flex align-items-start flex-column">
+                                        <TurnHome />
+                                        <LinksMenu />
+                                    </div>
                                 </div>
                             </div>
+
 
                             {/* COLUMNA PRINCIPAL */}
                             <div className="col-6 main-column-content">
@@ -277,7 +285,7 @@ export const Profile = () => {
                                                 id="username"
                                                 autoComplete="off"
                                                 onChange={handleChange}
-                                            placeholder={formData?.username || "" } 
+                                                placeholder={formData?.username || ""}
                                             />
                                         </div>
                                         <div className="mb-3">
@@ -288,7 +296,7 @@ export const Profile = () => {
                                                 id="Email1"
                                                 autoComplete="off"
                                                 onChange={handleChange}
-                                            placeholder={formData?.email || "" } 
+                                                placeholder={formData?.email || ""}
                                             />
                                             {store.user?.success && (
                                                 <div className="alert alert-info mt-2">
