@@ -102,6 +102,9 @@ export const Search = () =>{
                         <li className="m-2">
                             <button className="dropdown-item" onClick={() => setFilter('Diets')}>Diets</button>
                         </li>
+                        <li className="m-2">
+                            <button className="dropdown-item text-danger" onClick={() => navigate('/search')}>Advance Search</button>
+                        </li>
                     </ul>
                 </div>
                 :
