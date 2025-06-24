@@ -119,7 +119,6 @@ def login():
         print(e)
         return jsonify({"error": str(e)}), 500
 
-
 # GET to access the profile after logging in
 @api.route('/user', methods=['GET'])
 @jwt_required()  # Requires to request the token from the frontend
@@ -266,7 +265,7 @@ def forgot_password():
         )
 
         return jsonify({"message": f"If that email exists, a reset link was sent.", 
-                        "success" : True, "token" : token, "user": {"email": user.email}}), 200
+                        "success" : True, "user":user.email }), 200
 
     except Exception as e:
         print(e)

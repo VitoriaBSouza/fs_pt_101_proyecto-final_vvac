@@ -10,19 +10,6 @@ export const initialStore = () => {
     comments: [],
     comment: [],
     user_recipes: [],
-    message: null,
-    todos: [
-      {
-        id: 1,
-        title: "Make the bed",
-        background: null,
-      },
-      {
-        id: 2,
-        title: "Do my homework",
-        background: null,
-      },
-    ],
     selectedCalendarRecipe: null, // ✅ NUEVO: para integración con calendario
   };
 };
@@ -59,8 +46,7 @@ export default function storeReducer(store, action = {}) {
     case "forgotPasswd":
       return {
         ...store,
-        token: action.payload.token,
-        user: action.payload.user.email,
+        user: action.payload, // El payload ya es el email directamente
       };
 
     case "resetPasswd":
@@ -253,6 +239,11 @@ export default function storeReducer(store, action = {}) {
         ),
       };
     }
+    case "set_hello":
+      return {
+        ...store,
+        message: action.payload,
+      };
 
     case "get_user_collections":
       return {
@@ -276,21 +267,6 @@ export default function storeReducer(store, action = {}) {
       return {
         ...store,
         selectedCalendarRecipe: action.payload,
-      };
-
-    case "set_hello":
-      return {
-        ...store,
-        message: action.payload,
-      };
-
-    case "add_task":
-      const { id, color } = action.payload;
-      return {
-        ...store,
-        todos: store.todos.map((todo) =>
-          todo.id === id ? { ...todo, background: color } : todo
-        ),
       };
 
     default:

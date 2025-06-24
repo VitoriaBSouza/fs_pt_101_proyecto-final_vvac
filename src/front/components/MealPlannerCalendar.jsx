@@ -1,5 +1,3 @@
-// src/front/components/MealPlannerCalendar.jsx
-
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, dateFnsLocalizer, Views } from "react-big-calendar";
@@ -250,6 +248,22 @@ export const MealPlannerCalendar = () => {
     </div>
   );
 
+  // HACK: Fix Week View Empty Cell for rbc-row
+  useEffect(() => {
+    // Wait until next tick so DOM exists
+    setTimeout(() => {
+      document.querySelectorAll('.rbc-time-header-gutter').forEach(cell => {
+        cell.style.background = '#c1454b';
+        cell.style.color = '#fff';
+        cell.style.fontWeight = 'bold';
+        cell.style.borderTopLeftRadius = '8px';
+        cell.style.borderBottomLeftRadius = '8px';
+        cell.style.minWidth = '46px';
+        cell.style.borderRight = '2px solid #fff2';
+      });
+    }, 0);
+  }, [currentView, currentDate, events]);
+
   const eventPropGetter = (event) => {
     return {
       style: {
@@ -265,7 +279,7 @@ export const MealPlannerCalendar = () => {
   };
 
   return (
-    <div className="container mt-4">
+    <div className="container">
       <div className="d-flex justify-content-center align-items-center mb-3">
         <h3 className="text-light bg-danger rounded px-4 py-2 shadow">Meal Planner Calendar</h3>
       </div>

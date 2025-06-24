@@ -25,8 +25,14 @@ export const MyRecipes = () => {
     const allRecipesMap = new Map();
     store.user_recipes?.forEach((r) => allRecipesMap.set(r.id, r));
     (Array.isArray(store.collections) ? store.collections : []).forEach((c) => {
-        if (!allRecipesMap.has(c.id)) allRecipesMap.set(c.id, c);
+        if (!allRecipesMap.has(c.recipe_id)) allRecipesMap.set(c.recipe_id, {
+            id: c.recipe_id,
+            media: c.recipe_media,
+            title: c.recipe_title,
+            published: c.published
+        });
     });
+
     const allCombined = Array.from(allRecipesMap.values());
 
 
@@ -133,6 +139,7 @@ export const MyRecipes = () => {
                                                         published={formatPublishedDate(recipe.published) || ""}
                                                     />
                                                 ))}
+
                                             </div>
                                         </div>
                                     )}

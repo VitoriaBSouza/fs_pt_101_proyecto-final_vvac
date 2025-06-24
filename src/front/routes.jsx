@@ -17,7 +17,6 @@ import { Profile } from "./pages/Profile";
 import { ShoppingList } from "./pages/ShoppingList";
 import { MealPlanner } from "./pages/MealPlanner";
 import { Single } from "./pages/Single";
-import { Demo } from "./pages/Demo";
 import { CreateRecipe } from "./pages/CreateRecipe";
 import { EditRecipe } from "./pages/EditRecipe";
 import { MyRecipes } from "./pages/MyRecipes";
@@ -40,7 +39,7 @@ export const router = createBrowserRouter(
             <Route path="/login" element={<LogInPage />} />
             <Route path="/signup" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswd />} />
-            <Route path="/change-password" element={<ChangePasswd />} />
+            <Route path="/reset-password/:token" element={<ChangePasswd />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/shopping-list" element={<ShoppingList />} />
             <Route path="/your-collection" element={<MyRecipes />} />
@@ -49,8 +48,6 @@ export const router = createBrowserRouter(
             <Route path="/recipes/new" element={<CreateRecipe />} />
             <Route path="/recipes/edit/:id" element={<EditRecipe />} />
             <Route path="/search" element={<SearchPage />} />
-            <Route path="/demo" element={<Demo />} />
-
         </Route>
     ),
     {

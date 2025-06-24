@@ -1,24 +1,31 @@
 // src/front/pages/SearchPage.jsx
-import React from "react";
+import React, { useState } from "react";
 import { TurnHome } from "../components/buttons/TurnHome.jsx";
 import { SearchFilter } from "../components/SearchFilter.jsx";
+import { SearchView } from "../components/SearchView.jsx";
 import { LinksMenu } from "../components/LinksMenu.jsx";
 
 export const SearchPage = () => {
-    return (
-        <div className="container-fluid">
-            <TurnHome />
-            <div className="row">
-                {/* Menú lateral izquierdo */}
-                <div className="col-md-2 p-3">
-                    <LinksMenu />
-                </div>
+  const [filteredRecipes, setFilteredRecipes] = useState([]);
 
-                {/* SearchFilter contiene filtros + vista de recetas */}
-                <div className="col-md-10 p-3">
-                    <SearchFilter />
-                </div>
-            </div>
+  return (
+    <div className="container-fluid">
+      <div className="row flex-nowrap min-vh-100">
+        {/* Left sidebar */}
+        <div className="col-12 col-sm-3 col-md-2 p-2 d-flex flex-column">
+          <LinksMenu />
         </div>
-    );
+
+        {/* Center: recipes view */}
+        <div className="col-12 col-sm-6 col-md-8 p-2 d-flex flex-column">
+          <SearchView recipes={filteredRecipes} />
+        </div>
+
+        {/* Right sidebar: filters */}
+        <div className="col-12 col-sm-3 col-md-2 p-2 d-flex flex-column">
+          <SearchFilter onRecipesFiltered={setFilteredRecipes} />
+        </div>
+      </div>
+    </div>
+  );
 };

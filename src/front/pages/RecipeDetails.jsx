@@ -134,7 +134,8 @@ export const RecipeDetails = () => {
                         <div className="col-12 col-md-12 col-lg-3 col-xl-2 g-0 my-sm-1 d-flex justify-content-center justify-content-lg-end">
                             <img src={store.recipe?.user_photo} className="float-start user_img border-0" alt="user_img" />
                         </div>
-                        <div className="col-12 col-md-12 col-lg-8 col-lx-10 ms-sm-2 my-sm-1 d-flex mt-2 mt-sm-0 d-flex justify-content-center justify-content-lg-start">
+                        <div className="col-12 col-md-12 col-lg-8 col-lx-10 ms-sm-2 my-sm-1 d-flex 
+                        mt-2 mt-sm-0 d-flex justify-content-center justify-content-lg-start">
                             <h5 className="align-self-end text-center text-md-start fs-3">@{store.recipe?.username}</h5>
                         </div>
                     </div>
