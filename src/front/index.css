@@ -1505,6 +1505,7 @@ input[type="search"]::-webkit-search-cancel-button {
   padding: 20px 0;
   display: flex;
   flex-direction: column;
+  z-index: 1080;
 }
 
 .rct-create-recipe-container {

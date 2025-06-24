@@ -96,6 +96,9 @@ recipeServices.createRecipe = async (recipeData) => {
 
         const data = await resp.json();
         if (!resp.ok) throw new Error(data.error);
+
+        console.log(data);
+    
         return data;
     } catch (error) {
         console.error("Error creating recipe:", error);
@@ -106,7 +109,6 @@ recipeServices.createRecipe = async (recipeData) => {
 // PUT to edit an existing recipe (need to log in and be the author of the recipe)
 recipeServices.editRecipe = async (id, recipeData) => {
     try {
-    console.log("------>editRecipe - Services: " + JSON.stringify(recipeData))
         const resp = await fetch(url + "/api/user/recipes/" + id, {
         method: 'PUT',
         headers: authHeaders(),

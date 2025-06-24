@@ -58,7 +58,13 @@ export const RecipeDetails = () => {
         }
 
         if (Array.isArray(parsedSteps)) {
-            return parsedSteps.map(step => step.trim()).filter(step => step.length > 0);
+            return parsedSteps
+                .map(step => {
+                    if (typeof step === "string") return step.trim();
+                    if (typeof step === "object" && typeof step.description === "string") return step.description.trim();
+                    return "";
+                })
+                .filter(step => step.length > 0);
         }
 
         return steps
@@ -66,6 +72,7 @@ export const RecipeDetails = () => {
             .map(step => step.trim())
             .filter(step => step.length > 0);
     };
+
 
     const stepsArray = splitSteps(store.recipe?.steps);
     console.log(store.recipe?.diet_label);
@@ -202,7 +209,7 @@ export const RecipeDetails = () => {
                                 {store.recipe?.ingredients?.map((ing, i) => (
                                     <li key={i} className="m-0 p-0 d-flex justify-content-center justify-content-lg-start">
                                         <p className="text_ing1 me-2 fs-4">{ing.quantity} {ing.unit}</p>
-                                        <p className="text_ing_steps fs-4">of <span className='text-capitapzed'>{ing.ingredient_name}</span></p>
+                                        <p className="text_ing_steps fs-4">of <span className='text-capitalize'>{ing.ingredient_name}</span></p>
                                     </li>
                                 ))}
                             </ul>

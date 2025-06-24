@@ -23,8 +23,6 @@ export const CollectionList = () => {
 
         //We update the store to match the backend DB
         dispatch({ type: 'get_user_collection', payload: data.data });
-        console.log(data.data);
-
         return data.data;
 
     })
@@ -48,7 +46,7 @@ export const CollectionList = () => {
             );
 
             
-            setCollection(collectionList);
+            setCollection(updatedCollections);
 
             //update store.collections
             dispatch({ type: 'update_collections', payload: updatedCollections });

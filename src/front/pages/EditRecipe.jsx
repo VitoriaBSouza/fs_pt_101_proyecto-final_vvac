@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 //hooks
 import useGlobalReducer from "../hooks/useGlobalReducer";
@@ -11,15 +11,42 @@ import mediaServices from "../services/recetea_API/mediaServices";
 //components
 import { TurnHome } from "../components/buttons/TurnHome";
 import { LinksMenu } from "../components/LinksMenu";
-import { AddRecipeMedia } from "../components/addRecipeMedia";
+import { EditRecipeMedia } from "../components/editRecipeMedia";
 
-export const CreateRecipe = () => {
+export const EditRecipe = () => {
 
     const { store, dispatch } = useGlobalReducer();
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const { id } = useParams();
+    const recipe_id = Number(id)
 
     const difficultyOptions = ["Easy", "Moderate", "Hard"];
     const [images, setImages] = useState([]);
+    const recipeToEdit = store.recipes?.find(r => r.id === Number(id));
+
+    useEffect(() => {
+        if (recipeToEdit) {
+            console.log("Recipe to edit:", recipeToEdit);
+            setRecipe({
+                ...recipeToEdit,
+                ingredients: Array.isArray(recipeToEdit.ingredients)
+                    ? recipeToEdit.ingredients.map((ing, i) => ({
+                        id: ing.id ?? i,
+                        name: ing.name || "",
+                        quantity: ing.quantity || 0,
+                        unit: ing.unit || ""
+                    }))
+                    : [],
+                steps: typeof recipeToEdit.steps === "string"
+                    ? JSON.parse(recipeToEdit.steps)
+                    : Array.isArray(recipeToEdit.steps)
+                        ? recipeToEdit.steps
+                        : [],
+                media: recipeToEdit.media || []
+            });
+            setImages(recipeToEdit.media || []);
+        }
+    }, [recipeToEdit]);
 
     const [recipe, setRecipe] = useState({
         title: "",
@@ -43,8 +70,8 @@ export const CreateRecipe = () => {
         });
     };
 
-    //handle changes of ingredientss details, converts to number quatity string
-    const handleIngredientsChange = (index, e) => {
+    //handle changes of ingredients details, converts to number quatity string
+    const handleIngredientChange = (index, e) => {
         const { name, value } = e.target;
         const updated = [...recipe.ingredients];
         updated[index][name] = (name === "quantity") ? Number(value) : value;
@@ -58,8 +85,8 @@ export const CreateRecipe = () => {
         setRecipe(prev => ({ ...prev, steps: updated }));
     };
 
-    //this adds the ingredientss to the list
-    const addIngredients = () => {
+    //this adds the ingredients to the list
+    const addIngredient = () => {
         const newId = Math.max(0, ...recipe.ingredients.map(i => i.id)) + 1;
         setRecipe(prev => ({
             ...prev,
@@ -67,8 +94,8 @@ export const CreateRecipe = () => {
         }));
     };
 
-    //this wil remove ingredientss from list
-    const removeIngredients = idToRemove => {
+    //this wil remove ingredients from list
+    const removeIngredient = idToRemove => {
         setRecipe(prev => ({
             ...prev,
             ingredients: prev.ingredients.filter(i => i.id !== idToRemove)
@@ -96,12 +123,17 @@ export const CreateRecipe = () => {
     const handleDiscard = () => {
         if (window.confirm("Discard all changes?")) {
             setRecipe({
-                title: "",
-                difficulty_type: "",
-                portions: 0,
-                prep_time: 0,
-                ingredients: [{ id: 0, name: "", quantity: 0, unit: "" }],
-                steps: [{ id: 0, description: "" }]
+                title: store.recipe?.title,
+                difficulty_type: store.recipe?.difficulty_type,
+                portions: store.recipe?.portions,
+                prep_time: store.recipe?.prep_time,
+                ingredients: [{
+                    id: store.recipe?.ingredients?.ingredients_id,
+                    name: store.recipe?.ingredients?.ingredients_name,
+                    quantity: store.recipe?.ingredients?.quantity,
+                    unit: store.recipe?.ingredients?.unit
+                }],
+                steps: [{ id: store.recipe?.steps, description: store.recipe?.description }]
             });
         }
     };
@@ -110,43 +142,41 @@ export const CreateRecipe = () => {
         e.preventDefault();
 
         try {
-            // 1. Crear receta sin media (media vacío)
-            const response = await recipeServices.createRecipe({
-                ...recipe,
-                media: [],
-            });
-            const newRecipeID = response.recipe_id;
 
-            console.log(newRecipeID);
-
-
-            // 2. Subir imágenes (ya sea URL o base64)
+            // we will just delete the recipes the user want as well add if any new is found
             for (const img of images) {
-                if (img.url && img.url.trim()) {
-                    console.log("Enviando URL:", img.url.trim());
-                    const data = await mediaServices.addMediaToRecipe(newRecipeID, {
-                        type_media: "image",
-                        url: img.url.trim(),
-                    });
-                    console.log("Respuesta backend media:", data);
-                }else{
-                    alert("Could not post the image, please try again.");
+                if (img.deleted && img.id) {
+                    await mediaServices.deleteMediaFromRecipe(img.id);
                 }
             }
 
+            // After media is deleted we edit recipe
+            const response = await recipeServices.editRecipe(recipe_id, {
+                ...recipe,
+                media: [],
+            });
 
-            //call it here because the recipe image is also added
-            dispatch({ type: "create_recipe", payload:response});
+            // load new images be URL or base64 with the images
+            for (const img of images) {
+                if (!img.deleted && !img.id && img.url?.trim()) {
+                    await mediaServices.editRecipe(recipe_id, {
+                        type_media: "image",
+                        url: img.url.trim(),
+                    });
+                }
+            }
 
-            //go back to collection to see their recipe on their my recipes list
-            navigate("/your-collection")
+            //call it here after media was added
+            dispatch({ type: "update_recipe", payload: response });
+
+            //will got back to collection to see recipe added to user list of my recipes
+            navigate("/your-collection");
 
         } catch (err) {
             console.error(err);
-            alert("Could not post the recipe, please try again.");
+            alert("Could not update recipe, please try again.");
         }
     };
-
 
     return (
         <div className="rct-create-recipe-wrapper fs-5">
@@ -162,19 +192,19 @@ export const CreateRecipe = () => {
                     <div className="col-12 col-md-9 rct-main-content">
                         <form className="rct-recipe-form-area d-flex flex-column mb-3" onSubmit={handleSubmit}>
                             {/* Top bar */}
-                            <AddRecipeMedia images={images} setImages={setImages} />
+                            <EditRecipe images={images} setImages={setImages} />
 
                             <div className="rct-top-section row g-0 mb-4">
                                 <div className="col-12 col-md-6 d-flex justify-content-end mt-3 mt-md-0 ms-auto">
-                                    <button type="button" className="btn btn-outline-danger me-2 fs-4" 
-                                    onClick={() => navigate("/your-collection")}>
+                                    <button type="button" className="btn btn-outline-danger me-2 fs-4"
+                                        onClick={() => navigate("/your-collection")}>
                                         Cancel
                                     </button>
-                                    <button type="button" className="btn btn-outline-secondary me-2 fs-4" 
-                                    onClick={handleDiscard}>
+                                    <button type="button" className="btn btn-outline-secondary me-2 fs-4"
+                                        onClick={handleDiscard}>
                                         Clear
                                     </button>
-                                    <button type="submit" className="btn btn-success fs-4">Publish</button>
+                                    <button type="submit" className="btn btn-success fs-4">Update</button>
                                 </div>
                             </div>
 
@@ -186,7 +216,6 @@ export const CreateRecipe = () => {
                                     name="title"
                                     required
                                     autoFocus
-                                    placeholder="Title: My favorite pumpkin cream"
                                     value={recipe.title}
                                     onChange={handleChange}
                                 />
@@ -233,53 +262,50 @@ export const CreateRecipe = () => {
                                 </div>
                             </div>
 
-                            {/* Ingredientss */}
+                            {/* Ingredients */}
                             <div className="mb-4">
-                                <h3>Ingredientss</h3>
-                                {recipe.ingredients.map((ing, idx) => (
-                                    <div key={ing.id} className="d-flex mb-2">
+                                <h3>Ingredients</h3>
+                                {Array.isArray(recipe.ingredients) && recipe.ingredients.map((ing, idx) => (
+                                    <div key={ing.id || idx} className="d-flex mb-2">
                                         <input
                                             type="number"
                                             className="form-control me-2"
                                             name="quantity"
-                                            placeholder="Cantidad"
                                             value={ing.quantity}
-                                            onChange={(e) => handleIngredientsChange(idx, e)}
+                                            onChange={(e) => handleIngredientChange(idx, e)}
                                         />
                                         <input
                                             type="text"
                                             className="form-control me-2"
                                             name="unit"
-                                            placeholder="Unidad"
                                             value={ing.unit}
-                                            onChange={(e) => handleIngredientsChange(idx, e)}
+                                            onChange={(e) => handleIngredientChange(idx, e)}
                                         />
                                         <input
                                             type="text"
                                             className="form-control me-2"
                                             name="name"
-                                            placeholder="Ej: Harina de trigo"
                                             value={ing.name}
-                                            onChange={(e) => handleIngredientsChange(idx, e)}
+                                            onChange={(e) => handleIngredientChange(idx, e)}
                                         />
-                                        {recipe.ingredients.length > 1 && (
-                                            <button type="button" className="btn btn-outline-danger" onClick={() => removeIngredients(ing.id)}>
+                                        {Array.isArray(recipe.ingredients) && recipe.ingredients.length > 1 && (
+                                            <button type="button" className="btn btn-outline-danger" onClick={() => removeIngredient(ing.id)}>
                                                 <i className="fa-solid fa-minus"></i>
                                             </button>
                                         )}
                                     </div>
                                 ))}
-                                <button type="button" className="btn btn-outline-success p-2 d-flex" onClick={addIngredients}>
+                                <button type="button" className="btn btn-outline-success p-2 d-flex" onClick={addIngredient}>
                                     <i className="fa-solid fa-plus mx-2 mt-2"></i>
-                                    <p className="fs-5">Add ingredientss</p>
+                                    <p className="fs-5">Add ingredients</p>
                                 </button>
                             </div>
 
                             {/* Steps */}
                             <div className="mb-4">
                                 <h3>Steps</h3>
-                                {recipe.steps.map((step, idx) => (
-                                    <div key={step.id} className="mb-3">
+                                {Array.isArray(recipe.steps) && recipe.steps?.map((step, idx) => (
+                                    <div key={step.id || idx} className="mb-3">
                                         <label className="form-label">Step {idx + 1}</label>
                                         <textarea
                                             className="form-control"
@@ -288,10 +314,10 @@ export const CreateRecipe = () => {
                                             value={step.description}
                                             onChange={(e) => handleStepChange(idx, e)}
                                         />
-                                        {recipe.steps.length > 1 && (
+                                        {Array.isArray(recipe.steps) && recipe.steps.length > 1 && (
                                             <button type="button" className="btn btn-sm btn-outline-danger mt-1 d-flex" onClick={() => removeStep(step.id)}>
                                                 <i className="fa-solid fa-trash mt-2 mx-2"></i>
-                                                 <p className="fs-5">Remove</p>
+                                                <p className="fs-5">Remove</p>
                                             </button>
                                         )}
                                     </div>

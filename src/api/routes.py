@@ -388,7 +388,7 @@ def create_recipe():
         if not data["steps"]:
             return jsonify({"error": "Please add all the steps and instructions needed to your recipe"}), 400
 
-        if not data["ingredient"]:
+        if not data["ingredients"]:
             return jsonify({"error": "Please add all the igredients details to your recipe"}), 400
         
         # Conditions to turn the string value into the enum value in our database
@@ -437,7 +437,7 @@ def create_recipe():
         total_grams = 0
         ingredients_list = []
 
-        for ing in data["ingredient"]:
+        for ing in data["ingredients"]:
             name = ing["name"]
             quantity = ing["quantity"]
             unit = ing["unit"]
@@ -523,6 +523,7 @@ def create_recipe():
         db.session.commit()
 
         print(f"Received diet label: {diet_label}")
+        print(f"Recipe created: ID={new_recipe.id}, title={new_recipe.title}")
 
         return jsonify({"success": True, "recipe_id": new_recipe.id}), 201
 
@@ -552,7 +553,7 @@ def edit_recipe(recipe_id):
         if not data["steps"]:
             return jsonify({"error": "Please add all the steps and instructions needed to your recipe"}), 400
 
-        if not data["ingredient"]:
+        if not data["ingredients"]:
             return jsonify({"error": "Please add all the igredients details to your recipe"}), 400
 
         # Conditions to turn the string value into the enum value in our database
@@ -603,7 +604,7 @@ def edit_recipe(recipe_id):
         total_grams = 0
         ingredients_list = []
 
-        for ing in data["ingredient"]:
+        for ing in data["ingredients"]:
             name = ing["name"]
             quantity = ing["quantity"]
             unit = ing["unit"]

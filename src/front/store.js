@@ -113,6 +113,29 @@ export default function storeReducer(store, action = {}) {
       };
     }
 
+    case "create_recipe": {
+      return {
+        ...store,
+        recipes: action.payload
+      }
+    }
+
+    case "update_recipe": {
+      const updated = action.payload;
+      return {
+        ...store,
+        recipe: action.payload,
+        recipes: store.recipes.map(recp => recp.id === updated.id ? updated : recp)
+      };
+    }
+
+    case "detele_recipe": {
+      return {
+        ...store,
+        recipes: action.payload
+      }
+    }
+
     case "like": {
       const { recipe_id, user_id } = action.payload;
       const newScoreEntry = {
