@@ -248,7 +248,7 @@ export const RecipeDetails = () => {
             <Comments recipe_id={id} />
 
             <div className="row row_bg_suggestions">
-                <h2 className="p-4 text-light">Latest Recipes</h2>
+                <h2 className="p-4 text-light fs-1">Latest Recipes</h2>
                 <div className="col-12">
                     <div className="scroll-container d-flex p-3">
 
