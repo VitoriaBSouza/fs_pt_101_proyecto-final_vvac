@@ -1,5 +1,6 @@
 import { TurnHome } from "../components/buttons/TurnHome";
 import { LinksMenu } from "../components/LinksMenu";
+
 // import { Link } from "react-router-dom"; // Link no se usa, se puede quitar si no hay rutas internas explícitas
 import useGlobalReducer from "../hooks/useGlobalReducer";
 import { RightMenu } from "../components/RightMenu";
@@ -337,7 +338,7 @@ export const Profile = () => {
                 </div>
             </div>
 
-            {/* Modal de confirmación para eliminar cuenta (sin cambios significativos, usa Bootstrap JS) */}
+            {/* Modal de confirmación para eliminar cuenta */}
             <div className="modal fade" id="modalDeleteAccount" data-bs-backdrop="static" data-bs-keyboard="false" tabIndex="-1" aria-labelledby="modalDeleteAccountLabel">
                 <div className="modal-dialog w-75">
                     <div className="modal-content">
@@ -357,6 +358,7 @@ export const Profile = () => {
                     </div>
                 </div>
             </div>
+
 
             {/* --- MODAL PARA CAMBIAR IMAGEN DE PERFIL --- */}
             {showUrlModal && (

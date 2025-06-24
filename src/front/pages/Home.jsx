@@ -48,9 +48,9 @@ export const Home = () => {
 		<div className="container-fluid container_home">
 			<TopSection />
 			<div className="row_home">
-				
-					<RecipeScroller />
-			
+
+				<RecipeScroller />
+
 			</div>
 			<BottomSection />
 		</div>

@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router-dom";
+ import { useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useRef } from "react";
 
 //hooks
@@ -11,6 +11,7 @@ import recipeServices from "../services/recetea_API/recipeServices.js"
 import { Comments } from "../components/Comments.jsx";
 import { NutricionalTable } from "../components/NutricionalTable.jsx";
 import { RecipeCard } from "../components/RecipeCard.jsx";
+import { UserRecipeCard } from "../components/UserRecipeCard.jsx";
 
 //buttons
 import { LikeButton } from '../components/buttons/likeButton.jsx';
@@ -58,7 +59,13 @@ export const RecipeDetails = () => {
         }
 
         if (Array.isArray(parsedSteps)) {
-            return parsedSteps.map(step => step.trim()).filter(step => step.length > 0);
+            return parsedSteps
+                .map(step => {
+                    if (typeof step === "string") return step.trim();
+                    if (typeof step === "object" && typeof step.description === "string") return step.description.trim();
+                    return "";
+                })
+                .filter(step => step.length > 0);
         }
 
         return steps
@@ -66,6 +73,7 @@ export const RecipeDetails = () => {
             .map(step => step.trim())
             .filter(step => step.length > 0);
     };
+
 
     const stepsArray = splitSteps(store.recipe?.steps);
     console.log(store.recipe?.diet_label);
@@ -203,7 +211,7 @@ export const RecipeDetails = () => {
                                 {store.recipe?.ingredients?.map((ing, i) => (
                                     <li key={i} className="m-0 p-0 d-flex justify-content-center justify-content-lg-start">
                                         <p className="text_ing1 me-2 fs-4">{ing.quantity} {ing.unit}</p>
-                                        <p className="text_ing_steps fs-4">of <span className='text-capitapzed'>{ing.ingredient_name}</span></p>
+                                        <p className="text_ing_steps fs-4">of <span className='text-capitalize'>{ing.ingredient_name}</span></p>
                                     </li>
                                 ))}
                             </ul>
