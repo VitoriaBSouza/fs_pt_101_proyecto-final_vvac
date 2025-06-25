@@ -256,19 +256,7 @@ table {
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
 }
 
-.title_Recipe_Scroller {
-  margin-bottom: 1rem;
-  font-size: 3rem;
-  color: white;
-}
 
-.recipe_scroller_container {
-  display: flex;
-  overflow-x: auto;
-  gap: 2rem;
-  padding-bottom: 1rem;
-  scroll-snap-type: x mandatory;
-}
 
 .details-btn {
   margin-top: 0.5rem;
@@ -1360,6 +1348,20 @@ input[type="search"]::-webkit-search-cancel-button {
 
 /*recipescroll in landingPage*/
 
+.title_Recipe_Scroller {
+  margin-bottom: 1rem;
+  font-size: 3rem;
+  color: white;
+}
+
+.recipe_scroller_container {
+  display: flex;
+  overflow-x: auto;
+  gap: 2rem;
+  padding-bottom: 1rem;
+  scroll-snap-type: x mandatory;
+}
+
 .scroll_cards_bg {
   min-width: 24rem;
   border-radius: 0.8rem;
@@ -1374,12 +1376,7 @@ input[type="search"]::-webkit-search-cancel-button {
   transform: scale(1.02); /* Efecto zoom al pasar el mouse */
 }
 
-.title_Recipe_Scroller {
-  line-height: 1;
-  font-size: 3rem;
-  color: #eff0ea;
-  padding-bottom: 1rem;
-}
+
 
  
 .card_row_scroll {
