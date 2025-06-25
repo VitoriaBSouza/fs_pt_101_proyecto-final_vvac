@@ -1,5 +1,5 @@
 import React from 'react';
-import alimentosTop from '../assets/img/alimentosTop.jpg'
+import alimentosTop from '../assets/img/alimentosTop.png'
 export const TopSection = () => {
     return (
         <div className="row m-0 justify-content-center row_home_top">

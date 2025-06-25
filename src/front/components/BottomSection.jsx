@@ -1,10 +1,10 @@
 import React from 'react';
-import VeganDiet from '../assets/img/VeganDiet.jpg'
-import GlutenFree from '../assets/img/GlutenFree.jpg'
-import Proteic from '../assets/img/Proteic.jpg'
-import lowCalorie from '../assets/img/low-calorie.jpg'
-import FastRecipes from '../assets/img/FastRecipes.jpg'
-import CheatMeals from '../assets/img/CheatMeals.jpg'
+import VeganDiet from '../assets/img/VeganDiet.png'
+import GlutenFree from '../assets/img/GlutenFree.png'
+import Proteic from '../assets/img/Proteic.png'
+import lowCalorie from '../assets/img/low-calorie.png'
+import FastRecipes from '../assets/img/FastRecipes.png'
+import CheatMeals from '../assets/img/CheatMeals.png'
 
 
 export const BottomSection = () => {
