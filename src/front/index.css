@@ -182,15 +182,15 @@ table {
 
 .top_intro_text {
   background-color: rgba(0, 0, 0, 0.75); /* Fondo oscuro translúcido */
-  color: #fff;
-  padding: 2rem;
-  border-radius: 1rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
 
   /* Tamaño relativo y responsivo */
-  width: 35%;
+  width: 60%;
+  height: 70%;
   min-width: 250px;
   max-width: 500px;
-  max-height: 250px;
+  max-height: 500px;
   aspect-ratio: 4 / 3;
 
   display: flex;
@@ -209,7 +209,7 @@ table {
 }
 
 .top_intro_text h1 {
-  font-size: 2.5rem; /* ajustable */
+  font-size: 2.5rem; 
   line-height: 1.2;
   margin-bottom: 1rem;
 }
@@ -256,19 +256,7 @@ table {
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
 }
 
-.title_Recipe_Scroller {
-  margin-bottom: 1rem;
-  font-size: 3rem;
-  color: white;
-}
 
-.recipe_scroller_container {
-  display: flex;
-  overflow-x: auto;
-  gap: 2rem;
-  padding-bottom: 1rem;
-  scroll-snap-type: x mandatory;
-}
 
 .details-btn {
   margin-top: 0.5rem;
@@ -1360,8 +1348,22 @@ input[type="search"]::-webkit-search-cancel-button {
 
 /*recipescroll in landingPage*/
 
+.title_Recipe_Scroller {
+  margin-bottom: 1rem;
+  font-size: 3rem;
+  color: white;
+}
+
+.recipe_scroller_container {
+  display: flex;
+  overflow-x: auto;
+  gap: 2rem;
+  padding-bottom: 1rem;
+  scroll-snap-type: x mandatory;
+}
+
 .scroll_cards_bg {
-  min-width: 25rem;
+  min-width: 24rem;
   border-radius: 0.8rem;
   border: 1px solid #c1454b;
   overflow: hidden;
@@ -1374,12 +1376,7 @@ input[type="search"]::-webkit-search-cancel-button {
   transform: scale(1.02); /* Efecto zoom al pasar el mouse */
 }
 
-.title_Recipe_Scroller {
-  line-height: 1;
-  font-size: 3rem;
-  color: #eff0ea;
-  padding-bottom: 1rem;
-}
+
 
  
 .card_row_scroll {
@@ -1433,7 +1430,7 @@ input[type="search"]::-webkit-search-cancel-button {
 }
 
 .card_bottom{
-  background-color: #4a5a79a1;
+  background-color: #ffffff;
 }
 
 .scroll-bottom-row {
@@ -1453,6 +1450,7 @@ input[type="search"]::-webkit-search-cancel-button {
 .card_scroll_bottom {
   flex: 0 0 auto;
   width: 25rem;
+  padding: 1rem;
   scroll-snap-align: start;
 }
 
