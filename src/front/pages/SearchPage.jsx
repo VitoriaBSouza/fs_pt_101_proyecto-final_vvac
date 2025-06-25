@@ -1,6 +1,5 @@
 // src/front/pages/SearchPage.jsx
 import React, { useState } from "react";
-import { TurnHome } from "../components/buttons/TurnHome.jsx";
 import { SearchFilter } from "../components/SearchFilter.jsx";
 import { SearchView } from "../components/SearchView.jsx";
 import { LinksMenu } from "../components/LinksMenu.jsx";
