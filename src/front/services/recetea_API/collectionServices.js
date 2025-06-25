@@ -27,7 +27,6 @@ collectionService.getUserCollections = async () => {
      return { success: false, error: error.message }
   }
 };
-
 // Add recipe to collection
 collectionService.addToCollection = async (recipe_id) => {
   try {

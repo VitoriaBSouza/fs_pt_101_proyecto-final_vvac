@@ -1,8 +1,7 @@
 {
     "_meta": {
         "hash": {
-
-            "sha256": "dcf1888d106f7a2a5fdf0df6486f87248a58ad41efaa1ab206ac2e59ec365d42"
+            "sha256": "5a93e2af1105a98ababdc47020858c54de48c5cda5048122ff8ca5fbd9aff5c2"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -32,14 +31,6 @@
             ],
             "markers": "python_version >= '3.8'",
             "version": "==0.7.0"
-        },
-        "beautifulsoup4": {
-            "hashes": [
-                "sha256:9bbbb14bfde9d79f38b8cd5f8c7c85f4b8f2523190ebed90e950a8dea4cb1c4b",
-                "sha256:dbb3c4e1ceae6aefebdaf2423247260cd062430a410e38c66f2baa50a8437195"
-            ],
-            "markers": "python_full_version >= '3.7.0'",
-            "version": "==4.13.4"
         },
         "blinker": {
             "hashes": [
@@ -208,12 +199,12 @@
         },
         "flask-jwt-extended": {
             "hashes": [
-                "sha256:63a28fc9731bcc6c4b8815b6f954b5904caa534fc2ae9b93b1d3ef12930dca95",
-                "sha256:9215d05a9413d3855764bcd67035e75819d23af2fafb6b55197eb5a3313fdfb2"
+                "sha256:52f35bf0985354d7fb7b876e2eb0e0b141aaff865a22ff6cc33d9a18aa987978",
+                "sha256:8085d6757505b6f3291a2638c84d207e8f0ad0de662d1f46aa2f77e658a0c976"
             ],
             "index": "pypi",
-            "markers": "python_version >= '3.7' and python_version < '4'",
-            "version": "==4.6.0"
+            "markers": "python_version >= '3.9' and python_version < '4'",
+            "version": "==4.7.1"
         },
         "flask-migrate": {
             "hashes": [
@@ -240,14 +231,6 @@
             ],
             "index": "pypi",
             "version": "==0.2.14"
-        },
-        "google": {
-            "hashes": [
-                "sha256:143530122ee5130509ad5e989f0512f7cb218b2d4eddbafbad40fd10e8d8ccbe",
-                "sha256:889cf695f84e4ae2c55fbc0cfdaf4c1e729417fa52ab1db0485202ba173e4935"
-            ],
-            "index": "pypi",
-            "version": "==3.0.0"
         },
         "google-ai-generativelanguage": {
             "hashes": [
@@ -886,7 +869,6 @@
             "markers": "python_version >= '3.6' and python_version < '4'",
             "version": "==4.9.1"
         },
-
         "six": {
             "hashes": [
                 "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
@@ -894,14 +876,6 @@
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2'",
             "version": "==1.17.0"
-        },
-        "soupsieve": {
-            "hashes": [
-                "sha256:6e60cc5c1ffaf1cebcc12e8188320b72071e922c2e897f737cadce79ad5d30c4",
-                "sha256:ad282f9b6926286d2ead4750552c8a6142bc4c783fd66b0293547c8fe6ae126a"
-            ],
-            "markers": "python_version >= '3.8'",
-            "version": "==2.7"
         },
         "sqlalchemy": {
             "hashes": [
