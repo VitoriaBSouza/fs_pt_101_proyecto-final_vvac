@@ -28,27 +28,6 @@ collectionService.getUserCollections = async () => {
   }
 };
 
-  
-// Toggle recipe in collection
-collectionServices.ToggleCollection = async (recipe_id) => {
-  //primero ver si está o no
-  //segundo, si está --> eliminar
-  //         sino --> añadir
-
-  
-  try {
-    const actualmente = await collectionServices.getUserCollections();
-
-    //Funcion para saber si una receta se encuentra dentro de un listado de collections
-    // some() —> devuelve true si encuentra alguna coincidencia
-    const existe = (recipe_id) => {return actualmente.some((item) => item.recipe_id == recipe_id);}
-    existe(recipe_id) ? await collectionServices.removeFromCollection(recipe_id) : await collectionServices.addToCollection(recipe_id)
-    }
-    catch {
-      console.log("ERROR")
-    }
-};
-
 // Add recipe to collection
 collectionService.addToCollection = async (recipe_id) => {
   try {
