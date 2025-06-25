@@ -35,28 +35,26 @@ export const RecipeScroller = () => {
         className="d-flex overflow-auto gap-5 pb-2 pt-2 scrollbar-custom"
         style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
       >
-        {recipes.map(recipe => (
-          <div
-            className="m-0 scroll_cards_bg border flex-shrink-0"
-            style={{ width: '250px', scrollSnapAlign: 'start', cursor: 'pointer' }}
-            key={recipe.id}
-          >
-            {recipes.length === 0 ? (
-              <p>No recipes available yet.</p>
-            ) : (
-              recipes.map(recipe => (
-                <div key={recipe.id}>
-                  <HomeCard
-                    id={recipe.id}
-                    url={recipe.media?.[0]?.url}
-                    title={recipe.title}
-                  />
-                </div>
-              ))
-            )}
+        <div
+          className="m-0 scroll_cards_bg border flex-shrink-0"
+          style={{ width: '250px', scrollSnapAlign: 'start', cursor: 'pointer' }}
+        >
+          {recipes.length === 0 ? (
+            <p>No recipes available yet.</p>
+          ) : (
+            recipes.map(recipe => (
+              <div key={recipe.id}>
+                <HomeCard
+                  id={recipe.id}
+                  url={recipe.media?.[0]?.url}
+                  title={recipe.title}
+                />
+              </div>
+            ))
+          )}
 
-          </div>
-        ))}
+        </div>
+        ))
       </div>
     </div>
   );
