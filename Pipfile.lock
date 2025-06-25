@@ -1,11 +1,7 @@
 {
     "_meta": {
         "hash": {
-<<<<<<< HEAD
-            "sha256": "27f355ffc331ef9b3b46fc3aac6cab254ece5e97315c61bde8db3e231db119f7"
-=======
             "sha256": "3aa1f0600a06f290576872348503005c1a6e06caafe0bfb6f866cdbe71eaef2d"
->>>>>>> 53c822fb17d55f793084e52779d48ec8f5068de7
         },
         "pipfile-spec": 6,
         "requires": {
@@ -1929,8 +1925,6 @@
             "markers": "python_version >= '3.6' and python_version < '4'",
             "version": "==4.9.1"
         },
-<<<<<<< HEAD
-=======
         "safetensors": {
             "hashes": [
                 "sha256:1077f3e94182d72618357b04b5ced540ceb71c8a813d3319f1aba448e68a770d",
@@ -1953,7 +1947,6 @@
             "markers": "python_version >= '3.7'",
             "version": "==0.5.3"
         },
->>>>>>> 53c822fb17d55f793084e52779d48ec8f5068de7
         "sentencepiece": {
             "hashes": [
                 "sha256:0461324897735512a32d222e3d886e24ad6a499761952b6bda2a9ee6e4313ea5",
