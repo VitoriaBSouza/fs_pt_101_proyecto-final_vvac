@@ -182,15 +182,15 @@ table {
 
 .top_intro_text {
   background-color: rgba(0, 0, 0, 0.75); /* Fondo oscuro translúcido */
-  color: #fff;
-  padding: 2rem;
-  border-radius: 1rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
 
   /* Tamaño relativo y responsivo */
-  width: 35%;
+  width: 60%;
+  height: 70%;
   min-width: 250px;
   max-width: 500px;
-  max-height: 250px;
+  max-height: 500px;
   aspect-ratio: 4 / 3;
 
   display: flex;
@@ -209,7 +209,7 @@ table {
 }
 
 .top_intro_text h1 {
-  font-size: 2.5rem; /* ajustable */
+  font-size: 2.5rem; 
   line-height: 1.2;
   margin-bottom: 1rem;
 }
