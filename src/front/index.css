@@ -416,6 +416,22 @@ table {
   background-color: #4a5a79a1;
   height: 5rem;
   border-radius: 0.4rem;
+
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+}
+
+.title_suggestion_card p {
+  margin: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 /* End of recipe cards CSS classes */
