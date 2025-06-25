@@ -54,7 +54,6 @@ export const RecipeScroller = () => {
           )}
 
         </div>
-        ))
       </div>
     </div>
   );
