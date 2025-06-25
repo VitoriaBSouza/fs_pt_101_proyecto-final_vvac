@@ -1,6 +1,5 @@
 // src/front/pages/MealPlanner.jsx
 
-import { TurnHome } from "../components/buttons/TurnHome";
 import { LinksMenu } from "../components/LinksMenu";
 import { RightMenu } from "../components/RightMenu";
 import { MealPlannerCalendar } from "../components/MealPlannerCalendar";
