@@ -1,6 +1,7 @@
 {
     "_meta": {
         "hash": {
+
             "sha256": "dcf1888d106f7a2a5fdf0df6486f87248a58ad41efaa1ab206ac2e59ec365d42"
         },
         "pipfile-spec": 6,
@@ -885,6 +886,7 @@
             "markers": "python_version >= '3.6' and python_version < '4'",
             "version": "==4.9.1"
         },
+
         "six": {
             "hashes": [
                 "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274",
