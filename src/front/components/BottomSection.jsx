@@ -9,7 +9,7 @@ export const BottomSection = () => {
       <div className="scroll-bottom-row">
         <div className="card card_scroll_bottom h-100 shadow-sm " style={{ border: "10px solid #ca3e49" }}>
           <img
-            src="src/front/assets/img/VeganDiet.jpg"
+            src="src/front/assets/img/VeganDiet.png"
             alt="img"
             className="card-img-bottom"
             style={{ height: '180px', objectFit: 'cover'}}
@@ -22,7 +22,7 @@ export const BottomSection = () => {
 
         <div className="card card_scroll_bottom h-100 shadow-sm" style={{ border: "10px solid #ca3e49" }}>
           <img
-            src="src/front/assets/img/GlutenFree.jpg"
+            src="src/front/assets/img/GlutenFree.png"
             alt="img"
             className="card-img-bottom"
             style={{ height: '180px', objectFit: 'cover' }}
@@ -34,7 +34,7 @@ export const BottomSection = () => {
         </div>
         <div className="card card_scroll_bottom h-100 shadow-sm" style={{ border: "10px solid #ca3e49" }}>
           <img
-            src="src/front/assets/img/Proteic.jpg"
+            src="src/front/assets/img/Proteic.png"
             alt="img"
             className="card-img-bottom"
             style={{ height: '180px', objectFit: 'cover'}}
@@ -50,7 +50,7 @@ export const BottomSection = () => {
       <div className="scroll-bottom-row">
         <div className=" card card_scroll_bottom h-100 shadow-sm" style={{ border: "10px solid #ca3e49" }}>
           <img
-            src="src/front/assets/img/low-calorie.jpg"
+            src="src/front/assets/img/low-calorie.png"
             alt="img"
             className="card-img-bottom"
             style={{ height: '180px', objectFit: 'cover'}}
@@ -62,7 +62,7 @@ export const BottomSection = () => {
         </div>
         <div className="card card_scroll_bottom h-100 shadow-sm" style={{ border: "10px solid #ca3e49" }}>
           <img
-            src="src/front/assets/img/FastRecipes.jpg"
+            src="src/front/assets/img/FastRecipes.png"
             alt="img"
             className="card-img-bottom"
             style={{ height: '180px', objectFit: 'cover'}}
@@ -74,7 +74,7 @@ export const BottomSection = () => {
         </div>
         <div className="card card_scroll_bottom h-100 shadow-sm" style={{ border: "10px solid #ca3e49" }}>
           <img
-            src="src/front/assets/img/CheatMeals.jpg"
+            src="src/front/assets/img/CheatMeals.png"
             alt="img"
             className="card-img-bottom"
             style={{ height: '180px', objectFit: 'cover'}}

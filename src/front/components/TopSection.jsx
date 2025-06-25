@@ -6,7 +6,7 @@ export const TopSection = () => {
             <div className="col-12 position-relative p-4 top_home_img">
 
                 <img
-                    src="src/front/assets/img/alimentosTop.jpg"
+                    src="src/front/assets/img/alimentosTop.png"
                     alt="Fondo"
                     className="w-100 h-100 object-fit-cover mx-auto p-4"
                 />
