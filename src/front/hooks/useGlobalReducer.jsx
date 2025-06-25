@@ -38,32 +38,16 @@ export function StoreProvider({ children }) {
         }
     }
 
-    const loadUserRecipes = async () => {
-        try {
-            const data = await recipeServices.getAllUserRecipes();
-            dispatch({ type: 'get_user_recipes', payload: data });
-        } catch (error) {
-            console.error("Error fetching user recipes:", error.message || error);
-        }
-    }
-
     // Load the page once only
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        const user = localStorage.getItem("user");
-
-        if (token && user) {
-            dispatch({
-                type: "logIn",
-               payload: { token, user: user && user !== "undefined" ? JSON.parse(user) : {} },
-            });
+        if (store.user && store.token) {
             loadRecipes();
             loadCollections();
-            loadUserRecipes();
         } else {
-            loadRecipes(); // solo recetas públicas si no hay login
+            loadRecipes();
         }
-    }, []);
+    }, [store.user, store.token]);
+
 
     // Provide the store and dispatch method to all child components.
     return <StoreContext.Provider value={{ store, dispatch }}>
